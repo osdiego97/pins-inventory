@@ -21,6 +21,10 @@ docs/images/
 # Claude context — stays local
 CLAUDE.md
 
+# Internal constraints — stays local
+docs/architecture-rules.md
+docs/security-rules.md
+
 # OS
 .DS_Store
 Thumbs.db
