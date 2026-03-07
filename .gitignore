@@ -1,0 +1,35 @@
+# Dependencies
+node_modules/
+
+# Expo
+.expo/
+dist/
+web-build/
+
+# Environment variables — never commit
+.env
+.env.local
+.env.*.local
+
+# Supabase local
+.supabase/
+
+# Personal data — stays local
+source-data/
+docs/images/
+
+# Claude context — stays local
+CLAUDE.md
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+
+# Native (if ejected)
+ios/
+android/
