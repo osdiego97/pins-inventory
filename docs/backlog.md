@@ -19,6 +19,14 @@
 - **Light mode / dark mode switch** — dark mode is the MVP default. Add an in-app toggle to switch between dark and light mode in a future iteration.
 - **Map view** — visualise the collection on a map showing where each pin came from, based on the city/country data already stored in the schema.
 
+## Build Config
+
+- **Set `cli.appVersionSource`** — EAS warns this will be required in future. Set to `"remote"` in `eas.json` to manage version increments server-side. Low priority, non-blocking.
+
 ## Auth & Sync
 
 - **Cross-device sync** — automatic once web is live and the user logs in with the same email on a second device.
+
+## V2 Direction — Multi-collection platform
+
+- **Support multiple collection types** — extend the app to host collections beyond pins (e.g. thimbles, stamps, coins). This is a meaningful architectural pivot: the current schema is pins-specific (geographic fields, `is_commemorative`, tag taxonomy). Doing this right requires a flexible schema per collection type (or a generic schema with custom fields), multi-collection management per user, per-collection taxonomies, and likely a rebrand. **Do not bolt onto the MVP schema — design from scratch when the time comes.**
