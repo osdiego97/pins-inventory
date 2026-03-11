@@ -82,7 +82,27 @@ Small, well-scoped problem with a real user (me). Perfect for demonstrating end-
 
 ## 5. Technical Challenges
 
-> [Fill as they arise]
+### NativeWind v4 dependency chain
+
+NativeWind v4 has an underdocumented dependency chain that caused multiple EAS build failures before the root cause was identified. Installing `nativewind` alone is not enough — it requires `react-native-css-interop`, `react-native-reanimated`, and `react-native-worklets` to be installed explicitly. The reanimated Babel plugin also calls into worklets at build time, so both packages must be present or the autolinking step fails silently with a non-obvious error.
+
+Additionally, the `nativewind/babel` plugin cannot be used as a standard Babel plugin in newer versions of `@babel/core` — it returns a preset-like object rather than a plugin. The fix was to reference `react-native-css-interop/dist/babel-plugin` directly.
+
+**Lesson:** When using NativeWind v4, install the full dependency chain upfront and verify the babel config before triggering a cloud build.
+
+### Metro bundler — nested semver module resolution failure
+
+After installing `react-native-reanimated`, Metro failed to bundle with an `UnableToResolveError` for `../internal/parse-options` inside a nested `semver` package at `node_modules/react-native-reanimated/node_modules/semver/`. The nested `semver` installation was incomplete — missing its `internal/` directory. Metro was resolving to the nested copy instead of the root `semver`.
+
+**Fix:** Delete the broken nested package (`rm -rf node_modules/react-native-reanimated/node_modules/semver`) and restart Metro with `--clear`. Metro then falls back to the complete root installation.
+
+### Magic link deep linking in React Native
+
+Supabase magic links redirect to a URL containing the session tokens in the URL fragment (`#access_token=...&refresh_token=...`). On web, Supabase handles this automatically via `detectSessionInUrl`. In React Native, `window.location` doesn't exist, so this detection does nothing.
+
+The solution was to listen for incoming deep links in the root layout using `expo-linking`, parse the URL fragment manually with `URLSearchParams`, and call `supabase.auth.setSession` with the extracted tokens. The Supabase `onAuthStateChange` listener in `useAuth` then fires, updating the session state and triggering navigation to the authenticated screen.
+
+Additionally, the `emailRedirectTo` option must be set explicitly to the app's custom scheme (`pins-inventory://`) in the `signInWithOtp` call, and that scheme must be whitelisted in the Supabase project's allowed redirect URLs — otherwise Supabase defaults the redirect to `localhost:3000`.
 
 ---
 
@@ -106,6 +126,6 @@ Small, well-scoped problem with a real user (me). Perfect for demonstrating end-
 
 ## 7. Links
 
-- **Repo:** [GitHub link — TBD]
+- **Repo:** https://github.com/osdiego97/pins-inventory
 - **Live app / demo:** [TestFlight link — TBD]
 - **PRDs:** `docs/` folder in this repo

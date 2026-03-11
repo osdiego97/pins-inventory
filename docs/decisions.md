@@ -137,6 +137,27 @@
 
 ---
 
+### 2026-03-11 Auth implementation — deep link handling, session storage, and signup control
+
+**Context:** With the magic link approach decided, three implementation-level decisions were needed: how to intercept the token when the user taps the magic link, where to store the session, and whether to allow new accounts to be created via the app.
+
+**Options considered:**
+
+- **Deep link handling:** Supabase's `detectSessionInUrl` is web-only — it reads `window.location`, which doesn't exist in React Native. The alternative is listening for incoming deep links via `expo-linking`, extracting the `access_token` and `refresh_token` from the URL fragment, and calling `supabase.auth.setSession` manually.
+- **Session storage:** `AsyncStorage` (unencrypted) vs `expo-secure-store` (encrypted at rest via Android Keystore). Auth tokens are credentials — they warrant encrypted storage.
+- **`shouldCreateUser`:** Setting this to `true` allows any email to create a new account. For a personal app with a single intended user, that's an open registration door.
+
+**Decision:**
+- Manual deep link handling via `expo-linking` in the root layout
+- `expo-secure-store` as the Supabase auth storage adapter
+- `shouldCreateUser: false` — account created once manually, flag locked to prevent new signups
+
+**Rationale:** Each decision defaults to the more secure option. The deep link handler is a one-time addition to the root layout; the complexity cost is low. SecureStore has no meaningful downside over AsyncStorage for this use case. Locking `shouldCreateUser` to `false` closes the only way a third party could create an account.
+
+**Trade-off accepted:** Manual deep link handling requires parsing the URL fragment directly — slightly brittle if Supabase changes the redirect format. Acceptable given the simplicity of the parsing logic.
+
+---
+
 ### 2026-03-07 Authentication approach — magic link over anonymous auth
 
 **Context:** App is single-user (personal collection), so multi-user auth complexity is not needed. However, data needs to survive device loss since the collection is irreplaceable. Anonymous auth was considered as the simplest option.
