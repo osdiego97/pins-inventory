@@ -13,6 +13,7 @@
       "backgroundColor": "#ffffff"
     },
     "android": {
+      "package": "com.osdiego97.pinsinventory",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/android-icon-foreground.png",

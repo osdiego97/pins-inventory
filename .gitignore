@@ -48,3 +48,5 @@ CLAUDE.md
 docs/architecture-rules.md
 docs/security-rules.md
 .supabase/
+.mcp.json
+.claude/settings.local.json
