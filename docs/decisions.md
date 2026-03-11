@@ -23,6 +23,22 @@
 
 ## Entries
 
+### 2026-03-11 Pin ordering — collection_number column
+
+**Context:** After seeding 477 pins from CSV, the collection screen needed a meaningful sort order. Pins were inserted in batches of 50, so all pins in a batch shared the same `created_at` timestamp — ordering by timestamp only gave batch-level ordering, not exact row order.
+
+**Options considered:**
+  - `created_at ASC`: fast, no schema change, but within-batch order not guaranteed (50-pin granularity)
+  - `collection_number` integer column: exact order, requires migration + re-seed, permanent and meaningful beyond CSV import
+
+**Decision:** Add `collection_number integer` column to `pins` table. Seeded with the row index from the CSV (1–477). New pins added via the app will also receive a collection number.
+
+**Rationale:** The collection number is meaningful beyond ordering — it represents the pin's permanent position in the physical collection (e.g. "pin #42"). It also gives the user a stable reference they can use when talking about their collection. A minor migration cost for a permanent benefit.
+
+**Trade-off accepted:** Future pins added via the app require the user to assign a collection number manually. Acceptable for a single-user app.
+
+---
+
 ### 2026-03-11 Collection screen layout — card list, not photo grid
 
 **Context:** Designing the main collection screen for 478 pins. Two common patterns: photo grid (visual scanning) or card list (text + metadata).

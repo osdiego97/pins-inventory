@@ -19,7 +19,7 @@
 
 | Goal | Metric | Target |
 |------|--------|--------|
-| Digitise the existing collection | Pins imported via seed script | 478 pins loaded at launch |
+| Digitise the existing collection | Pins imported via seed script | 477 pins loaded at launch |
 | Enable new pin logging | Time to add a new pin | Under 60 seconds |
 | Make the collection browsable | Core flow works end-to-end on Android | All screens functional at launch |
 
@@ -69,7 +69,8 @@ So that I have a complete digital record of it.
 - [ ] Is commemorative is optional — toggle, defaults to off
 - [ ] User can assign one or more tags from the predefined taxonomy (two-level: category + subcategory)
 - [ ] Photo is optional — pin can be saved without one
-- [ ] On save, pin appears immediately in the collection grid
+- [ ] User can assign a collection number (optional — for ordering within the collection)
+- [ ] On save, pin appears immediately in the collection list
 - [ ] If image upload fails, an error is shown and the user can retry
 
 ---
@@ -78,15 +79,15 @@ So that I have a complete digital record of it.
 
 ```
 As a collector,
-I want to browse my collection as a photo grid,
-So that I can visually explore what I have.
+I want to browse my collection as a scrollable card list,
+So that I can quickly scan and find pins by name and location.
 ```
 
 **Acceptance criteria:**
-- [ ] Collection is displayed as a scrollable photo grid
-- [ ] Each card shows the pin photo (or a placeholder if no photo)
-- [ ] Each card shows the pin description
-- [ ] Grid loads the full collection on open
+- [ ] Collection is displayed as a scrollable card list, ordered by collection number
+- [ ] Each card shows: collection number, description, city · country, category tags (up to 3), commemorative badge if applicable
+- [ ] Photos are not shown in the list — visible only in the detail screen
+- [ ] List loads the full collection on open
 - [ ] Empty state is shown with a CTA to add the first pin when the collection is empty
 
 ---
@@ -100,9 +101,9 @@ So that I can recall all information about it.
 ```
 
 **Acceptance criteria:**
-- [ ] Tapping a pin in the grid opens a detail screen
-- [ ] Detail screen shows: photo, description, country, city, region (if set), acquired year (if set), is commemorative flag, and all assigned tags
-- [ ] Back navigation returns to the collection grid
+- [ ] Tapping a pin in the list opens a detail screen
+- [ ] Detail screen shows: collection number, photo (or placeholder), description, country, city, region (if set), acquired year (if set), is commemorative flag, and all assigned tags
+- [ ] Back navigation returns to the collection list
 
 ---
 
@@ -119,7 +120,7 @@ So that I can fix mistakes or add missing information.
 - [ ] Edit screen is pre-populated with the pin's existing data
 - [ ] All fields editable: description, country, city, region, acquired year, is commemorative, photo, tags
 - [ ] Changes are saved to Supabase on confirm
-- [ ] Updated data is reflected immediately in the grid and detail screen
+- [ ] Updated data is reflected immediately in the list and detail screen
 
 ---
 
@@ -134,7 +135,7 @@ So that I can remove duplicates or incorrect entries.
 **Acceptance criteria:**
 - [ ] Delete option is accessible from the pin detail screen
 - [ ] A confirmation dialog is shown before deleting — no accidental deletions
-- [ ] On confirm, pin is removed from Supabase and disappears from the collection grid immediately
+- [ ] On confirm, pin is removed from Supabase and disappears from the collection list immediately
 - [ ] Associated image is deleted from Supabase Storage
 
 ---
@@ -148,10 +149,10 @@ So that I can quickly find specific pins.
 ```
 
 **Acceptance criteria:**
-- [ ] A search bar is visible at the top of the collection grid
+- [ ] A search bar is visible at the top of the collection list
 - [ ] Search filters pins in real time by description, city, and country
 - [ ] A horizontal scrollable row of category chips is shown below the search bar
-- [ ] Tapping a category chip filters the grid to show only pins in that category
+- [ ] Tapping a category chip filters the list to show only pins in that category
 - [ ] Search and category filter can be combined — both active at the same time
 - [ ] An active filter chip shows a visual indicator (selected state)
 - [ ] Tapping an active chip deselects it and clears that filter
@@ -162,24 +163,24 @@ So that I can quickly find specific pins.
 
 ## 4. Solution Overview
 
-Single-user Android app. User logs in once via magic link. The main screen is a photo grid of their collection. From there they can add a new pin. Tapping any pin opens its detail.
+Single-user Android app. User logs in once via magic link. The main screen is a card list of their collection ordered by collection number. From there they can add a new pin. Tapping any pin opens its detail.
 
 **Screens:**
 1. **Login** — email input + "Send magic link" button. No password, no signup form.
-2. **Collection grid** — search bar + category filter chips + scrollable grid of pin cards. Floating "+" button to add a pin.
-3. **Add pin** — form with photo picker, description, location fields, year, commemorative toggle, and tag selector (bottom sheet, two-level: category chips → subcategory).
-4. **Pin detail** — full view of a single pin's data. Edit and delete actions accessible from here.
+2. **Collection list** — search bar + category filter chips + scrollable card list ordered by collection number. Floating "+" FAB to add a pin.
+3. **Add pin** — form with photo picker, description, location fields, year, collection number, commemorative toggle, and tag selector (bottom sheet, two-level: category chips → subcategory).
+4. **Pin detail** — full view of a single pin's data including collection number. Edit and delete actions accessible from here.
 5. **Edit pin** — same form as Add pin, pre-populated with existing data.
 
 **Key flows:**
-1. First open → Login screen → enter email → check email → tap magic link → Collection grid
-2. Returning user → Collection grid (session persists)
-3. Add pin → fill form → save → back to Collection grid (pin appears)
-4. Tap pin → Detail screen → back to Collection grid
+1. First open → Login screen → enter email → check email → tap magic link → Collection list
+2. Returning user → Collection list (session persists)
+3. Add pin → fill form → save → back to Collection list (pin appears)
+4. Tap pin → Detail screen → back to Collection list
 5. Detail screen → Edit → update form → save → back to Detail screen
-6. Detail screen → Delete → confirmation dialog → back to Collection grid
-7. Collection grid → search bar → type query → grid filters in real time
-8. Collection grid → tap category chip → grid filters to that category
+6. Detail screen → Delete → confirmation dialog → back to Collection list
+7. Collection list → search bar → type query → list filters in real time
+8. Collection list → tap category chip → list filters to that category
 
 **Edge cases to handle:**
 - Magic link expired → show error + resend option
@@ -193,7 +194,7 @@ Single-user Android app. User logs in once via magic link. The main screen is a 
 ## 5. Technical Considerations
 
 - **Auth:** Supabase magic link. Session stored in `expo-secure-store`. Auto-refresh enabled.
-- **Database:** Supabase Postgres. Three tables: `pins`, `tags`, `pin_tags`. RLS enforced — users can only read/write their own data.
+- **Database:** Supabase Postgres. Three tables: `pins`, `tags`, `pin_tags`. RLS enforced — users can only read/write their own data. `pins` includes a `collection_number` integer for stable ordering.
 - **Tags:** Controlled vocabulary only. `tags` table seeded at launch, not user-editable in MVP.
 - **Image storage:** Supabase Storage. Images stored under `{user_id}/{pin_id}`. `image_url` stored on the pin record.
 - **Image picker:** `expo-image-picker` — supports camera and gallery on Android.
@@ -233,6 +234,8 @@ Single-user Android app. User logs in once via magic link. The main screen is a 
 | 2026-03-07 | Filter and search in MVP | Core to the value of a catalogue — without it, browsing 478 pins is impractical |
 | 2026-03-07 | Tag selector: bottom sheet with two-level chips | Fastest mobile UX for a known two-level taxonomy — category tap then subcategory, no typing required |
 | 2026-03-07 | NativeWind v4 for styling, dark mode as MVP default | Premium UI goal requires a design system — NativeWind's Tailwind dark mode support is first-class. Light mode is v2. |
+| 2026-03-11 | Card list over photo grid for collection view | Pins are identified by text (description + location), not thumbnails. Cards allow scanning at a glance. Photo grid added to backlog as future layout option. |
+| 2026-03-11 | `collection_number` column for ordering | Batch inserts share timestamps — timestamp ordering is unreliable. Collection number is also semantically meaningful (pin's permanent catalogue position). |
 
 ---
 
@@ -246,4 +249,4 @@ Single-user Android app. User logs in once via magic link. The main screen is a 
 - [ ] RLS policies verified — no cross-user data access possible
 - [ ] No secrets committed to the repo
 - [ ] Security rules applied (see `docs/security-rules.md`)
-- [ ] 478 pins seeded via CSV import script
+- [x] 477 pins seeded via CSV import script (`scripts/seed-pins.js`)

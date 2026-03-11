@@ -46,6 +46,9 @@ export default function PinDetailScreen() {
 
             {/* Details */}
             <View className="mx-4 mt-4">
+              {pin.collection_number != null && (
+                <Text className="text-text-muted text-sm mb-1">#{pin.collection_number}</Text>
+              )}
               <Text className="text-text-primary text-xl font-bold">{pin.description}</Text>
 
               {/* Location */}

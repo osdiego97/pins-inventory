@@ -58,6 +58,7 @@ export function usePinDetail(id: string | string[] | undefined) {
       image_url: row.image_url,
       acquired_year: row.acquired_year,
       is_commemorative: row.is_commemorative,
+      collection_number: row.collection_number,
       created_at: row.created_at,
       tags: row.pin_tags.map((pt) => pt.tags).filter((t): t is Tag => t !== null),
     });

@@ -25,11 +25,16 @@ export default function PinCard({ pin, onPress }: PinCardProps) {
         >
           {pin.description}
         </Text>
-        {pin.is_commemorative && (
-          <View className="bg-surface-elevated rounded-full px-2 py-0.5 mt-0.5">
-            <Text className="text-accent text-xs font-medium">Conm.</Text>
-          </View>
-        )}
+        <View className="items-end" style={{ gap: 4 }}>
+          {pin.collection_number != null && (
+            <Text className="text-text-muted text-xs">#{pin.collection_number}</Text>
+          )}
+          {pin.is_commemorative && (
+            <View className="bg-surface-elevated rounded-full px-2 py-0.5">
+              <Text className="text-accent text-xs font-medium">Conm.</Text>
+            </View>
+          )}
+        </View>
       </View>
 
       {location ? (
