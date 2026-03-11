@@ -23,6 +23,22 @@
 
 ## Entries
 
+### 2026-03-11 Collection screen layout — card list, not photo grid
+
+**Context:** Designing the main collection screen for 478 pins. Two common patterns: photo grid (visual scanning) or card list (text + metadata).
+
+**Options considered:**
+  - Photo grid: Visually rich, but pins are small physical objects — thumbnails look similar and don't convey description, country, or tags. Requires images to be loaded on the main screen.
+  - Card list: Shows description, country/city, and category tags. Scannable by text, which is how you identify a pin mentally. Photos deferred to detail screen.
+
+**Decision:** Vertical card list. Each card shows description, country · city, and category tag chips. Photo visible only on detail screen.
+
+**Rationale:** With 478 pins, text-based scanning is how you find a specific pin. A photo grid is only effective when the image alone is the identifier (e.g. product catalogue). For a pin collection, description + location is the primary identifier. Deferring photos also keeps the list fast to render.
+
+**Trade-off accepted:** Less visual impact on the main screen. Acceptable — the premium feel comes from card design and typography, not photo density.
+
+---
+
 ### 2026-03-07 UI — NativeWind v4, dark mode first
 
 **Context:** MVP requires a modern, polished UI. The original architecture rules banned external styling libraries to keep dependencies minimal. That constraint was set before the UI quality bar was defined.

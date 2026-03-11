@@ -17,6 +17,7 @@
 ## UI
 
 - **Light mode / dark mode switch** — dark mode is the MVP default. Add an in-app toggle to switch between dark and light mode in a future iteration.
+- **Collection layout toggle (list/grid)** — MVP uses a card list. Add a toggle to switch between card list and photo grid once pins have photos populated. Grid only makes sense as a secondary option — list remains the default.
 - **Map view** — visualise the collection on a map showing where each pin came from, based on the city/country data already stored in the schema.
 
 ## Build Config
