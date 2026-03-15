@@ -65,5 +65,5 @@ export function usePinDetail(id: string | string[] | undefined) {
     setLoading(false);
   }
 
-  return { pin, loading, error };
+  return { pin, loading, error, refetch: fetchPin };
 }

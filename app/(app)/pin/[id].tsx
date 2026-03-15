@@ -1,13 +1,31 @@
-import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
-import { useLocalSearchParams, router, Stack } from 'expo-router';
+import { useState, useEffect, useCallback } from 'react';
+import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Image } from 'react-native';
+import { useLocalSearchParams, router, Stack, useFocusEffect } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { usePinDetail } from '../../../hooks/usePinDetail';
+import { usePinDelete } from '../../../hooks/usePinDelete';
+import { getSignedImageUrl } from '../../../lib/storage';
+import TagIcon from '../../../components/ui/TagIcon';
 
 export default function PinDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { pin, loading, error } = usePinDetail(id);
+  const { pin, loading, error, refetch } = usePinDetail(id);
+  const { confirmDelete } = usePinDelete(() => router.replace('/(app)/' as any));
   const insets = useSafeAreaInsets();
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
+
+  useFocusEffect(
+    useCallback(() => {
+      refetch();
+    }, [])
+  );
+
+  useEffect(() => {
+    if (pin?.image_url) {
+      getSignedImageUrl(pin.image_url).then(setImageUrl);
+    }
+  }, [pin?.image_url]);
 
   return (
     <>
@@ -21,6 +39,16 @@ export default function PinDetailScreen() {
           <Text className="text-text-primary text-lg font-semibold flex-1" numberOfLines={1}>
             {pin?.description ?? ''}
           </Text>
+          {pin && (
+            <View className="flex-row items-center" style={{ gap: 16 }}>
+              <TouchableOpacity onPress={() => router.push(`/(app)/pin/edit/${pin.id}` as any)}>
+                <Ionicons name="pencil-outline" size={20} color="#f5f5f5" />
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => confirmDelete(pin.id)}>
+                <Ionicons name="trash-outline" size={20} color="#e05c5c" />
+              </TouchableOpacity>
+            </View>
+          )}
         </View>
 
         {loading ? (
@@ -38,10 +66,16 @@ export default function PinDetailScreen() {
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{ paddingBottom: insets.bottom + 24 }}
           >
-            {/* Photo placeholder */}
-            <View className="mx-4 mt-2 h-56 bg-surface-card rounded-2xl items-center justify-center">
-              <Ionicons name="image-outline" size={48} color="#606060" />
-              <Text className="text-text-muted text-sm mt-2">Sin foto</Text>
+            {/* Photo */}
+            <View className="mx-4 mt-2 h-56 bg-surface-card rounded-2xl overflow-hidden items-center justify-center">
+              {imageUrl ? (
+                <Image source={{ uri: imageUrl }} className="w-full h-full" resizeMode="cover" />
+              ) : (
+                <>
+                  <Ionicons name="image-outline" size={48} color="#606060" />
+                  <Text className="text-text-muted text-sm mt-2">Sin foto</Text>
+                </>
+              )}
             </View>
 
             {/* Details */}
@@ -70,7 +104,8 @@ export default function PinDetailScreen() {
                   </View>
                 )}
                 {pin.is_commemorative && (
-                  <View className="bg-surface-elevated rounded-full px-3 py-1">
+                  <View className="bg-surface-elevated rounded-full px-3 py-1 flex-row items-center" style={{ gap: 5 }}>
+                    <Ionicons name="ribbon" size={13} color="#e8c97e" />
                     <Text className="text-accent text-xs font-medium">Conmemorativo</Text>
                   </View>
                 )}
@@ -84,8 +119,13 @@ export default function PinDetailScreen() {
                   </Text>
                   <View className="flex-row flex-wrap" style={{ gap: 8 }}>
                     {pin.tags!.map((tag) => (
-                      <View key={tag.id} className="bg-surface-card rounded-full px-3 py-1.5">
-                        <Text className="text-text-secondary text-sm">{tag.name}</Text>
+                      <View key={tag.id} className="bg-surface-card rounded-full px-3 py-1.5 flex-row items-center" style={{ gap: 5 }}>
+                        {!tag.parent_id && (
+                          <TagIcon tagName={tag.name} size={13} color="#a0a0a0" />
+                        )}
+                        <Text className="text-text-secondary text-sm">
+                          {tag.parent_id ? tag.name : tag.name.toUpperCase()}
+                        </Text>
                       </View>
                     ))}
                   </View>

@@ -14,9 +14,17 @@
 
 - **Add new tags from the app** — tag list is hardcoded/seeded for MVP. Allow users to create new tags from within the app in a future iteration.
 
+## Pin Form
+
+- **Camera support for pin photos** — allow taking a photo directly from the camera when adding/editing a pin, in addition to picking from the gallery. `expo-image-picker` already supports this via `launchCameraAsync` — low effort to add.
+- **Auto-populate location from device GPS** — pre-fill country and city fields based on the device's current location using `expo-location` + reverse geocoding. Useful when adding a pin on the spot. Requires location permission request.
+
 ## UI
 
+- **Icons for L2 tags** — L1 categories already have icons. Extend the icon system to L2 subcategories (e.g. Club, Selección, Escudo de Ciudad). Requires mapping each L2 to an icon — FontAwesome6 likely has better coverage for the more specific ones.
+- **Pin badges / special icons on cards** — show small contextual icons on pin cards based on attributes: gift (e.g. gift icon), Hard Rock category (e.g. music note or HR logo), premium/rare pins, and other user-defined special statuses. Requires deciding whether these map to existing fields (tags, is_commemorative) or need new schema fields (e.g. `is_gift`, `is_rare`). Design decision needed before implementation.
 - **Light mode / dark mode switch** — dark mode is the MVP default. Add an in-app toggle to switch between dark and light mode in a future iteration.
+- **Sortable collection** — add a sort selector to switch between collection number order, alphabetical by description, and by country. Natural follow-on once the collection grows and browsing by name becomes useful.
 - **Collection layout toggle (list/grid)** — MVP uses a card list. Add a toggle to switch between card list and photo grid once pins have photos populated. Grid only makes sense as a secondary option — list remains the default.
 - **Map view** — visualise the collection on a map showing where each pin came from, based on the city/country data already stored in the schema.
 
