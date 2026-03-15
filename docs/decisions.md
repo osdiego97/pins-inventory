@@ -23,6 +23,38 @@
 
 ## Entries
 
+### 2026-03-11 Pin ordering — collection_number column
+
+**Context:** After seeding 477 pins from CSV, the collection screen needed a meaningful sort order. Pins were inserted in batches of 50, so all pins in a batch shared the same `created_at` timestamp — ordering by timestamp only gave batch-level ordering, not exact row order.
+
+**Options considered:**
+  - `created_at ASC`: fast, no schema change, but within-batch order not guaranteed (50-pin granularity)
+  - `collection_number` integer column: exact order, requires migration + re-seed, permanent and meaningful beyond CSV import
+
+**Decision:** Add `collection_number integer` column to `pins` table. Seeded with the row index from the CSV (1–477). New pins added via the app will also receive a collection number.
+
+**Rationale:** The collection number is meaningful beyond ordering — it represents the pin's permanent position in the physical collection (e.g. "pin #42"). It also gives the user a stable reference they can use when talking about their collection. A minor migration cost for a permanent benefit.
+
+**Trade-off accepted:** Future pins added via the app require the user to assign a collection number manually. Acceptable for a single-user app.
+
+---
+
+### 2026-03-11 Collection screen layout — card list, not photo grid
+
+**Context:** Designing the main collection screen for 478 pins. Two common patterns: photo grid (visual scanning) or card list (text + metadata).
+
+**Options considered:**
+  - Photo grid: Visually rich, but pins are small physical objects — thumbnails look similar and don't convey description, country, or tags. Requires images to be loaded on the main screen.
+  - Card list: Shows description, country/city, and category tags. Scannable by text, which is how you identify a pin mentally. Photos deferred to detail screen.
+
+**Decision:** Vertical card list. Each card shows description, country · city, and category tag chips. Photo visible only on detail screen.
+
+**Rationale:** With 478 pins, text-based scanning is how you find a specific pin. A photo grid is only effective when the image alone is the identifier (e.g. product catalogue). For a pin collection, description + location is the primary identifier. Deferring photos also keeps the list fast to render.
+
+**Trade-off accepted:** Less visual impact on the main screen. Acceptable — the premium feel comes from card design and typography, not photo density.
+
+---
+
 ### 2026-03-07 UI — NativeWind v4, dark mode first
 
 **Context:** MVP requires a modern, polished UI. The original architecture rules banned external styling libraries to keep dependencies minimal. That constraint was set before the UI quality bar was defined.

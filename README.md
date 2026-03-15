@@ -9,9 +9,10 @@ A mobile app to catalogue a personal pin collection with photos, built with Reac
 ## What it does
 
 Simple, focused tool for pin collectors who want to:
-- Add pins with a photo, name, and optional notes
-- Browse their collection as a photo grid
-- Keep everything private and synced across devices
+- Add pins with a photo, description, location, tags, and year
+- Browse their collection as a searchable card list ordered by collection number
+- Tap any pin to see full details including photo
+- Keep everything private and tied to their account
 
 No marketplace features. No social layer. Just a clean digital catalogue.
 
@@ -21,10 +22,11 @@ No marketplace features. No social layer. Just a clean digital catalogue.
 
 | Layer | Technology |
 |-------|-----------|
-| Framework | React Native + Expo SDK 51 |
+| Framework | React Native + Expo SDK 55 |
 | Navigation | Expo Router v3 |
 | Backend | Supabase (auth, database, storage) |
 | Language | TypeScript (strict) |
+| Styling | NativeWind v4 (Tailwind CSS) |
 
 ---
 

@@ -2,7 +2,7 @@
 
 **Role:** Product Manager + Builder
 **Timeline:** March 2026 → In Progress
-**Stack:** React Native, Expo, Supabase, TypeScript
+**Stack:** React Native, Expo SDK 55, Supabase, TypeScript, NativeWind v4
 **Status:** In Progress
 
 ---
@@ -70,10 +70,10 @@ Small, well-scoped problem with a real user (me). Perfect for demonstrating end-
 > [Fill as features ship]
 
 **Core flow:**
-1. Sign up / log in
-2. Add a pin: take photo, add name, optional notes
-3. View collection as a photo grid
-4. Tap a pin to see detail
+1. Sign up / log in via magic link
+2. Browse collection as a searchable card list (477 pins pre-loaded from CSV)
+3. Tap a pin to see full detail: photo, description, location, tags, year, collection number
+4. Add a new pin: photo, description, location, tags, year, collection number
 
 **Key screens:**
 - [To be added with screenshots]

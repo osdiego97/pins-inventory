@@ -8,6 +8,7 @@ export interface Pin {
   image_url?: string;
   acquired_year?: number;
   is_commemorative: boolean;
+  collection_number?: number;
   created_at: string;
   tags?: Tag[];
 }
