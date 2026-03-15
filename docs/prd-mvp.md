@@ -43,10 +43,10 @@ So that my collection is tied to my account and survives device loss.
 ```
 
 **Acceptance criteria:**
-- [ ] User can enter their email on the login screen
-- [ ] Supabase sends a magic link email
-- [ ] Tapping the link in the email opens the app and logs the user in
-- [ ] Session persists across app restarts — user does not need to log in again
+- [x] User can enter their email on the login screen
+- [x] Supabase sends a magic link email
+- [x] Tapping the link in the email opens the app and logs the user in
+- [x] Session persists across app restarts — user does not need to log in again
 - [ ] If the magic link has expired, the app shows an error and allows resending
 
 ---
@@ -60,18 +60,18 @@ So that I have a complete digital record of it.
 ```
 
 **Acceptance criteria:**
-- [ ] User can open an "Add pin" screen from the main collection view
-- [ ] User can take a photo or select one from the gallery
-- [ ] Description is required — form cannot be submitted without it
-- [ ] Country and city are required in the form
-- [ ] Region (Comunidad Autónoma) is optional
-- [ ] Acquired year is optional — numeric input, 4 digits
-- [ ] Is commemorative is optional — toggle, defaults to off
-- [ ] User can assign one or more tags from the predefined taxonomy (two-level: category + subcategory)
-- [ ] Photo is optional — pin can be saved without one
-- [ ] User can assign a collection number (optional — for ordering within the collection)
-- [ ] On save, pin appears immediately in the collection list
-- [ ] If image upload fails, an error is shown and the user can retry
+- [x] User can open an "Add pin" screen from the main collection view via FAB
+- [ ] User can take a photo or select one from the gallery (gallery only in MVP — camera deferred to backlog)
+- [x] Description is required — form cannot be submitted without it (max 100 chars, live counter)
+- [x] Country and city are required in the form
+- [x] Region (Comunidad Autónoma) is optional
+- [x] Acquired year is required — numeric input, 4 digits, pre-filled to current year _(changed from optional — see decisions.md 2026-03-15)_
+- [x] Is commemorative is optional — toggle, defaults to off
+- [x] User can assign one or more tags from the predefined taxonomy (inline two-level chip selector in form — see decisions.md 2026-03-15)
+- [x] Photo is optional — pin can be saved without one
+- [x] Collection number auto-assigned as max+1 on create; re-sequenced on delete via Postgres RPC
+- [x] On save, pin appears immediately in the collection list
+- [x] If image upload fails, an error is shown and the user can retry
 
 ---
 
@@ -84,11 +84,12 @@ So that I can quickly scan and find pins by name and location.
 ```
 
 **Acceptance criteria:**
-- [ ] Collection is displayed as a scrollable card list, ordered by collection number
-- [ ] Each card shows: collection number, description, city · country, category tags (up to 3), commemorative badge if applicable
-- [ ] Photos are not shown in the list — visible only in the detail screen
-- [ ] List loads the full collection on open
-- [ ] Empty state is shown with a CTA to add the first pin when the collection is empty
+- [x] Collection is displayed as a scrollable card list, ordered by collection number
+- [x] Each card shows: collection number, description, city · country (with location icon), acquired year (with calendar icon), category tags (up to 3, L1 uppercase + icon), commemorative badge (ribbon icon) if applicable
+- [x] Photos are not shown in the list — visible only in the detail screen
+- [x] List loads the full collection on open; refreshes on focus (returning from add/edit/detail)
+- [x] Empty state is shown with a CTA to add the first pin when the collection is empty
+- [x] Swipe right on a card to edit; swipe left to delete (with confirmation dialog)
 
 ---
 
@@ -101,9 +102,10 @@ So that I can recall all information about it.
 ```
 
 **Acceptance criteria:**
-- [ ] Tapping a pin in the list opens a detail screen
-- [ ] Detail screen shows: collection number, photo (or placeholder), description, country, city, region (if set), acquired year (if set), is commemorative flag, and all assigned tags
-- [ ] Back navigation returns to the collection list
+- [x] Tapping a pin in the list opens a detail screen
+- [x] Detail screen shows: collection number, photo (signed URL, or placeholder), description, country · city · region (with location icon), acquired year (with calendar icon), is commemorative badge (ribbon icon + label), and all assigned tags (L1 uppercase + icon, L2 text)
+- [x] Edit (pencil) and delete (trash) actions accessible from detail screen header
+- [x] Back navigation returns to the collection list
 
 ---
 
@@ -116,11 +118,11 @@ So that I can fix mistakes or add missing information.
 ```
 
 **Acceptance criteria:**
-- [ ] Edit option is accessible from the pin detail screen
-- [ ] Edit screen is pre-populated with the pin's existing data
-- [ ] All fields editable: description, country, city, region, acquired year, is commemorative, photo, tags
-- [ ] Changes are saved to Supabase on confirm
-- [ ] Updated data is reflected immediately in the list and detail screen
+- [x] Edit option is accessible from the pin detail screen header (pencil icon) and via swipe right on the collection list
+- [x] Edit screen is pre-populated with the pin's existing data (including existing photo as signed URL)
+- [x] All fields editable: description, country, city, region, acquired year, is commemorative, photo, tags
+- [x] Changes are saved to Supabase on confirm
+- [x] Updated data is reflected immediately on returning to the detail screen (useFocusEffect refetch)
 
 ---
 
@@ -133,10 +135,11 @@ So that I can remove duplicates or incorrect entries.
 ```
 
 **Acceptance criteria:**
-- [ ] Delete option is accessible from the pin detail screen
-- [ ] A confirmation dialog is shown before deleting — no accidental deletions
-- [ ] On confirm, pin is removed from Supabase and disappears from the collection list immediately
-- [ ] Associated image is deleted from Supabase Storage
+- [x] Delete option is accessible from the pin detail screen header (trash icon) and via swipe left on the collection list
+- [x] A confirmation dialog is shown before deleting — no accidental deletions
+- [x] On confirm, pin is removed from Supabase and disappears from the collection list immediately
+- [x] Associated image is deleted from Supabase Storage
+- [x] Collection numbers of subsequent pins are re-sequenced via Postgres RPC to close the gap
 
 ---
 
@@ -149,15 +152,15 @@ So that I can quickly find specific pins.
 ```
 
 **Acceptance criteria:**
-- [ ] A search bar is visible at the top of the collection list
-- [ ] Search filters pins in real time by description, city, and country
-- [ ] A horizontal scrollable row of category chips is shown below the search bar
-- [ ] Tapping a category chip filters the list to show only pins in that category
-- [ ] Search and category filter can be combined — both active at the same time
-- [ ] An active filter chip shows a visual indicator (selected state)
-- [ ] Tapping an active chip deselects it and clears that filter
-- [ ] A "clear all" option resets both search and filters
-- [ ] Empty state is shown when no pins match the active filters
+- [x] A search bar is visible at the top of the collection list
+- [x] Search filters pins in real time by description, city, and country
+- [ ] A horizontal scrollable row of category chips is shown below the search bar _(not yet built)_
+- [ ] Tapping a category chip filters the list to show only pins in that category _(not yet built)_
+- [ ] Search and category filter can be combined — both active at the same time _(not yet built)_
+- [ ] An active filter chip shows a visual indicator (selected state) _(not yet built)_
+- [ ] Tapping an active chip deselects it and clears that filter _(not yet built)_
+- [ ] A "clear all" option resets both search and filters _(not yet built)_
+- [x] Empty state is shown when no pins match the active filters (search only)
 
 ---
 
@@ -168,7 +171,7 @@ Single-user Android app. User logs in once via magic link. The main screen is a 
 **Screens:**
 1. **Login** — email input + "Send magic link" button. No password, no signup form.
 2. **Collection list** — search bar + category filter chips + scrollable card list ordered by collection number. Floating "+" FAB to add a pin.
-3. **Add pin** — form with photo picker, description, location fields, year, collection number, commemorative toggle, and tag selector (bottom sheet, two-level: category chips → subcategory).
+3. **Add pin** — form with photo picker (gallery), description (max 100 chars), location fields, year (mandatory, pre-filled), commemorative toggle, and inline two-level tag chip selector (L1 + L2 with cascade logic). Collection number auto-assigned.
 4. **Pin detail** — full view of a single pin's data including collection number. Edit and delete actions accessible from here.
 5. **Edit pin** — same form as Add pin, pre-populated with existing data.
 
@@ -236,6 +239,11 @@ Single-user Android app. User logs in once via magic link. The main screen is a 
 | 2026-03-07 | NativeWind v4 for styling, dark mode as MVP default | Premium UI goal requires a design system — NativeWind's Tailwind dark mode support is first-class. Light mode is v2. |
 | 2026-03-11 | Card list over photo grid for collection view | Pins are identified by text (description + location), not thumbnails. Cards allow scanning at a glance. Photo grid added to backlog as future layout option. |
 | 2026-03-11 | `collection_number` column for ordering | Batch inserts share timestamps — timestamp ordering is unreliable. Collection number is also semantically meaningful (pin's permanent catalogue position). |
+| 2026-03-15 | Inline tag picker over bottom sheet | Tags embedded in form scroll view — state always visible, no modal layer. See decisions.md. |
+| 2026-03-15 | Acquired year mandatory, pre-filled to current year | Year is key catalogue data; pre-fill removes friction. DB column stays nullable for seeded data. |
+| 2026-03-15 | PanResponder for swipe gestures | Avoids new EAS build — react-native-gesture-handler not in existing binary. Backlogged for migration. |
+| 2026-03-15 | collection_number auto-assign + RPC re-sequence on delete | Keeps collection numbers contiguous and meaningful as the physical binder position. |
+| 2026-03-15 | L1 category icons — Ionicons + FontAwesome6 hybrid | FontAwesome6 already in @expo/vector-icons. TagIcon component encapsulates library selection. |
 
 ---
 

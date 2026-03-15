@@ -19,6 +19,10 @@
 - **Camera support for pin photos** — allow taking a photo directly from the camera when adding/editing a pin, in addition to picking from the gallery. `expo-image-picker` already supports this via `launchCameraAsync` — low effort to add.
 - **Auto-populate location from device GPS** — pre-fill country and city fields based on the device's current location using `expo-location` + reverse geocoding. Useful when adding a pin on the spot. Requires location permission request.
 
+## Gestures
+
+- **Migrate swipe gestures to react-native-gesture-handler** — swipe-to-edit and swipe-to-delete on collection cards currently use `PanResponder` (React Native core). Migrating to `react-native-gesture-handler` + Reanimated `Gesture.Pan` gives UI-thread gesture processing and better coexistence with nested scrollables. Requires a new EAS build when adopted. Do this when adding any additional gesture-heavy interactions.
+
 ## UI
 
 - **Icons for L2 tags** — L1 categories already have icons. Extend the icon system to L2 subcategories (e.g. Club, Selección, Escudo de Ciudad). Requires mapping each L2 to an icon — FontAwesome6 likely has better coverage for the more specific ones.
