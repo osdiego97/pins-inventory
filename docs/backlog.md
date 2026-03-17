@@ -25,7 +25,7 @@
 
 ## UI
 
-- **Icons for L2 tags** — L1 categories already have icons. Extend the icon system to L2 subcategories (e.g. Club, Selección, Escudo de Ciudad). Requires mapping each L2 to an icon — FontAwesome6 likely has better coverage for the more specific ones.
+- **Icons for L2 tags** — L1 categories already have icons. Extend the icon system to L2 subcategories, prioritising: Escudo de Ciudad, Escudo de País, Bandera de País, Religión, Club, Selección. Requires mapping each L2 to an icon — FontAwesome6 likely has better coverage for the more specific ones (shields, flags, religious symbols).
 - **Pin badges / special icons on cards** — show small contextual icons on pin cards based on attributes: gift (e.g. gift icon), Hard Rock category (e.g. music note or HR logo), premium/rare pins, and other user-defined special statuses. Requires deciding whether these map to existing fields (tags, is_commemorative) or need new schema fields (e.g. `is_gift`, `is_rare`). Design decision needed before implementation.
 - **Light mode / dark mode switch** — dark mode is the MVP default. Add an in-app toggle to switch between dark and light mode in a future iteration.
 - **Sortable collection** — add a sort selector to switch between collection number order, alphabetical by description, and by country. Natural follow-on once the collection grows and browsing by name becomes useful.
