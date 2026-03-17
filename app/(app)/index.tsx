@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import {
   View,
   Text,
@@ -7,16 +7,24 @@ import {
   TouchableOpacity,
   ActivityIndicator,
 } from 'react-native';
-import { router } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { usePins } from '../../hooks/usePins';
+import { usePinDelete } from '../../hooks/usePinDelete';
 import PinCard from '../../components/pins/PinCard';
 
 export default function CollectionScreen() {
-  const { pins, loading, error } = usePins();
+  const { pins, loading, error, refetch } = usePins();
+  const { confirmDelete } = usePinDelete(refetch);
   const [search, setSearch] = useState('');
   const insets = useSafeAreaInsets();
+
+  useFocusEffect(
+    useCallback(() => {
+      refetch();
+    }, [])
+  );
 
   const filtered = useMemo(() => {
     if (!search.trim()) return pins;
@@ -78,7 +86,12 @@ export default function CollectionScreen() {
           data={filtered}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
-            <PinCard pin={item} onPress={(id) => router.push(`/(app)/pin/${id}` as any)} />
+            <PinCard
+                pin={item}
+                onPress={(id) => router.push(`/(app)/pin/${id}` as any)}
+                onEdit={(id) => router.push(`/(app)/pin/edit/${id}` as any)}
+                onDelete={confirmDelete}
+              />
           )}
           contentContainerStyle={{
             paddingHorizontal: 16,

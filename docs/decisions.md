@@ -23,6 +23,83 @@
 
 ## Entries
 
+### 2026-03-15 Swipe gestures — PanResponder over react-native-gesture-handler
+
+**Context:** Adding swipe-to-edit (right) and swipe-to-delete (left) on collection list cards. Two options for gesture handling in React Native.
+
+**Options considered:**
+  - `react-native-gesture-handler`: UI-thread gesture processing, better coexistence with FlatList scroll via `activeOffsetX`/`failOffsetY` API. Requires native module compiled into the app binary.
+  - `PanResponder` (React Native core): JS-thread, no native module required, works with any existing build.
+
+**Decision:** `PanResponder` for MVP. `react-native-gesture-handler` added to backlog for future migration.
+
+**Rationale:** Gesture handler requires a new EAS build to include its native module. PanResponder works immediately with the existing binary and delivers the same end-user behaviour for a simple swipe-to-reveal. Migrating is low-risk when the time comes.
+
+**Trade-off accepted:** Gesture processing on JS thread — could lag if JS is busy. Acceptable for a single-user app with no heavy background work.
+
+---
+
+### 2026-03-15 Tag picker UX — inline chip selector embedded in form
+
+**Context:** PRD specified a bottom sheet with two-level chips for tag selection. When building the form, inline chips within the scrollable form were evaluated against the bottom sheet approach.
+
+**Options considered:**
+  - Bottom sheet: Clean separation, but adds a modal layer, requires a bottom sheet library or custom implementation, and hides the tag state while the sheet is open.
+  - Inline chip grid: Tags rendered directly in the form scroll view. L1 as selectable chips (uppercase + category icon), L2 chips indented below. State visible at all times.
+
+**Decision:** Inline chip grid. PRD updated to reflect this.
+
+**Rationale:** The form is already a scroll view. Embedding the tag picker inline keeps all form state visible without a modal layer, and the L1/L2 hierarchy is clear at a glance. The bottom sheet adds navigation complexity for no UX gain given the form's existing scroll container.
+
+**Trade-off accepted:** Tag picker occupies vertical space in the form rather than being hidden until needed.
+
+---
+
+### 2026-03-15 Acquired year — mandatory in form
+
+**Context:** PRD marked acquired year as optional. During implementation, making it mandatory was evaluated.
+
+**Decision:** Acquired year is mandatory in the add/edit form. Pre-filled to the current year to reduce friction.
+
+**Rationale:** Year is a key piece of catalogue data — a pin without a year loses important context. Pre-filling to the current year means the user only needs to change it if incorrect, making mandatory feel frictionless in practice.
+
+**Trade-off accepted:** Existing seeded pins without a year (from the CSV) are unaffected — the DB column remains nullable. Only new entries via the form require a year.
+
+---
+
+### 2026-03-15 L1 category icons — multi-library approach (Ionicons + FontAwesome6)
+
+**Context:** Adding icons to L1 category chips in the tag picker and on pin cards. Ionicons (already in `@expo/vector-icons`) was the first choice, but several categories lacked suitable icons.
+
+**Options considered:**
+  - Ionicons only: No additional library, but `guitar` and military-specific icons are absent.
+  - FontAwesome6 + Ionicons: Full icon coverage. `@expo/vector-icons` includes FontAwesome6 — no new dependency.
+
+**Decision:** Hybrid approach. `TagIcon` component wraps both libraries and selects based on a `library` field in `lib/tagIcons.ts`. L1 categories only — L2 icons deferred to backlog.
+
+**Rationale:** FontAwesome6 is already bundled in `@expo/vector-icons`. No new dependency. `TagIcon` encapsulates the multi-library logic — consumers just pass the tag name.
+
+**Trade-off accepted:** Multi-library icon map requires maintenance when new categories are added. Acceptable given the controlled vocabulary.
+
+---
+
+### 2026-03-15 Collection number — auto-assign on add, re-sequence on delete
+
+**Context:** When a user adds a new pin, a collection number must be assigned. When a pin is deleted, subsequent numbers become gaps.
+
+**Options considered:**
+  - Manual assignment: User enters the number. Error-prone and friction-heavy.
+  - Auto-assign as max+1 on add; leave gaps on delete: Simple, but gaps make the collection number meaningless over time.
+  - Auto-assign as max+1 on add; re-sequence on delete via Postgres RPC: Keeps numbers contiguous. Slightly more complex.
+
+**Decision:** Auto-assign max+1 on create. On delete, call Postgres RPC `decrement_collection_numbers_after` to close the gap.
+
+**Rationale:** Collection number represents the pin's position in the physical binder. Gaps would break that mapping. The RPC is a single DB call and handles the re-sequencing atomically.
+
+**Trade-off accepted:** Delete is slightly more expensive (two DB calls). Acceptable — deletes are infrequent.
+
+---
+
 ### 2026-03-11 Pin ordering — collection_number column
 
 **Context:** After seeding 477 pins from CSV, the collection screen needed a meaningful sort order. Pins were inserted in batches of 50, so all pins in a batch shared the same `created_at` timestamp — ordering by timestamp only gave batch-level ordering, not exact row order.
