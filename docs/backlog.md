@@ -35,6 +35,7 @@
 ## Build Config
 
 - **Set `cli.appVersionSource`** — EAS warns this will be required in future. Set to `"remote"` in `eas.json` to manage version increments server-side. Low priority, non-blocking.
+- **Replace deprecated SafeAreaView** — Expo warns that the built-in `SafeAreaView` from `react-native` is deprecated and will be removed. Replace all usages with `SafeAreaView` from `react-native-safe-area-context`. Package is already a transitive dependency via Expo — no new install needed, just update imports.
 
 ## Auth & Sync
 
