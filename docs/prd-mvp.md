@@ -154,13 +154,21 @@ So that I can quickly find specific pins.
 **Acceptance criteria:**
 - [x] A search bar is visible at the top of the collection list
 - [x] Search filters pins in real time by description, city, and country
-- [ ] A horizontal scrollable row of category chips is shown below the search bar _(not yet built)_
-- [ ] Tapping a category chip filters the list to show only pins in that category _(not yet built)_
-- [ ] Search and category filter can be combined — both active at the same time _(not yet built)_
-- [ ] An active filter chip shows a visual indicator (selected state) _(not yet built)_
-- [ ] Tapping an active chip deselects it and clears that filter _(not yet built)_
-- [ ] A "clear all" option resets both search and filters _(not yet built)_
-- [x] Empty state is shown when no pins match the active filters (search only)
+- [x] A horizontal scrollable row of L1 category chips is shown below the search bar
+- [x] Tapping a category chip filters the list to that L1 category
+- [x] Search and category filter can be combined
+- [x] Active chip shows selected state; tapping again deselects
+- [x] Pin count in header reflects active filters (e.g. "47 de 477 pins")
+- [x] Empty state shown when no pins match active filters
+- [x] Replace L1 chip row with a "Filtrar" button (+ active count badge) next to search bar
+- [x] Tapping "Filtrar" opens a bottom sheet with 5 sections:
+  - Categoría (L1 chips — narrowed by other active filters)
+  - Subcategoría (L2 chips — all shown by default, narrowed when L1 selected; selecting L2 without L1 works)
+  - País (searchable input + chips, shown on type)
+  - Ciudad (searchable input + chips, shown on type; cascades from País)
+  - Año (year chips)
+- [x] All filters combinable with each other and with search (full faceted search — each dimension only shows values that return results given other active filters)
+- [x] Clear all resets all filters
 
 ---
 
@@ -170,7 +178,7 @@ Single-user Android app. User logs in once via magic link. The main screen is a 
 
 **Screens:**
 1. **Login** — email input + "Send magic link" button. No password, no signup form.
-2. **Collection list** — search bar + category filter chips + scrollable card list ordered by collection number. Floating "+" FAB to add a pin.
+2. **Collection list** — search bar + Filtrar button + scrollable card list ordered by collection number. Floating "+" FAB to add a pin. Filtrar opens a bottom sheet with 5 filter sections (Categoría, Subcategoría, País, Ciudad, Año) with full faceted search.
 3. **Add pin** — form with photo picker (gallery), description (max 100 chars), location fields, year (mandatory, pre-filled), commemorative toggle, and inline two-level tag chip selector (L1 + L2 with cascade logic). Collection number auto-assigned.
 4. **Pin detail** — full view of a single pin's data including collection number. Edit and delete actions accessible from here.
 5. **Edit pin** — same form as Add pin, pre-populated with existing data.
@@ -183,7 +191,7 @@ Single-user Android app. User logs in once via magic link. The main screen is a 
 5. Detail screen → Edit → update form → save → back to Detail screen
 6. Detail screen → Delete → confirmation dialog → back to Collection list
 7. Collection list → search bar → type query → list filters in real time
-8. Collection list → tap category chip → list filters to that category
+8. Collection list → tap Filtrar → bottom sheet → select filters → close → list updates
 
 **Edge cases to handle:**
 - Magic link expired → show error + resend option

@@ -26,3 +26,11 @@ export interface PinTag {
   tag_id: string;
   user_id: string;
 }
+
+export interface FilterState {
+  l1: string | null;
+  l2: string | null;
+  country: string | null;
+  city: string | null;
+  year: number | null;
+}

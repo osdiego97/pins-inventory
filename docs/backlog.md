@@ -32,6 +32,11 @@
 - **Collection layout toggle (list/grid)** — MVP uses a card list. Add a toggle to switch between card list and photo grid once pins have photos populated. Grid only makes sense as a secondary option — list remains the default.
 - **Map view** — visualise the collection on a map showing where each pin came from, based on the city/country data already stored in the schema.
 
+
+## Performance
+
+- **Migrate FlatList to FlashList** — FlashList (`@shopify/flash-list`) recycles native cell components and has faster reconciliation than FlatList. Worth evaluating once the collection grows significantly beyond 477 pins. Requires a new EAS build.
+
 ## Build Config
 
 - **Set `cli.appVersionSource`** — EAS warns this will be required in future. Set to `"remote"` in `eas.json` to manage version increments server-side. Low priority, non-blocking.

@@ -12,14 +12,20 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { usePins } from '../../hooks/usePins';
 import { usePinDelete } from '../../hooks/usePinDelete';
+import { useTags } from '../../hooks/useTags';
+import { FilterState } from '../../lib/types';
 import PinCard from '../../components/pins/PinCard';
-import CategoryFilterChips from '../../components/pins/CategoryFilterChips';
+import FilterBottomSheet from '../../components/pins/FilterBottomSheet';
+
+const EMPTY_FILTERS: FilterState = { l1: null, l2: null, country: null, city: null, year: null };
 
 export default function CollectionScreen() {
   const { pins, loading, error, refetch } = usePins();
   const { confirmDelete } = usePinDelete(refetch);
+  const { tagGroups } = useTags();
   const [search, setSearch] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [filters, setFilters] = useState<FilterState>(EMPTY_FILTERS);
+  const [filterSheetVisible, setFilterSheetVisible] = useState(false);
   const insets = useSafeAreaInsets();
 
   useFocusEffect(
@@ -27,6 +33,8 @@ export default function CollectionScreen() {
       refetch();
     }, [])
   );
+
+  const { l1, l2, country, city, year } = filters;
 
   const filtered = useMemo(() => {
     let result = pins;
@@ -41,16 +49,18 @@ export default function CollectionScreen() {
       );
     }
 
-    if (selectedCategory) {
-      result = result.filter((p) =>
-        (p.tags ?? []).some((t) => !t.parent_id && t.name === selectedCategory)
-      );
-    }
+    if (l1) result = result.filter((p) => (p.tags ?? []).some((t) => !t.parent_id && t.name === l1));
+    if (l2) result = result.filter((p) => (p.tags ?? []).some((t) => t.parent_id && t.name === l2));
+    if (country) result = result.filter((p) => p.country === country);
+    if (city) result = result.filter((p) => p.city === city);
+    if (year) result = result.filter((p) => p.acquired_year === year);
 
     return result;
-  }, [pins, search, selectedCategory]);
+  }, [pins, search, l1, l2, country, city, year]);
 
-  const isFiltering = search.trim().length > 0 || selectedCategory !== null;
+  const activeFilterCount = [l1, l2, country, city, year].filter(Boolean).length;
+
+  const isFiltering = search.trim().length > 0 || activeFilterCount > 0;
 
   const handlePress = useCallback((id: string) => router.push(`/(app)/pin/${id}` as any), []);
   const handleEdit = useCallback((id: string) => router.push(`/(app)/pin/edit/${id}` as any), []);
@@ -68,37 +78,53 @@ export default function CollectionScreen() {
   );
 
   return (
-    <View className="flex-1 bg-surface" style={{ paddingTop: insets.top }}>
+    <View className="flex-1 bg-surface">
+      {/* Padded content area */}
+      <View className="flex-1" style={{ paddingTop: insets.top }}>
       {/* Header */}
       <View className="px-4 pt-4 pb-2">
         <Text className="text-text-primary text-2xl font-bold">Mi Colección</Text>
         {!loading && (
-          <Text className="text-text-muted text-sm mt-0.5">{pins.length} pins</Text>
+          <Text className="text-text-muted text-sm mt-0.5">
+            {isFiltering ? `${filtered.length} de ${pins.length} pins` : `${pins.length} pins`}
+          </Text>
         )}
       </View>
 
-      {/* Search bar */}
-      <View className="mx-4 mb-3 flex-row items-center bg-surface-card rounded-xl px-3">
-        <Ionicons name="search" size={16} color="#606060" />
-        <TextInput
-          className="flex-1 ml-2 py-3 text-text-primary text-sm"
-          placeholder="Buscar pins..."
-          placeholderTextColor="#606060"
-          value={search}
-          onChangeText={setSearch}
-        />
-        {search.length > 0 && (
-          <TouchableOpacity onPress={() => setSearch('')}>
-            <Ionicons name="close-circle" size={16} color="#606060" />
-          </TouchableOpacity>
-        )}
-      </View>
+      {/* Search bar + Filter button */}
+      <View className="mx-4 mb-3 flex-row items-center gap-2">
+        <View className="flex-1 flex-row items-center bg-surface-card rounded-xl px-3">
+          <Ionicons name="search" size={16} color="#606060" />
+          <TextInput
+            className="flex-1 ml-2 py-3 text-text-primary text-sm"
+            placeholder="Buscar pins..."
+            placeholderTextColor="#606060"
+            value={search}
+            onChangeText={setSearch}
+          />
+          {search.length > 0 && (
+            <TouchableOpacity onPress={() => setSearch('')}>
+              <Ionicons name="close-circle" size={16} color="#606060" />
+            </TouchableOpacity>
+          )}
+        </View>
 
-      {/* Category filter chips */}
-      <CategoryFilterChips
-        selected={selectedCategory}
-        onSelect={setSelectedCategory}
-      />
+        <TouchableOpacity
+          onPress={() => setFilterSheetVisible(true)}
+          className={`flex-row items-center px-3 py-3 rounded-xl gap-1.5 ${
+            activeFilterCount > 0 ? 'bg-accent' : 'bg-surface-card'
+          }`}
+        >
+          <Ionicons
+            name="options-outline"
+            size={16}
+            color={activeFilterCount > 0 ? '#0f0f0f' : '#909090'}
+          />
+          {activeFilterCount > 0 && (
+            <Text className="text-surface text-xs font-bold">{activeFilterCount}</Text>
+          )}
+        </TouchableOpacity>
+      </View>
 
       {/* Content */}
       {loading ? (
@@ -142,6 +168,18 @@ export default function CollectionScreen() {
       >
         <Ionicons name="add" size={28} color="#0f0f0f" />
       </TouchableOpacity>
+      </View>{/* end padded content */}
+
+      {/* Filter overlay — outside padded view so it covers the full screen */}
+      <FilterBottomSheet
+        visible={filterSheetVisible}
+        filters={filters}
+        onFiltersChange={setFilters}
+        onClose={() => setFilterSheetVisible(false)}
+        pins={pins}
+        tagGroups={tagGroups}
+        search={search}
+      />
     </View>
   );
 }
