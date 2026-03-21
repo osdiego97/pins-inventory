@@ -13,11 +13,13 @@ import { Ionicons } from '@expo/vector-icons';
 import { usePins } from '../../hooks/usePins';
 import { usePinDelete } from '../../hooks/usePinDelete';
 import PinCard from '../../components/pins/PinCard';
+import CategoryFilterChips from '../../components/pins/CategoryFilterChips';
 
 export default function CollectionScreen() {
   const { pins, loading, error, refetch } = usePins();
   const { confirmDelete } = usePinDelete(refetch);
   const [search, setSearch] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const insets = useSafeAreaInsets();
 
   useFocusEffect(
@@ -27,15 +29,43 @@ export default function CollectionScreen() {
   );
 
   const filtered = useMemo(() => {
-    if (!search.trim()) return pins;
-    const q = search.toLowerCase();
-    return pins.filter(
-      (p) =>
-        p.description.toLowerCase().includes(q) ||
-        p.country?.toLowerCase().includes(q) ||
-        p.city?.toLowerCase().includes(q)
-    );
-  }, [pins, search]);
+    let result = pins;
+
+    if (search.trim()) {
+      const q = search.toLowerCase();
+      result = result.filter(
+        (p) =>
+          p.description.toLowerCase().includes(q) ||
+          p.country?.toLowerCase().includes(q) ||
+          p.city?.toLowerCase().includes(q)
+      );
+    }
+
+    if (selectedCategory) {
+      result = result.filter((p) =>
+        (p.tags ?? []).some((t) => !t.parent_id && t.name === selectedCategory)
+      );
+    }
+
+    return result;
+  }, [pins, search, selectedCategory]);
+
+  const isFiltering = search.trim().length > 0 || selectedCategory !== null;
+
+  const handlePress = useCallback((id: string) => router.push(`/(app)/pin/${id}` as any), []);
+  const handleEdit = useCallback((id: string) => router.push(`/(app)/pin/edit/${id}` as any), []);
+
+  const renderItem = useCallback(
+    ({ item }: { item: (typeof filtered)[0] }) => (
+      <PinCard
+        pin={item}
+        onPress={handlePress}
+        onEdit={handleEdit}
+        onDelete={confirmDelete}
+      />
+    ),
+    [handlePress, handleEdit, confirmDelete]
+  );
 
   return (
     <View className="flex-1 bg-surface" style={{ paddingTop: insets.top }}>
@@ -64,6 +94,12 @@ export default function CollectionScreen() {
         )}
       </View>
 
+      {/* Category filter chips */}
+      <CategoryFilterChips
+        selected={selectedCategory}
+        onSelect={setSelectedCategory}
+      />
+
       {/* Content */}
       {loading ? (
         <View className="flex-1 items-center justify-center">
@@ -76,8 +112,8 @@ export default function CollectionScreen() {
       ) : filtered.length === 0 ? (
         <View className="flex-1 items-center justify-center px-8">
           <Text className="text-text-secondary text-center">
-            {search
-              ? 'No hay pins que coincidan con la búsqueda.'
+            {isFiltering
+              ? 'No hay pins que coincidan con los filtros activos.'
               : 'Aún no tienes pins. ¡Añade el primero!'}
           </Text>
         </View>
@@ -85,19 +121,16 @@ export default function CollectionScreen() {
         <FlatList
           data={filtered}
           keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-            <PinCard
-                pin={item}
-                onPress={(id) => router.push(`/(app)/pin/${id}` as any)}
-                onEdit={(id) => router.push(`/(app)/pin/edit/${id}` as any)}
-                onDelete={confirmDelete}
-              />
-          )}
+          renderItem={renderItem}
           contentContainerStyle={{
             paddingHorizontal: 16,
             paddingBottom: insets.bottom + 80,
           }}
           showsVerticalScrollIndicator={false}
+          removeClippedSubviews
+          maxToRenderPerBatch={10}
+          windowSize={5}
+          initialNumToRender={15}
         />
       )}
 

@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef, memo } from 'react';
 import { View, Text, TouchableOpacity, PanResponder, Animated } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Pin } from '../../lib/types';
@@ -14,7 +14,7 @@ interface PinCardProps {
   onDelete: (id: string) => void;
 }
 
-export default function PinCard({ pin, onPress, onEdit, onDelete }: PinCardProps) {
+function PinCard({ pin, onPress, onEdit, onDelete }: PinCardProps) {
   const location = [pin.city, pin.country].filter(Boolean).join(' · ');
   const tags = pin.tags ?? [];
   const visibleTags = tags.slice(0, 3);
@@ -157,3 +157,5 @@ export default function PinCard({ pin, onPress, onEdit, onDelete }: PinCardProps
     </View>
   );
 }
+
+export default memo(PinCard);
