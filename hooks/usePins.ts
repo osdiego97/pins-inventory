@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
 import { Pin, Tag } from '../lib/types';
 
@@ -19,7 +19,7 @@ export function usePins() {
     fetchPins();
   }, []);
 
-  async function fetchPins() {
+  const fetchPins = useCallback(async function () {
     setLoading(true);
     setError(null);
 
@@ -60,7 +60,7 @@ export function usePins() {
 
     setPins(mapped);
     setLoading(false);
-  }
+  }, []);
 
   return { pins, loading, error, refetch: fetchPins };
 }

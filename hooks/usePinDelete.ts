@@ -1,18 +1,22 @@
+import { useCallback } from 'react';
 import { Alert } from 'react-native';
 import { supabase } from '../lib/supabase';
 import { deleteImage } from '../lib/storage';
 
 export function usePinDelete(onSuccess: () => void) {
-  function confirmDelete(pinId: string) {
-    Alert.alert(
-      'Eliminar pin',
-      '¿Seguro que quieres eliminar este pin? Esta acción no se puede deshacer.',
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        { text: 'Eliminar', style: 'destructive', onPress: () => handleDelete(pinId) },
-      ]
-    );
-  }
+  const confirmDelete = useCallback(
+    (pinId: string) => {
+      Alert.alert(
+        'Eliminar pin',
+        '¿Seguro que quieres eliminar este pin? Esta acción no se puede deshacer.',
+        [
+          { text: 'Cancelar', style: 'cancel' },
+          { text: 'Eliminar', style: 'destructive', onPress: () => handleDelete(pinId) },
+        ]
+      );
+    },
+    [onSuccess]
+  );
 
   async function handleDelete(pinId: string) {
     const { data: pin } = await supabase
@@ -34,7 +38,9 @@ export function usePinDelete(onSuccess: () => void) {
     }
 
     if (pin?.collection_number != null) {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (user) {
         await supabase.rpc('decrement_collection_numbers_after', {
           p_deleted_number: pin.collection_number,

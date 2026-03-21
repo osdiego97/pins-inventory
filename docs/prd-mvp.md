@@ -154,13 +154,21 @@ So that I can quickly find specific pins.
 **Acceptance criteria:**
 - [x] A search bar is visible at the top of the collection list
 - [x] Search filters pins in real time by description, city, and country
-- [ ] A horizontal scrollable row of category chips is shown below the search bar _(not yet built)_
-- [ ] Tapping a category chip filters the list to show only pins in that category _(not yet built)_
-- [ ] Search and category filter can be combined — both active at the same time _(not yet built)_
-- [ ] An active filter chip shows a visual indicator (selected state) _(not yet built)_
-- [ ] Tapping an active chip deselects it and clears that filter _(not yet built)_
-- [ ] A "clear all" option resets both search and filters _(not yet built)_
-- [x] Empty state is shown when no pins match the active filters (search only)
+- [x] A horizontal scrollable row of L1 category chips is shown below the search bar
+- [x] Tapping a category chip filters the list to that L1 category
+- [x] Search and category filter can be combined
+- [x] Active chip shows selected state; tapping again deselects
+- [x] Pin count in header reflects active filters (e.g. "47 de 477 pins")
+- [x] Empty state shown when no pins match active filters
+- [x] Replace L1 chip row with a "Filtrar" button (+ active count badge) next to search bar
+- [x] Tapping "Filtrar" opens a bottom sheet with 5 sections:
+  - Categoría (L1 chips — narrowed by other active filters)
+  - Subcategoría (L2 chips — all shown by default, narrowed when L1 selected; selecting L2 without L1 works)
+  - País (searchable input + chips, shown on type)
+  - Ciudad (searchable input + chips, shown on type; cascades from País)
+  - Año (year chips)
+- [x] All filters combinable with each other and with search (full faceted search — each dimension only shows values that return results given other active filters)
+- [x] Clear all resets all filters
 
 ---
 
