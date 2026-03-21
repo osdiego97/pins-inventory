@@ -257,7 +257,7 @@ Single-user Android app. User logs in once via magic link. The main screen is a 
 
 ## 9. Launch Checklist
 
-- [ ] Acceptance criteria met for all four user stories
+- [ ] Acceptance criteria met for all user stories
 - [ ] Magic link deep linking tested on a physical Android device
 - [ ] Image upload and retrieval tested on a physical Android device
 - [ ] Empty states visible and correct
@@ -266,3 +266,4 @@ Single-user Android app. User logs in once via magic link. The main screen is a 
 - [ ] No secrets committed to the repo
 - [ ] Security rules applied (see `docs/security-rules.md`)
 - [x] 477 pins seeded via CSV import script (`scripts/seed-pins.js`)
+- [ ] Preview APK built via EAS (`eas build --platform android --profile preview`) and installed on device — app runs without Metro
