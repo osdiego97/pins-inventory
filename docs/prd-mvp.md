@@ -178,7 +178,7 @@ Single-user Android app. User logs in once via magic link. The main screen is a 
 
 **Screens:**
 1. **Login** — email input + "Send magic link" button. No password, no signup form.
-2. **Collection list** — search bar + category filter chips + scrollable card list ordered by collection number. Floating "+" FAB to add a pin.
+2. **Collection list** — search bar + Filtrar button + scrollable card list ordered by collection number. Floating "+" FAB to add a pin. Filtrar opens a bottom sheet with 5 filter sections (Categoría, Subcategoría, País, Ciudad, Año) with full faceted search.
 3. **Add pin** — form with photo picker (gallery), description (max 100 chars), location fields, year (mandatory, pre-filled), commemorative toggle, and inline two-level tag chip selector (L1 + L2 with cascade logic). Collection number auto-assigned.
 4. **Pin detail** — full view of a single pin's data including collection number. Edit and delete actions accessible from here.
 5. **Edit pin** — same form as Add pin, pre-populated with existing data.
@@ -191,7 +191,7 @@ Single-user Android app. User logs in once via magic link. The main screen is a 
 5. Detail screen → Edit → update form → save → back to Detail screen
 6. Detail screen → Delete → confirmation dialog → back to Collection list
 7. Collection list → search bar → type query → list filters in real time
-8. Collection list → tap category chip → list filters to that category
+8. Collection list → tap Filtrar → bottom sheet → select filters → close → list updates
 
 **Edge cases to handle:**
 - Magic link expired → show error + resend option

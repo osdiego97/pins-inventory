@@ -23,6 +23,56 @@
 
 ## Entries
 
+### 2026-03-21 Filter sheet — draft state, pre-warming, overlay over Modal
+
+**Context:** Building the filter bottom sheet for story 3.7. Initial implementation caused 2-second open delay and laggy chip interactions.
+
+**Options considered:**
+- Real-time filter application (call `setFilters` on every chip tap): Simple, but causes the collection list behind the sheet to re-render on every tap — JS thread contention makes chips feel unresponsive.
+- Draft state (apply filters once on close): Chip taps update local state only; `onFiltersChange` fires once when the sheet dismisses. Collection list untouched while sheet is open.
+
+- `Modal` component: Native Android modal system — ~2 second presentation delay on every open due to native window creation.
+- Absolute-positioned overlay rendered in the screen's view hierarchy: No native overhead — appears instantly.
+
+- Render chip lists on open: First open creates 500+ native views (200+ city chips alone) — 1-2 seconds in dev builds.
+- Pre-render via `InteractionManager.runAfterInteractions`: Native views created in background after screen settles. Open triggers only the spring animation.
+
+**Decision:** Draft state + absolute overlay + `InteractionManager` pre-warming. País/Ciudad chip rows only render when user types (no chips dumped on initial render).
+
+**Rationale:** Each fix addresses a distinct layer of the problem: draft state eliminates background re-renders, overlay removes native modal overhead, pre-warming eliminates first-render cost at open time.
+
+**Trade-off accepted:** Filters apply on sheet close, not in real time as chips are tapped. Faceted values inside the sheet still update in real time (local state), so the user gets interactive feedback. The list updates once on dismiss — acceptable and arguably cleaner UX.
+
+---
+
+### 2026-03-21 Filter — full faceted search over cascade-only
+
+**Context:** Designing how filter dimensions interact. País → Ciudad cascade was the minimum. Full faceted search (every dimension narrows based on all other active filters) was the alternative.
+
+**Options considered:**
+- Cascade only (País → Ciudad): Simple, but selecting Fútbol doesn't narrow País — you could still pick "Tokyo" with Fútbol active and get 0 results.
+- Full faceted search: Each dimension shows only values that return results given everything else active. No dead-end combinations possible.
+
+**Decision:** Full faceted search. Each section's available values computed from pins filtered by all other dimensions (`applyFilters` called 5 times, each excluding its own dimension). Granular `useMemo` deps prevent unnecessary recomputation.
+
+**Rationale:** With 477 pins across 11 categories and many countries/cities, guided navigation is the right call. It prevents dead ends and helps the user discover what's actually in their collection (e.g. tapping Fútbol immediately shows only countries where football pins exist).
+
+**Trade-off accepted:** More computation per filter change. Mitigated by granular `useMemo` deps — changing L1 only recomputes memos that depend on L1.
+
+---
+
+### 2026-03-21 Filter — L2 visible without requiring L1 selection
+
+**Context:** Initial implementation showed L2 subcategories only after an L1 was selected. User wanted to filter by "Escudo de Ciudad" directly without first selecting "Geografía".
+
+**Decision:** L2 section always visible, showing all subcategories across all categories (faceted). When L1 is selected, L2 narrows to that category's subcategories. Selecting L2 without L1 works independently. Switching L1 resets L2 only if the selected L2 doesn't belong to the new L1.
+
+**Rationale:** Users know what they're looking for — forcing them to go via L1 adds unnecessary friction. The faceted filtering ensures only valid L2 values are shown anyway.
+
+**Trade-off accepted:** More L2 chips shown initially (~30 vs ~6). Acceptable given the pre-warming strategy handles the render cost.
+
+---
+
 ### 2026-03-15 Swipe gestures — PanResponder over react-native-gesture-handler
 
 **Context:** Adding swipe-to-edit (right) and swipe-to-delete (left) on collection list cards. Two options for gesture handling in React Native.

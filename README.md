@@ -10,7 +10,7 @@ A mobile app to catalogue a personal pin collection with photos, built with Reac
 
 Simple, focused tool for pin collectors who want to:
 - Add pins with a photo, description, location, tags, and year
-- Browse their collection as a searchable card list ordered by collection number
+- Browse their collection as a searchable, filterable card list ordered by collection number (filter by category, subcategory, country, city, and year with full faceted search)
 - Tap any pin to see full details including photo
 - Keep everything private and tied to their account
 
