@@ -10,12 +10,12 @@ import {
 import { router, useFocusEffect } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { usePins } from '../../hooks/usePins';
-import { usePinDelete } from '../../hooks/usePinDelete';
-import { useTags } from '../../hooks/useTags';
-import { FilterState } from '../../lib/types';
-import PinCard from '../../components/pins/PinCard';
-import FilterBottomSheet from '../../components/pins/FilterBottomSheet';
+import { usePins } from '../../../hooks/usePins';
+import { usePinDelete } from '../../../hooks/usePinDelete';
+import { useTags } from '../../../hooks/useTags';
+import { FilterState } from '../../../lib/types';
+import PinCard from '../../../components/pins/PinCard';
+import FilterBottomSheet from '../../../components/pins/FilterBottomSheet';
 
 const EMPTY_FILTERS: FilterState = { l1: null, l2: null, country: null, city: null, year: null };
 
