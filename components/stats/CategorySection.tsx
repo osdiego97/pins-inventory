@@ -128,14 +128,12 @@ export default function CategorySection({ categories, uncategorized }: Props) {
               <Text className="text-text-primary text-sm font-semibold w-8 text-right">
                 {cat.count}
               </Text>
-              {/* Chevron */}
-              {hasL2 && (
-                <Ionicons
-                  name={isExpanded ? 'chevron-up' : 'chevron-down'}
-                  size={14}
-                  color="#606060"
-                />
-              )}
+              {/* Chevron — always reserve space for alignment */}
+              <Ionicons
+                name={isExpanded ? 'chevron-up' : 'chevron-down'}
+                size={14}
+                color={hasL2 ? '#606060' : 'transparent'}
+              />
             </TouchableOpacity>
 
             {/* L2 rows */}
