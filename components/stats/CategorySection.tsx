@@ -8,25 +8,11 @@ import Animated, {
 } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { L1Stat } from '../../hooks/useStats';
+import { SEGMENT_COLORS } from '../../constants/chartColors';
 
 if (Platform.OS === 'android') {
   UIManager.setLayoutAnimationEnabledExperimental?.(true);
 }
-
-const SEGMENT_COLORS = [
-  '#e8c97e',
-  '#7ec8e8',
-  '#5ce07a',
-  '#e87e9a',
-  '#a87ee8',
-  '#e8a07e',
-  '#7ee8d4',
-  '#e8e87e',
-  '#e05c5c',
-  '#5c8ce0',
-  '#e87ee8',
-  '#7ee89a',
-];
 
 const ANIMATION_DURATION = 800;
 

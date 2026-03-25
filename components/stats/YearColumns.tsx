@@ -78,6 +78,24 @@ export default function YearColumns({ years, pinsWithoutYear }: Props) {
     <View className="px-4">
       <ScrollView horizontal showsHorizontalScrollIndicator={false}>
         <View>
+          {/* Count labels above bars */}
+          <View className="flex-row mb-1">
+            {years.map((y, i) => (
+              <View
+                key={y.year}
+                style={{ width: COL_WIDTH, marginRight: i < years.length - 1 ? COL_GAP : 0 }}
+              >
+                <Text
+                  className="text-accent text-center font-semibold"
+                  style={{ fontSize: 8 }}
+                  numberOfLines={1}
+                >
+                  {y.count}
+                </Text>
+              </View>
+            ))}
+          </View>
+
           {/* Columns */}
           <Svg width={svgWidth} height={CHART_HEIGHT}>
             {years.map((y, i) => (
