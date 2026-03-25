@@ -266,4 +266,6 @@ Single-user Android app. User logs in once via magic link. The main screen is a 
 - [ ] No secrets committed to the repo
 - [ ] Security rules applied (see `docs/security-rules.md`)
 - [x] 477 pins seeded via CSV import script (`scripts/seed-pins.js`)
+- [ ] App icon set (1024×1024 PNG → `assets/icon.png`, referenced in `app.json`) — no default Expo icon
+- [ ] Splash screen configured (solid dark `#0F0F0F` background + icon centered, set in `app.json`) — no default Expo splash
 - [ ] Preview APK built via EAS (`eas build --platform android --profile preview`) and installed on device — app runs without Metro

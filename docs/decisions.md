@@ -23,6 +23,54 @@
 
 ## Entries
 
+
+### 2026-03-24 Stats screen — architecture and chart approach
+
+**Context:** Designing the first post-MVP feature: a statistics screen giving the user insight into their collection. Four decisions needed upfront before building.
+
+**Options considered:**
+
+*Navigation placement:*
+- Header icon from collection list: accessible but feels like a utility, not a feature
+- Bottom tab bar: promotes stats to a first-class screen alongside the collection
+
+*Chart implementation:*
+- Charting library (e.g. react-native-gifted-charts): faster to scaffold, but opinionated defaults hard to override for a custom dark mode design system
+- `react-native-svg` directly: write SVG primitives ourselves — full design control
+
+*Data fetching:*
+- Supabase RPC: server-side aggregation, one query — adds complexity
+- Client-side with `useMemo`: aggregate `pins` + `pin_tags` in JS — trivial at 477 pins
+
+*Scope of stats:*
+- Reflect active filters: complex, low value — filters are a collection-browsing tool, not an analysis lens
+- Always full collection: simple, coherent "big picture" view
+
+**Decision:** Tab bar navigation · react-native-svg directly (no library) · client-side aggregation · always full collection.
+
+**Rationale:** Tab bar gives stats the right structural weight. Custom SVG enables Revolut-style dark mode aesthetics (donut chart, animated fills) without fighting library defaults. Client-side aggregation at this scale is instant. Full collection keeps the screen's purpose clear.
+
+**Trade-off accepted:** react-native-svg requires a new EAS build. Acceptable — stats is a new feature branch that needs a build regardless. Filtered stats deferred to v2.
+
+---
+
+### 2026-03-24 EAS build profile for MVP distribution
+
+**Context:** MVP is a personal Android app — not distributed via Play Store. Needed to decide which EAS build profile to use as the final MVP artifact.
+
+**Options considered:**
+- `development`: Requires Metro running on the same machine — not standalone, not suitable for real-world testing
+- `preview`: Standalone APK, internal distribution, no Metro required — behaves like a real app
+- `production`: AAB format, intended for Play Store submission — unnecessary overhead for a personal app
+
+**Decision:** Use `preview` as the MVP distribution target.
+
+**Rationale:** `preview` produces a standalone APK that installs and runs without any dev tooling. It's the closest to a real production experience without the Play Store overhead. Since this is a single-user personal app, Play Store distribution is out of scope for MVP.
+
+**Trade-off accepted:** No Play Store listing. Acceptable — not a goal for this project.
+
+---
+
 ### 2026-03-21 Filter sheet — draft state, pre-warming, overlay over Modal
 
 **Context:** Building the filter bottom sheet for story 3.7. Initial implementation caused 2-second open delay and laggy chip interactions.
