@@ -47,7 +47,7 @@ So that my collection is tied to my account and survives device loss.
 - [x] Supabase sends a magic link email
 - [x] Tapping the link in the email opens the app and logs the user in
 - [x] Session persists across app restarts — user does not need to log in again
-- [ ] If the magic link has expired, the app shows an error and allows resending
+- [x] If the magic link has expired, the app shows an error and allows resending
 
 ---
 
@@ -61,7 +61,7 @@ So that I have a complete digital record of it.
 
 **Acceptance criteria:**
 - [x] User can open an "Add pin" screen from the main collection view via FAB
-- [ ] User can take a photo or select one from the gallery (gallery only in MVP — camera deferred to backlog)
+- [x] User can select a photo from the gallery _(camera deferred to backlog)_
 - [x] Description is required — form cannot be submitted without it (max 100 chars, live counter)
 - [x] Country and city are required in the form
 - [x] Region (Comunidad Autónoma) is optional
@@ -257,15 +257,15 @@ Single-user Android app. User logs in once via magic link. The main screen is a 
 
 ## 9. Launch Checklist
 
-- [ ] Acceptance criteria met for all user stories
-- [ ] Magic link deep linking tested on a physical Android device
-- [ ] Image upload and retrieval tested on a physical Android device
-- [ ] Empty states visible and correct
-- [ ] Error states visible and correct
-- [ ] RLS policies verified — no cross-user data access possible
-- [ ] No secrets committed to the repo
-- [ ] Security rules applied (see `docs/security-rules.md`)
+- [x] Acceptance criteria met for all user stories
+- [x] Magic link deep linking tested on a physical Android device
+- [x] Image upload and retrieval tested on a physical Android device
+- [x] Empty states visible and correct
+- [x] Error states visible and correct
+- [x] RLS policies verified — no cross-user data access possible
+- [x] No secrets committed to the repo
+- [x] Security rules applied (see `docs/security-rules.md`)
 - [x] 477 pins seeded via CSV import script (`scripts/seed-pins.js`)
-- [ ] App icon set (1024×1024 PNG → `assets/icon.png`, referenced in `app.json`) — no default Expo icon
-- [ ] Splash screen configured (solid dark `#0F0F0F` background + icon centered, set in `app.json`) — no default Expo splash
-- [ ] Preview APK built via EAS (`eas build --platform android --profile preview`) and installed on device — app runs without Metro
+- [x] App icon set (1024×1024 PNG → `assets/icon.png`, referenced in `app.json`) — no default Expo icon
+- [x] Splash screen configured (solid dark `#0F0F0F` background + icon centered, set in `app.json`) — no default Expo splash
+- [x] Preview APK built via EAS (`eas build --platform android --profile preview`) and installed on device — app runs without Metro
