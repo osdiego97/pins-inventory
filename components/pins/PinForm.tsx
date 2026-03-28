@@ -15,6 +15,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { usePinForm } from '../../hooks/usePinForm';
 import { useTags } from '../../hooks/useTags';
 import TagPicker from './TagPicker';
+import PlaceSearch from './PlaceSearch';
 
 interface PinFormProps {
   pinId?: string;
@@ -222,6 +223,28 @@ export default function PinForm({ pinId }: PinFormProps) {
                 />
               </View>
             </View>
+          </View>
+
+          {/* Map position */}
+          <View>
+            <Text className="text-text-secondary text-xs font-medium uppercase tracking-wider mb-1.5">
+              Posición en mapa
+            </Text>
+            <PlaceSearch
+              value={
+                form.mapLocationName
+                  ? { name: form.mapLocationName, latitude: form.latitude!, longitude: form.longitude! }
+                  : null
+              }
+              hasExistingCoords={!!(form.latitude && form.longitude && !form.mapLocationName)}
+              existingLatitude={form.latitude}
+              existingLongitude={form.longitude}
+              onChange={(place) => {
+                setField('mapLocationName', place?.name ?? null);
+                setField('latitude', place?.latitude ?? null);
+                setField('longitude', place?.longitude ?? null);
+              }}
+            />
           </View>
 
           {/* Tags */}

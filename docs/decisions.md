@@ -24,6 +24,50 @@
 ## Entries
 
 
+### 2026-03-28 Map view — architecture and key decisions
+
+**Context:** Building the map feature (user story: see pins plotted on a world map). Multiple connected decisions: how coordinates are stored, how they're set on each pin, which map library to use, filter behaviour, and marker design.
+
+**Coordinates storage:**
+- Option A: Separate `pin_locations` table (normalised, reusable) — adds join complexity, no benefit at this scale
+- Option B: `latitude FLOAT8` + `longitude FLOAT8` nullable columns directly on `pins` — simple, sufficient, no join needed
+
+**Decision:** Per-pin nullable lat/lng columns on `pins`. Schema migration `add_map_coordinates_to_pins` applied.
+
+**Coordinate input:**
+- Option A: Manual lat/lng fields — error-prone, not user-friendly
+- Option B: Semantic backfill script (geocode by tag type: Hard Rock → venue, Fútbol → stadium, etc.)
+- Option C: Google Places Autocomplete search field ("Posición en mapa") on add/edit form — user picks the specific place
+
+**Decision:** Option C (Places search field) as the primary input for new pins, Option B (backfill script) for existing 477 pins (separate session). Places API (New) used — `POST https://places.googleapis.com/v1/places:autocomplete`, not the legacy `/maps/api/place/` endpoint. API key exposed as `EXPO_PUBLIC_GOOGLE_MAPS_API_KEY` (was `GOOGLE_MAPS_API_KEY`) — `EXPO_PUBLIC_` prefix required for runtime access in app code.
+
+**Map library:**
+- `react-native-maps` (Google Maps, Android) + `react-native-map-clustering` for proximity clustering
+- Requires a new EAS build (native module)
+
+**Marker design:**
+- Option A: Native teardrop (`pinColor` prop) — simple, but can't customise shape/size for badge overlays
+- Option B: Custom View (gold circle 28×28, border #0f0f0f) — full control, consistent with design system
+
+**Decision:** Always render custom View. `tracksViewChanges` initialised to `true` (bitmap captured on first render), toggled to `false` after 500ms via `useFocusEffect` to prevent markers disappearing after navigation.
+
+**Same-location pins:**
+- Option A: Let ClusteredMapView handle — shows single pin at same coords, no grouping indication
+- Option B: `groupByLocation()` pre-groups exact duplicates; multi-pin groups show count badge (white bubble, top-right) and a callout listing all pins
+
+**Decision:** Option B. ClusteredMapView handles proximity clustering; `groupByLocation` handles exact-coordinate duplicates before that.
+
+**Filter multi-select:**
+- Previous filter design: single L1 + single L2 selection (string | null)
+- Map needs: "show Escudo Ciudad + Bandera Ciudad" — requires multiple L1/L2 simultaneously
+- Decision: change `FilterState.l1` and `l2` from `string | null` to `string[]`. Applied to both map and collection list (consistent behaviour everywhere). OR semantics: all selected tags merged into `[...l1, ...l2]`, filter with `.some(t => selectedTags.includes(t.name))`. Selecting an L2 auto-selects its parent L1.
+
+**Rationale:** Normalised schema keeps the data model clean. Google Places gives a UX comparable to Uber/Google Maps — no friction. Custom markers keep the design system consistent. Multi-select was the correct semantic fix; AND semantics across dimensions would always return 0 results when mixing categories.
+
+**Trade-off accepted:** Backfill script is a separate manual step — existing pins start without map coordinates. Google Maps API key must be embedded in the Android manifest at build time (not runtime-injectable).
+
+---
+
 ### 2026-03-24 Stats screen — architecture and chart approach
 
 **Context:** Designing the first post-MVP feature: a statistics screen giving the user insight into their collection. Four decisions needed upfront before building.

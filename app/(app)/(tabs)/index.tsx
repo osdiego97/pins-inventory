@@ -17,7 +17,7 @@ import { FilterState } from '../../../lib/types';
 import PinCard from '../../../components/pins/PinCard';
 import FilterBottomSheet from '../../../components/pins/FilterBottomSheet';
 
-const EMPTY_FILTERS: FilterState = { l1: null, l2: null, country: null, city: null, year: null };
+const EMPTY_FILTERS: FilterState = { l1: [], l2: [], country: null, city: null, year: null };
 
 export default function CollectionScreen() {
   const { pins, loading, error, refetch } = usePins();
@@ -49,8 +49,10 @@ export default function CollectionScreen() {
       );
     }
 
-    if (l1) result = result.filter((p) => (p.tags ?? []).some((t) => !t.parent_id && t.name === l1));
-    if (l2) result = result.filter((p) => (p.tags ?? []).some((t) => t.parent_id && t.name === l2));
+    const selectedTags = [...l1, ...l2];
+    if (selectedTags.length > 0) {
+      result = result.filter((p) => (p.tags ?? []).some((t) => selectedTags.includes(t.name)));
+    }
     if (country) result = result.filter((p) => p.country === country);
     if (city) result = result.filter((p) => p.city === city);
     if (year) result = result.filter((p) => p.acquired_year === year);
@@ -58,7 +60,7 @@ export default function CollectionScreen() {
     return result;
   }, [pins, search, l1, l2, country, city, year]);
 
-  const activeFilterCount = [l1, l2, country, city, year].filter(Boolean).length;
+  const activeFilterCount = [l1.length > 0, l2.length > 0, country, city, year].filter(Boolean).length;
 
   const isFiltering = search.trim().length > 0 || activeFilterCount > 0;
 

@@ -16,7 +16,7 @@ import { TAG_ICONS } from '../../lib/tagIcons';
 import { TagGroup } from '../../hooks/useTags';
 import { FilterState, Pin } from '../../lib/types';
 
-const EMPTY_FILTERS: FilterState = { l1: null, l2: null, country: null, city: null, year: null };
+const EMPTY_FILTERS: FilterState = { l1: [], l2: [], country: null, city: null, year: null };
 
 interface Props {
   visible: boolean;
@@ -31,8 +31,8 @@ interface Props {
 function applyFilters(
   pins: Pin[],
   search: string,
-  l1: string | null,
-  l2: string | null,
+  l1: string[],
+  l2: string[],
   country: string | null,
   city: string | null,
   year: number | null
@@ -49,8 +49,10 @@ function applyFilters(
     );
   }
 
-  if (l1) result = result.filter((p) => (p.tags ?? []).some((t) => !t.parent_id && t.name === l1));
-  if (l2) result = result.filter((p) => (p.tags ?? []).some((t) => t.parent_id && t.name === l2));
+  const selectedTags = [...l1, ...l2];
+  if (selectedTags.length > 0) {
+    result = result.filter((p) => (p.tags ?? []).some((t) => selectedTags.includes(t.name)));
+  }
   if (country) result = result.filter((p) => p.country === country);
   if (city) result = result.filter((p) => p.city === city);
   if (year) result = result.filter((p) => p.acquired_year === year);
@@ -178,13 +180,9 @@ function FilterBottomSheet({
 
   const { l1, l2, country, city, year } = draft;
 
-  const pinsForL1 = useMemo(
-    () => applyFilters(pins, search, null, l2, country, city, year),
-    [pins, search, l2, country, city, year]
-  );
-  const pinsForL2 = useMemo(
-    () => applyFilters(pins, search, l1, null, country, city, year),
-    [pins, search, l1, country, city, year]
+  const pinsForTags = useMemo(
+    () => applyFilters(pins, search, [], [], country, city, year),
+    [pins, search, country, city, year]
   );
   const pinsForCountry = useMemo(
     () => applyFilters(pins, search, l1, l2, null, city, year),
@@ -201,32 +199,28 @@ function FilterBottomSheet({
 
   const availableL1Names = useMemo(() => {
     const set = new Set<string>();
-    pinsForL1.forEach((p) =>
+    pinsForTags.forEach((p) =>
       (p.tags ?? []).filter((t) => !t.parent_id).forEach((t) => set.add(t.name))
     );
     return set;
-  }, [pinsForL1]);
+  }, [pinsForTags]);
 
   const availableL2Names = useMemo(() => {
     const set = new Set<string>();
-    pinsForL2.forEach((p) =>
+    pinsForTags.forEach((p) =>
       (p.tags ?? []).filter((t) => t.parent_id).forEach((t) => set.add(t.name))
     );
     return set;
-  }, [pinsForL2]);
+  }, [pinsForTags]);
 
   const availableTagGroups = useMemo(
     () => tagGroups.filter((g) => availableL1Names.has(g.category.name)),
     [tagGroups, availableL1Names]
   );
 
-  const selectedL1Group = tagGroups.find((g) => g.category.name === l1);
   const subcategories = useMemo(() => {
-    const source = l1
-      ? (selectedL1Group?.subcategories ?? [])
-      : tagGroups.flatMap((g) => g.subcategories);
-    return source.filter((s) => availableL2Names.has(s.name));
-  }, [l1, selectedL1Group, tagGroups, availableL2Names]);
+    return tagGroups.flatMap((g) => g.subcategories).filter((s) => availableL2Names.has(s.name));
+  }, [tagGroups, availableL2Names]);
 
   const distinctCountries = useMemo(() => {
     const set = new Set(pinsForCountry.map((p) => p.country).filter(Boolean) as string[]);
@@ -260,16 +254,24 @@ function FilterBottomSheet({
     return distinctCities.filter((c) => c.toLowerCase().includes(q));
   }, [distinctCities, cityInput]);
 
-  const activeCount = [l1, l2, country, city, year].filter(Boolean).length;
+  const activeCount = [l1.length > 0, l2.length > 0, country, city, year].filter(Boolean).length;
 
-  function setL1(name: string | null) {
-    const newL1Group = tagGroups.find((g) => g.category.name === name);
-    const l2StillValid = l2 !== null && newL1Group?.subcategories.some((s) => s.name === l2);
-    updateDraft({ ...draft, l1: name, l2: l2StillValid ? l2 : null });
+  function setL1(name: string) {
+    const newL1 = l1.includes(name) ? l1.filter((n) => n !== name) : [...l1, name];
+    updateDraft({ ...draft, l1: newL1 });
   }
 
-  function setL2(name: string | null) {
-    updateDraft({ ...draft, l2: name });
+  function setL2(name: string) {
+    const isRemoving = l2.includes(name);
+    const newL2 = isRemoving ? l2.filter((n) => n !== name) : [...l2, name];
+    let newL1 = l1;
+    if (!isRemoving) {
+      const parentGroup = tagGroups.find((g) => g.subcategories.some((s) => s.name === name));
+      if (parentGroup && !l1.includes(parentGroup.category.name)) {
+        newL1 = [...l1, parentGroup.category.name];
+      }
+    }
+    updateDraft({ ...draft, l1: newL1, l2: newL2 });
   }
 
   function selectCountry(value: string) {
@@ -361,14 +363,14 @@ function FilterBottomSheet({
                   <Chip
                     key={g.category.id}
                     label={g.category.name}
-                    active={l1 === g.category.name}
-                    onPress={() => setL1(l1 === g.category.name ? null : g.category.name)}
+                    active={l1.includes(g.category.name)}
+                    onPress={() => setL1(g.category.name)}
                     icon={
                       TAG_ICONS[g.category.name] ? (
                         <TagIcon
                           tagName={g.category.name}
                           size={12}
-                          color={l1 === g.category.name ? '#0f0f0f' : '#909090'}
+                          color={l1.includes(g.category.name) ? '#0f0f0f' : '#909090'}
                         />
                       ) : undefined
                     }
@@ -389,8 +391,8 @@ function FilterBottomSheet({
                   <Chip
                     key={sub.id}
                     label={sub.name}
-                    active={l2 === sub.name}
-                    onPress={() => setL2(l2 === sub.name ? null : sub.name)}
+                    active={l2.includes(sub.name)}
+                    onPress={() => setL2(sub.name)}
                   />
                 ))}
               </ScrollView>

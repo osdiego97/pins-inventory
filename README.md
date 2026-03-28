@@ -2,7 +2,7 @@
 
 A mobile app to catalogue a personal pin collection with photos, built with React Native + Expo + Supabase.
 
-**Status:** MVP in progress
+**Status:** MVP complete — map feature in review
 
 ---
 
@@ -12,6 +12,8 @@ Simple, focused tool for pin collectors who want to:
 - Add pins with a photo, description, location, tags, and year
 - Browse their collection as a searchable, filterable card list ordered by collection number (filter by category, subcategory, country, city, and year with full faceted search)
 - Tap any pin to see full details including photo
+- Explore collection analytics — totals, category breakdown, countries, year trends, cumulative growth, and data completeness
+- See pins plotted on a world map with proximity clustering, location search on add/edit, and map previews on pin detail
 - Keep everything private and tied to their account
 
 No marketplace features. No social layer. Just a clean digital catalogue.
