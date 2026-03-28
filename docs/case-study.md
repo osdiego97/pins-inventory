@@ -84,6 +84,7 @@ Small, well-scoped problem with a real user (me). Perfect for demonstrating end-
 - **Image handling** — `expo-image-picker` for selection, uploaded to private Supabase Storage bucket, served via signed URLs (24h TTL). MIME + size validation before upload.
 - **Collection number management** — auto-assigned as max+1 on add; Postgres RPC re-sequences on delete to keep numbers contiguous
 - **Swipe gestures** — `PanResponder` with `Animated.Value` for zero-dependency swipe-to-reveal on collection cards
+- **Stats screen** — dedicated tab with 7 analytics sections: summary cards (totals, year range), category donut chart with collapsible L1/L2 breakdown, country bar chart (expandable, alphabetical tiebreak), year column chart with count labels, cumulative growth line chart, cities-per-country bars, and data completeness tracker. All charts animate on mount using Reanimated. Client-side aggregation via `useStats` hook.
 
 **Key screens:**
 - [Screenshots to be added when MVP is complete]
@@ -103,6 +104,12 @@ Deleting a pin leaves a gap in collection numbers (e.g. deleting #42 leaves a ju
 
 **Swipe gestures coexisting with FlatList scroll**
 `PanResponder`'s `onMoveShouldSetPanResponder` uses `Math.abs(dx) > 10 && Math.abs(dy) < 15` to only claim the gesture when horizontal movement is dominant. This hands vertical scroll back to `FlatList` naturally.
+
+**Collection list scroll position on navigation return**
+`useFocusEffect` triggers `refetch()` every time the user returns to the collection screen. The original `loading` condition caused the FlatList to unmount and remount on every refetch, resetting scroll to zero. Fixed by changing the spinner condition to `loading && pins.length === 0` — the FlatList stays mounted on refetch and updates its data prop in place, preserving scroll position naturally without any restore logic.
+
+**SVG animation reliability on Android**
+The cumulative growth line chart required animating a path drawing on mount. Using `ClipPath` + `AnimatedRect` (a common approach) proved unreliable on Android — the clip region rendered inconsistently. Switched to animating `strokeDashoffset` on the path itself, which is the correct approach and works reliably across devices.
 
 ---
 
