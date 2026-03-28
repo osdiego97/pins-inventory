@@ -14,6 +14,9 @@ interface FormState {
   selectedTagIds: string[];
   localImageUri: string | null;
   existingImagePath: string | null;
+  mapLocationName: string | null;
+  latitude: number | null;
+  longitude: number | null;
 }
 
 interface FormErrors {
@@ -33,6 +36,9 @@ const INITIAL_STATE: FormState = {
   selectedTagIds: [],
   localImageUri: null,
   existingImagePath: null,
+  mapLocationName: null,
+  latitude: null,
+  longitude: null,
 };
 
 export function usePinForm(pinId?: string) {
@@ -80,6 +86,9 @@ export function usePinForm(pinId?: string) {
       selectedTagIds: (data.pin_tags as { tag_id: string }[]).map((pt) => pt.tag_id),
       localImageUri: null,
       existingImagePath: data.image_url ?? null,
+      mapLocationName: null,
+      latitude: data.latitude ?? null,
+      longitude: data.longitude ?? null,
     });
     setInitialLoading(false);
   }
@@ -181,6 +190,8 @@ export function usePinForm(pinId?: string) {
       acquired_year: form.acquired_year ? parseInt(form.acquired_year, 10) : null,
       is_commemorative: form.is_commemorative,
       image_url: imagePath,
+      latitude: form.latitude,
+      longitude: form.longitude,
     };
 
     let savedPinId: string;
