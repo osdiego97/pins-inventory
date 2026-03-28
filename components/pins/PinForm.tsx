@@ -237,6 +237,8 @@ export default function PinForm({ pinId }: PinFormProps) {
                   : null
               }
               hasExistingCoords={!!(form.latitude && form.longitude && !form.mapLocationName)}
+              existingLatitude={form.latitude}
+              existingLongitude={form.longitude}
               onChange={(place) => {
                 setField('mapLocationName', place?.name ?? null);
                 setField('latitude', place?.latitude ?? null);

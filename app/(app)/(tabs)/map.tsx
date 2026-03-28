@@ -149,7 +149,7 @@ export default function MapScreen() {
               coordinate={{ latitude: group.latitude, longitude: group.longitude }}
               tracksViewChanges={tracksViewChanges}
             >
-              <View style={{ width: 40, height: 44 }}>
+              <View collapsable={false} style={{ width: 40, height: 44 }}>
                 <Ionicons name="location-sharp" size={40} color="#e8c97e" style={{ zIndex: 0 }} />
                 {isMulti && (
                   <View style={{
@@ -176,7 +176,7 @@ export default function MapScreen() {
               </View>
 
               <Callout tooltip>
-                <View style={CALLOUT_STYLES.container}>
+                <View collapsable={false} style={CALLOUT_STYLES.container}>
                   {group.pins.map((pin, i) => (
                     <View key={pin.id}>
                       {i > 0 && <View style={CALLOUT_STYLES.divider} />}

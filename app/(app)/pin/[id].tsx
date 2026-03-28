@@ -3,6 +3,7 @@ import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Image } fr
 import { useLocalSearchParams, router, Stack, useFocusEffect } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import MapView, { Marker } from 'react-native-maps';
 import { usePinDetail } from '../../../hooks/usePinDetail';
 import { usePinDelete } from '../../../hooks/usePinDelete';
 import { getSignedImageUrl } from '../../../lib/storage';
@@ -129,6 +130,31 @@ export default function PinDetailScreen() {
                       </View>
                     ))}
                   </View>
+                </View>
+              )}
+
+              {/* Map */}
+              {pin.latitude != null && pin.longitude != null && (
+                <View collapsable={false} className="mt-4 rounded-2xl overflow-hidden" style={{ height: 160 }}>
+                  <MapView
+                    style={{ flex: 1 }}
+                    initialRegion={{
+                      latitude: pin.latitude,
+                      longitude: pin.longitude,
+                      latitudeDelta: 0.01,
+                      longitudeDelta: 0.01,
+                    }}
+                    scrollEnabled={false}
+                    zoomEnabled={false}
+                    pitchEnabled={false}
+                    rotateEnabled={false}
+                    mapType="standard"
+                    userInterfaceStyle="dark"
+                  >
+                    <Marker coordinate={{ latitude: pin.latitude, longitude: pin.longitude }}>
+                      <Ionicons name="location-sharp" size={32} color="#e8c97e" />
+                    </Marker>
+                  </MapView>
                 </View>
               )}
             </View>
