@@ -19,6 +19,13 @@ const INITIAL_REGION: Region = {
   longitudeDelta: 120,
 };
 
+interface PinGroup {
+  key: string;
+  latitude: number;
+  longitude: number;
+  pins: Pin[];
+}
+
 function applyFilters(pins: Pin[], filters: FilterState): Pin[] {
   const { l1, l2, country, city, year } = filters;
   let result = pins;
@@ -33,6 +40,39 @@ function applyFilters(pins: Pin[], filters: FilterState): Pin[] {
 
   return result;
 }
+
+function groupByLocation(pins: Pin[]): PinGroup[] {
+  const map = new Map<string, PinGroup>();
+  pins.forEach((pin) => {
+    const key = `${pin.latitude},${pin.longitude}`;
+    if (!map.has(key)) {
+      map.set(key, { key, latitude: pin.latitude!, longitude: pin.longitude!, pins: [] });
+    }
+    map.get(key)!.pins.push(pin);
+  });
+  return Array.from(map.values());
+}
+
+const CALLOUT_STYLES = {
+  container: {
+    backgroundColor: '#1a1a1a',
+    borderRadius: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    width: 220,
+    borderWidth: 1,
+    borderColor: '#2a2a2a',
+  },
+  divider: {
+    height: 1,
+    backgroundColor: '#2a2a2a',
+    marginVertical: 6,
+  },
+  row: {
+    flexDirection: 'row' as const,
+    alignItems: 'center' as const,
+  },
+};
 
 export default function MapScreen() {
   const { pins, loading, refetch } = usePins();
@@ -59,6 +99,8 @@ export default function MapScreen() {
     () => applyFilters(geocodedPins, filters),
     [geocodedPins, filters]
   );
+
+  const pinGroups = useMemo(() => groupByLocation(filteredPins), [filteredPins]);
 
   const activeFilterCount = [
     filters.l1.length > 0,
@@ -98,36 +140,74 @@ export default function MapScreen() {
         clusterTextColor="#0f0f0f"
         clusterFontFamily="System"
       >
-        {filteredPins.map((pin) => (
-          <Marker
-            key={pin.id}
-            coordinate={{ latitude: pin.latitude!, longitude: pin.longitude! }}
-            pinColor="#e8c97e"
-            tracksViewChanges={tracksViewChanges}
-          >
-            <Callout tooltip onPress={() => router.push(`/(app)/pin/${pin.id}` as any)}>
-              <View style={{
-                backgroundColor: '#1a1a1a',
-                borderRadius: 12,
-                paddingHorizontal: 14,
-                paddingVertical: 10,
-                width: 220,
-                borderWidth: 1,
-                borderColor: '#2a2a2a',
-              }}>
-                <Text style={{ fontSize: 13, fontWeight: '600', color: '#f5f5f5' }} numberOfLines={1}>
-                  {pin.description}
-                </Text>
-                <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 4 }}>
-                  <Text style={{ fontSize: 11, color: '#909090', flex: 1 }} numberOfLines={1}>
-                    #{pin.collection_number} · {pin.city}, {pin.country}
-                  </Text>
-                  <Ionicons name="chevron-forward" size={11} color="#e8c97e" />
-                </View>
+        {pinGroups.map((group) => {
+          const isMulti = group.pins.length > 1;
+
+          return (
+            <Marker
+              key={group.key}
+              coordinate={{ latitude: group.latitude, longitude: group.longitude }}
+              tracksViewChanges={tracksViewChanges}
+            >
+              {/* Custom marker view — badge only shown for multi-pin locations */}
+              <View style={{ alignItems: 'center', justifyContent: 'center' }}>
+                <View style={{
+                  width: 28,
+                  height: 28,
+                  borderRadius: 14,
+                  backgroundColor: '#e8c97e',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  borderWidth: 1.5,
+                  borderColor: '#0f0f0f',
+                }} />
+                {isMulti && (
+                  <View style={{
+                    position: 'absolute',
+                    top: -6,
+                    right: -8,
+                    backgroundColor: '#f5f5f5',
+                    borderRadius: 8,
+                    minWidth: 16,
+                    height: 16,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    paddingHorizontal: 3,
+                    borderWidth: 1,
+                    borderColor: '#0f0f0f',
+                  }}>
+                    <Text style={{ fontSize: 9, fontWeight: '700', color: '#0f0f0f' }}>
+                      {group.pins.length}
+                    </Text>
+                  </View>
+                )}
               </View>
-            </Callout>
-          </Marker>
-        ))}
+
+              <Callout tooltip>
+                <View style={CALLOUT_STYLES.container}>
+                  {group.pins.map((pin, i) => (
+                    <View key={pin.id}>
+                      {i > 0 && <View style={CALLOUT_STYLES.divider} />}
+                      <TouchableOpacity
+                        onPress={() => router.push(`/(app)/pin/${pin.id}` as any)}
+                      >
+                        <Text style={{ fontSize: 13, fontWeight: '600', color: '#f5f5f5' }} numberOfLines={1}>
+                          {pin.description}
+                        </Text>
+                        <View style={{ ...CALLOUT_STYLES.row, marginTop: 4 }}>
+                          <Text style={{ fontSize: 11, color: '#909090', flex: 1 }} numberOfLines={1}>
+                            #{pin.collection_number} · {pin.city}, {pin.country}
+                          </Text>
+                          <Ionicons name="chevron-forward" size={11} color="#e8c97e" />
+                        </View>
+                      </TouchableOpacity>
+                    </View>
+                  ))}
+                </View>
+              </Callout>
+            </Marker>
+          );
+        })}
       </ClusteredMapView>
 
       {/* Header overlay */}
