@@ -225,22 +225,6 @@ export default function PinForm({ pinId }: PinFormProps) {
             </View>
           </View>
 
-          {/* Tags */}
-          <View>
-            <Text className="text-text-secondary text-xs font-medium uppercase tracking-wider mb-3">
-              Etiquetas
-            </Text>
-            {tagsLoading ? (
-              <ActivityIndicator color="#e8c97e" size="small" />
-            ) : (
-              <TagPicker
-                tagGroups={tagGroups}
-                selectedIds={form.selectedTagIds}
-                onToggle={handleToggleTag}
-              />
-            )}
-          </View>
-
           {/* Map position */}
           <View>
             <Text className="text-text-secondary text-xs font-medium uppercase tracking-wider mb-1.5">
@@ -259,6 +243,22 @@ export default function PinForm({ pinId }: PinFormProps) {
                 setField('longitude', place?.longitude ?? null);
               }}
             />
+          </View>
+
+          {/* Tags */}
+          <View>
+            <Text className="text-text-secondary text-xs font-medium uppercase tracking-wider mb-3">
+              Etiquetas
+            </Text>
+            {tagsLoading ? (
+              <ActivityIndicator color="#e8c97e" size="small" />
+            ) : (
+              <TagPicker
+                tagGroups={tagGroups}
+                selectedIds={form.selectedTagIds}
+                onToggle={handleToggleTag}
+              />
+            )}
           </View>
         </View>
 
