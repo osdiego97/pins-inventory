@@ -10,12 +10,12 @@ import {
 import { router, useFocusEffect } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { usePins } from '../../hooks/usePins';
-import { usePinDelete } from '../../hooks/usePinDelete';
-import { useTags } from '../../hooks/useTags';
-import { FilterState } from '../../lib/types';
-import PinCard from '../../components/pins/PinCard';
-import FilterBottomSheet from '../../components/pins/FilterBottomSheet';
+import { usePins } from '../../../hooks/usePins';
+import { usePinDelete } from '../../../hooks/usePinDelete';
+import { useTags } from '../../../hooks/useTags';
+import { FilterState } from '../../../lib/types';
+import PinCard from '../../../components/pins/PinCard';
+import FilterBottomSheet from '../../../components/pins/FilterBottomSheet';
 
 const EMPTY_FILTERS: FilterState = { l1: null, l2: null, country: null, city: null, year: null };
 
@@ -127,7 +127,7 @@ export default function CollectionScreen() {
       </View>
 
       {/* Content */}
-      {loading ? (
+      {loading && pins.length === 0 ? (
         <View className="flex-1 items-center justify-center">
           <ActivityIndicator color="#e8c97e" />
         </View>
@@ -145,7 +145,7 @@ export default function CollectionScreen() {
         </View>
       ) : (
         <FlatList
-          data={filtered}
+data={filtered}
           keyExtractor={(item) => item.id}
           renderItem={renderItem}
           contentContainerStyle={{
