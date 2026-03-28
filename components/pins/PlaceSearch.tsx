@@ -11,8 +11,8 @@ import { Ionicons } from '@expo/vector-icons';
 const PLACES_API_KEY = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY;
 
 interface Prediction {
-  place_id: string;
-  description: string;
+  placeId: string;
+  description: string; // from structuredFormat or text
 }
 
 interface PlaceResult {
@@ -46,14 +46,25 @@ export default function PlaceSearch({ value, onChange, hasExistingCoords }: Prop
     setSearching(true);
     setError(null);
     try {
-      const res = await fetch(
-        `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${encodeURIComponent(text)}&key=${PLACES_API_KEY}&language=es`
-      );
+      const res = await fetch('https://places.googleapis.com/v1/places:autocomplete', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Goog-Api-Key': PLACES_API_KEY,
+        },
+        body: JSON.stringify({ input: text, languageCode: 'es' }),
+      });
       const data = await res.json();
-      if (data.status === 'OK' || data.status === 'ZERO_RESULTS') {
-        setPredictions(data.predictions ?? []);
+      if (data.suggestions) {
+        setPredictions(
+          data.suggestions
+            .filter((s: any) => s.placePrediction)
+            .map((s: any) => ({
+              placeId: s.placePrediction.placeId,
+              description: s.placePrediction.text?.text ?? s.placePrediction.placeId,
+            }))
+        );
       } else {
-        setError('No se pudo cargar el buscador de ubicaciones.');
         setPredictions([]);
       }
     } catch {
@@ -77,12 +88,17 @@ export default function PlaceSearch({ value, onChange, hasExistingCoords }: Prop
     setSearching(true);
     try {
       const res = await fetch(
-        `https://maps.googleapis.com/maps/api/place/details/json?place_id=${prediction.place_id}&fields=geometry&key=${PLACES_API_KEY}`
+        `https://places.googleapis.com/v1/places/${prediction.placeId}?fields=location`,
+        {
+          headers: {
+            'X-Goog-Api-Key': PLACES_API_KEY,
+          },
+        }
       );
       const data = await res.json();
-      const loc = data.result?.geometry?.location;
+      const loc = data.location;
       if (loc) {
-        onChange({ name: prediction.description, latitude: loc.lat, longitude: loc.lng });
+        onChange({ name: prediction.description, latitude: loc.latitude, longitude: loc.longitude });
       } else {
         setError('No se pudo obtener la ubicación.');
       }
@@ -151,7 +167,7 @@ export default function PlaceSearch({ value, onChange, hasExistingCoords }: Prop
         <View className="bg-surface-card rounded-xl mt-1 overflow-hidden">
           {predictions.map((p, i) => (
             <TouchableOpacity
-              key={p.place_id}
+              key={p.placeId}
               onPress={() => handleSelect(p)}
               className={`px-4 py-3 flex-row items-center ${
                 i < predictions.length - 1 ? 'border-b border-surface-elevated' : ''
