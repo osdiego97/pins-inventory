@@ -147,25 +147,26 @@ export default function MapScreen() {
             <Marker
               key={group.key}
               coordinate={{ latitude: group.latitude, longitude: group.longitude }}
+              pinColor={isMulti ? undefined : '#e8c97e'}
               tracksViewChanges={tracksViewChanges}
             >
-              {/* Custom marker view — badge only shown for multi-pin locations */}
-              <View style={{ alignItems: 'center', justifyContent: 'center' }}>
-                <View style={{
-                  width: 28,
-                  height: 28,
-                  borderRadius: 14,
-                  backgroundColor: '#e8c97e',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  borderWidth: 1.5,
-                  borderColor: '#0f0f0f',
-                }} />
-                {isMulti && (
+              {/* Custom marker only for multi-pin locations */}
+              {isMulti && (
+                <View style={{ width: 40, height: 36, alignItems: 'center', justifyContent: 'center' }}>
+                  <View style={{
+                    width: 28,
+                    height: 28,
+                    borderRadius: 14,
+                    backgroundColor: '#e8c97e',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    borderWidth: 1.5,
+                    borderColor: '#0f0f0f',
+                  }} />
                   <View style={{
                     position: 'absolute',
-                    top: -6,
-                    right: -8,
+                    top: 0,
+                    right: 0,
                     backgroundColor: '#f5f5f5',
                     borderRadius: 8,
                     minWidth: 16,
@@ -180,8 +181,8 @@ export default function MapScreen() {
                       {group.pins.length}
                     </Text>
                   </View>
-                )}
-              </View>
+                </View>
+              )}
 
               <Callout tooltip>
                 <View style={CALLOUT_STYLES.container}>
