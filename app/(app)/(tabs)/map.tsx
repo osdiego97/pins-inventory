@@ -81,7 +81,7 @@ export default function MapScreen() {
   const [filterSheetVisible, setFilterSheetVisible] = useState(false);
   const insets = useSafeAreaInsets();
   const mapRef = useRef<MapView>(null);
-  const [tracksViewChanges, setTracksViewChanges] = useState(false);
+  const [tracksViewChanges, setTracksViewChanges] = useState(true);
 
   useFocusEffect(useCallback(() => {
     refetch();
@@ -147,22 +147,18 @@ export default function MapScreen() {
             <Marker
               key={group.key}
               coordinate={{ latitude: group.latitude, longitude: group.longitude }}
-              pinColor={isMulti ? undefined : '#e8c97e'}
               tracksViewChanges={tracksViewChanges}
             >
-              {/* Custom marker only for multi-pin locations */}
-              {isMulti && (
-                <View style={{ width: 40, height: 36, alignItems: 'center', justifyContent: 'center' }}>
-                  <View style={{
-                    width: 28,
-                    height: 28,
-                    borderRadius: 14,
-                    backgroundColor: '#e8c97e',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    borderWidth: 1.5,
-                    borderColor: '#0f0f0f',
-                  }} />
+              <View style={{ width: 40, height: 36, alignItems: 'center', justifyContent: 'center' }}>
+                <View style={{
+                  width: 28,
+                  height: 28,
+                  borderRadius: 14,
+                  backgroundColor: '#e8c97e',
+                  borderWidth: 1.5,
+                  borderColor: '#0f0f0f',
+                }} />
+                {isMulti && (
                   <View style={{
                     position: 'absolute',
                     top: 0,
@@ -181,8 +177,8 @@ export default function MapScreen() {
                       {group.pins.length}
                     </Text>
                   </View>
-                </View>
-              )}
+                )}
+              </View>
 
               <Callout tooltip>
                 <View style={CALLOUT_STYLES.container}>
