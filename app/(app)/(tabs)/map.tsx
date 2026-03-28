@@ -100,18 +100,14 @@ export default function MapScreen() {
           >
             <View
               style={{
-                width: 30,
-                height: 30,
-                borderRadius: 15,
+                width: 20,
+                height: 20,
+                borderRadius: 10,
                 backgroundColor: '#e8c97e',
-                alignItems: 'center',
-                justifyContent: 'center',
-                borderWidth: 2,
+                borderWidth: 1.5,
                 borderColor: '#0f0f0f',
               }}
-            >
-              <Ionicons name="pin" size={14} color="#0f0f0f" />
-            </View>
+            />
             <Callout onPress={() => router.push(`/(app)/pin/${pin.id}` as any)}>
               <View style={{ width: 200, padding: 4 }}>
                 <Text
