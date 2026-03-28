@@ -96,7 +96,7 @@ export default function MapScreen() {
           <Marker
             key={pin.id}
             coordinate={{ latitude: pin.latitude!, longitude: pin.longitude! }}
-            image={require('../../../assets/map-marker.png')}
+            pinColor="#e8c97e"
             tracksViewChanges={false}
           >
             <Callout onPress={() => router.push(`/(app)/pin/${pin.id}` as any)}>
