@@ -55,6 +55,8 @@ export function usePins() {
       is_commemorative: row.is_commemorative,
       collection_number: row.collection_number,
       created_at: row.created_at,
+      latitude: row.latitude,
+      longitude: row.longitude,
       tags: row.pin_tags.map((pt) => pt.tags).filter((t): t is Tag => t !== null),
     }));
 

@@ -42,6 +42,15 @@ export default function TabLayout() {
           ),
         }}
       />
+      <Tabs.Screen
+        name="map"
+        options={{
+          title: 'Mapa',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="earth-outline" size={size} color={color} />
+          ),
+        }}
+      />
     </Tabs>
   );
 }
