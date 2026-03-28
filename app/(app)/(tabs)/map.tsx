@@ -82,6 +82,7 @@ export default function MapScreen() {
   const insets = useSafeAreaInsets();
   const mapRef = useRef<MapView>(null);
   const [tracksViewChanges, setTracksViewChanges] = useState(true);
+  const pendingNavRef = useRef<string | null>(null);
 
   useFocusEffect(useCallback(() => {
     refetch();
@@ -175,14 +176,19 @@ export default function MapScreen() {
                 )}
               </View>
 
-              <Callout tooltip>
+              <Callout
+                tooltip
+                onPress={() => {
+                  const id = pendingNavRef.current ?? group.pins[0].id;
+                  pendingNavRef.current = null;
+                  router.push(`/(app)/pin/${id}` as any);
+                }}
+              >
                 <View collapsable={false} style={CALLOUT_STYLES.container}>
                   {group.pins.map((pin, i) => (
                     <View key={pin.id}>
                       {i > 0 && <View style={CALLOUT_STYLES.divider} />}
-                      <TouchableOpacity
-                        onPress={() => router.push(`/(app)/pin/${pin.id}` as any)}
-                      >
+                      <TouchableOpacity onPress={() => { pendingNavRef.current = pin.id; }}>
                         <Text style={{ fontSize: 13, fontWeight: '600', color: '#f5f5f5' }} numberOfLines={1}>
                           {pin.description}
                         </Text>
