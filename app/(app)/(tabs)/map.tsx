@@ -149,20 +149,15 @@ export default function MapScreen() {
               coordinate={{ latitude: group.latitude, longitude: group.longitude }}
               tracksViewChanges={tracksViewChanges}
             >
-              <View style={{ width: 40, height: 36, alignItems: 'center', justifyContent: 'center' }}>
-                <View style={{
-                  width: 28,
-                  height: 28,
-                  borderRadius: 14,
-                  backgroundColor: '#e8c97e',
-                  borderWidth: 1.5,
-                  borderColor: '#0f0f0f',
-                }} />
+              <View style={{ width: 40, height: 44 }}>
+                <Ionicons name="location-sharp" size={40} color="#e8c97e" style={{ zIndex: 0 }} />
                 {isMulti && (
                   <View style={{
                     position: 'absolute',
                     top: 0,
                     right: 0,
+                    zIndex: 1,
+                    elevation: 1,
                     backgroundColor: '#f5f5f5',
                     borderRadius: 8,
                     minWidth: 16,
