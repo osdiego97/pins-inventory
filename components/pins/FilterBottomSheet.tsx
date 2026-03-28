@@ -262,8 +262,16 @@ function FilterBottomSheet({
   }
 
   function setL2(name: string) {
-    const newL2 = l2.includes(name) ? l2.filter((n) => n !== name) : [...l2, name];
-    updateDraft({ ...draft, l2: newL2 });
+    const isRemoving = l2.includes(name);
+    const newL2 = isRemoving ? l2.filter((n) => n !== name) : [...l2, name];
+    let newL1 = l1;
+    if (!isRemoving) {
+      const parentGroup = tagGroups.find((g) => g.subcategories.some((s) => s.name === name));
+      if (parentGroup && !l1.includes(parentGroup.category.name)) {
+        newL1 = [...l1, parentGroup.category.name];
+      }
+    }
+    updateDraft({ ...draft, l1: newL1, l2: newL2 });
   }
 
   function selectCountry(value: string) {
