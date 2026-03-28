@@ -127,7 +127,7 @@ export default function CollectionScreen() {
       </View>
 
       {/* Content */}
-      {loading ? (
+      {loading && pins.length === 0 ? (
         <View className="flex-1 items-center justify-center">
           <ActivityIndicator color="#e8c97e" />
         </View>
@@ -145,7 +145,7 @@ export default function CollectionScreen() {
         </View>
       ) : (
         <FlatList
-          data={filtered}
+data={filtered}
           keyExtractor={(item) => item.id}
           renderItem={renderItem}
           contentContainerStyle={{
