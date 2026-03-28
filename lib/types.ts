@@ -11,6 +11,8 @@ export interface Pin {
   collection_number?: number;
   created_at: string;
   tags?: Tag[];
+  latitude?: number;
+  longitude?: number;
 }
 
 export interface Tag {
@@ -28,8 +30,8 @@ export interface PinTag {
 }
 
 export interface FilterState {
-  l1: string | null;
-  l2: string | null;
+  l1: string[];
+  l2: string[];
   country: string | null;
   city: string | null;
   year: number | null;
