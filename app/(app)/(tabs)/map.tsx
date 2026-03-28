@@ -41,8 +41,14 @@ export default function MapScreen() {
   const [filterSheetVisible, setFilterSheetVisible] = useState(false);
   const insets = useSafeAreaInsets();
   const mapRef = useRef<MapView>(null);
+  const [tracksViewChanges, setTracksViewChanges] = useState(false);
 
-  useFocusEffect(useCallback(() => { refetch(); }, []));
+  useFocusEffect(useCallback(() => {
+    refetch();
+    setTracksViewChanges(true);
+    const timer = setTimeout(() => setTracksViewChanges(false), 500);
+    return () => clearTimeout(timer);
+  }, []));
 
   const geocodedPins = useMemo(
     () => pins.filter((p) => p.latitude != null && p.longitude != null),
@@ -97,7 +103,7 @@ export default function MapScreen() {
             key={pin.id}
             coordinate={{ latitude: pin.latitude!, longitude: pin.longitude! }}
             pinColor="#e8c97e"
-            tracksViewChanges={false}
+            tracksViewChanges={tracksViewChanges}
           >
             <Callout onPress={() => router.push(`/(app)/pin/${pin.id}` as any)}>
               <View style={{ width: 200, padding: 4 }}>
