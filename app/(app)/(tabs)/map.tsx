@@ -105,24 +105,24 @@ export default function MapScreen() {
             pinColor="#e8c97e"
             tracksViewChanges={tracksViewChanges}
           >
-            <Callout onPress={() => router.push(`/(app)/pin/${pin.id}` as any)}>
-              <View style={{ width: 200, padding: 4 }}>
-                <Text
-                  style={{ fontSize: 13, fontWeight: '600', color: '#0f0f0f' }}
-                  numberOfLines={1}
-                >
+            <Callout tooltip onPress={() => router.push(`/(app)/pin/${pin.id}` as any)}>
+              <View style={{
+                backgroundColor: '#1a1a1a',
+                borderRadius: 12,
+                paddingHorizontal: 14,
+                paddingVertical: 10,
+                width: 220,
+                borderWidth: 1,
+                borderColor: '#2a2a2a',
+              }}>
+                <Text style={{ fontSize: 13, fontWeight: '600', color: '#f5f5f5' }} numberOfLines={1}>
                   {pin.description}
                 </Text>
-                <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 2 }}>
-                  <Text style={{ fontSize: 11, color: '#606060' }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 4 }}>
+                  <Text style={{ fontSize: 11, color: '#909090', flex: 1 }} numberOfLines={1}>
                     #{pin.collection_number} · {pin.city}, {pin.country}
                   </Text>
-                  <Ionicons
-                    name="chevron-forward"
-                    size={11}
-                    color="#606060"
-                    style={{ marginLeft: 'auto' }}
-                  />
+                  <Ionicons name="chevron-forward" size={11} color="#e8c97e" />
                 </View>
               </View>
             </Callout>
