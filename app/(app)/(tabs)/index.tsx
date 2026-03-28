@@ -49,8 +49,10 @@ export default function CollectionScreen() {
       );
     }
 
-    if (l1.length > 0) result = result.filter((p) => (p.tags ?? []).some((t) => !t.parent_id && l1.includes(t.name)));
-    if (l2.length > 0) result = result.filter((p) => (p.tags ?? []).some((t) => t.parent_id && l2.includes(t.name)));
+    const selectedTags = [...l1, ...l2];
+    if (selectedTags.length > 0) {
+      result = result.filter((p) => (p.tags ?? []).some((t) => selectedTags.includes(t.name)));
+    }
     if (country) result = result.filter((p) => p.country === country);
     if (city) result = result.filter((p) => p.city === city);
     if (year) result = result.filter((p) => p.acquired_year === year);

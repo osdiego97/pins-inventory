@@ -49,8 +49,10 @@ function applyFilters(
     );
   }
 
-  if (l1.length > 0) result = result.filter((p) => (p.tags ?? []).some((t) => !t.parent_id && l1.includes(t.name)));
-  if (l2.length > 0) result = result.filter((p) => (p.tags ?? []).some((t) => t.parent_id && l2.includes(t.name)));
+  const selectedTags = [...l1, ...l2];
+  if (selectedTags.length > 0) {
+    result = result.filter((p) => (p.tags ?? []).some((t) => selectedTags.includes(t.name)));
+  }
   if (country) result = result.filter((p) => p.country === country);
   if (city) result = result.filter((p) => p.city === city);
   if (year) result = result.filter((p) => p.acquired_year === year);
@@ -178,13 +180,9 @@ function FilterBottomSheet({
 
   const { l1, l2, country, city, year } = draft;
 
-  const pinsForL1 = useMemo(
-    () => applyFilters(pins, search, [], l2, country, city, year),
-    [pins, search, l2, country, city, year]
-  );
-  const pinsForL2 = useMemo(
-    () => applyFilters(pins, search, l1, [], country, city, year),
-    [pins, search, l1, country, city, year]
+  const pinsForTags = useMemo(
+    () => applyFilters(pins, search, [], [], country, city, year),
+    [pins, search, country, city, year]
   );
   const pinsForCountry = useMemo(
     () => applyFilters(pins, search, l1, l2, null, city, year),
@@ -201,19 +199,19 @@ function FilterBottomSheet({
 
   const availableL1Names = useMemo(() => {
     const set = new Set<string>();
-    pinsForL1.forEach((p) =>
+    pinsForTags.forEach((p) =>
       (p.tags ?? []).filter((t) => !t.parent_id).forEach((t) => set.add(t.name))
     );
     return set;
-  }, [pinsForL1]);
+  }, [pinsForTags]);
 
   const availableL2Names = useMemo(() => {
     const set = new Set<string>();
-    pinsForL2.forEach((p) =>
+    pinsForTags.forEach((p) =>
       (p.tags ?? []).filter((t) => t.parent_id).forEach((t) => set.add(t.name))
     );
     return set;
-  }, [pinsForL2]);
+  }, [pinsForTags]);
 
   const availableTagGroups = useMemo(
     () => tagGroups.filter((g) => availableL1Names.has(g.category.name)),
@@ -221,11 +219,8 @@ function FilterBottomSheet({
   );
 
   const subcategories = useMemo(() => {
-    const source = l1.length > 0
-      ? tagGroups.filter((g) => l1.includes(g.category.name)).flatMap((g) => g.subcategories)
-      : tagGroups.flatMap((g) => g.subcategories);
-    return source.filter((s) => availableL2Names.has(s.name));
-  }, [l1, tagGroups, availableL2Names]);
+    return tagGroups.flatMap((g) => g.subcategories).filter((s) => availableL2Names.has(s.name));
+  }, [tagGroups, availableL2Names]);
 
   const distinctCountries = useMemo(() => {
     const set = new Set(pinsForCountry.map((p) => p.country).filter(Boolean) as string[]);
@@ -263,13 +258,7 @@ function FilterBottomSheet({
 
   function setL1(name: string) {
     const newL1 = l1.includes(name) ? l1.filter((n) => n !== name) : [...l1, name];
-    const validL2Names = new Set(
-      tagGroups
-        .filter((g) => newL1.includes(g.category.name))
-        .flatMap((g) => g.subcategories.map((s) => s.name))
-    );
-    const newL2 = newL1.length > 0 ? l2.filter((n) => validL2Names.has(n)) : l2;
-    updateDraft({ ...draft, l1: newL1, l2: newL2 });
+    updateDraft({ ...draft, l1: newL1 });
   }
 
   function setL2(name: string) {
