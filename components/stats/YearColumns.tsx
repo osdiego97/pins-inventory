@@ -15,7 +15,7 @@ const CHART_HEIGHT = 100;
 const COL_WIDTH = 24;
 const COL_GAP = 6;
 const RADIUS = 3;
-const BAR_COLOR = '#e8c97e';
+const BAR_COLOR = '#a87ee8';
 const ANIMATION_DURATION = 900;
 
 interface ColumnProps {
@@ -86,7 +86,7 @@ export default function YearColumns({ years, pinsWithoutYear }: Props) {
                 style={{ width: COL_WIDTH, marginRight: i < years.length - 1 ? COL_GAP : 0 }}
               >
                 <Text
-                  className="text-accent text-center font-semibold"
+                  className="text-text-secondary text-center font-semibold"
                   style={{ fontSize: 8 }}
                   numberOfLines={1}
                 >

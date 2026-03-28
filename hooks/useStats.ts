@@ -22,6 +22,22 @@ export interface YearStat {
   count: number;
 }
 
+export interface CumulativeStat {
+  year: number;
+  total: number;
+}
+
+export interface CitiesPerCountryStat {
+  country: string;
+  cities: number;
+}
+
+export interface Completeness {
+  withPhoto: number;
+  withCategory: number;
+  withYear: number;
+}
+
 export interface CollectionStats {
   totalPins: number;
   totalCountries: number;
@@ -30,9 +46,11 @@ export interface CollectionStats {
   categories: L1Stat[];
   uncategorized: number;
   countries: CountryStat[];
-  extraCountries: number;
   years: YearStat[];
   pinsWithoutYear: number;
+  cumulative: CumulativeStat[];
+  citiesPerCountry: CitiesPerCountryStat[];
+  completeness: Completeness;
 }
 
 export function useStats(pins: Pin[]): CollectionStats {
@@ -90,11 +108,9 @@ export function useStats(pins: Pin[]): CollectionStats {
     for (const pin of pins) {
       if (pin.country) countryMap.set(pin.country, (countryMap.get(pin.country) ?? 0) + 1);
     }
-    const allCountries = Array.from(countryMap.entries())
+    const countries = Array.from(countryMap.entries())
       .map(([country, count]) => ({ country, count }))
-      .sort((a, b) => b.count - a.count);
-    const countries = allCountries.slice(0, 10);
-    const extraCountries = Math.max(0, allCountries.length - 10);
+      .sort((a, b) => b.count - a.count || a.country.localeCompare(b.country));
 
     // --- Years ---
     const yearMap = new Map<number, number>();
@@ -110,6 +126,31 @@ export function useStats(pins: Pin[]): CollectionStats {
       .map(([year, count]) => ({ year, count }))
       .sort((a, b) => a.year - b.year);
 
+    // --- Cities per country ---
+    const citiesMap = new Map<string, Set<string>>();
+    for (const pin of pins) {
+      if (pin.country && pin.city) {
+        if (!citiesMap.has(pin.country)) citiesMap.set(pin.country, new Set());
+        citiesMap.get(pin.country)!.add(pin.city);
+      }
+    }
+    const citiesPerCountry: CitiesPerCountryStat[] = Array.from(citiesMap.entries())
+      .map(([country, cities]) => ({ country, cities: cities.size }))
+      .sort((a, b) => b.cities - a.cities || a.country.localeCompare(b.country));
+
+    // --- Completeness ---
+    const withPhoto = totalPins > 0 ? pins.filter((p) => !!p.image_url).length / totalPins : 0;
+    const withCategory = totalPins > 0 ? (totalPins - uncategorized) / totalPins : 0;
+    const withYear = totalPins > 0 ? pins.filter((p) => !!p.acquired_year).length / totalPins : 0;
+    const completeness: Completeness = { withPhoto, withCategory, withYear };
+
+    // --- Cumulative growth ---
+    let running = 0;
+    const cumulative: CumulativeStat[] = years.map((y) => {
+      running += y.count;
+      return { year: y.year, total: running };
+    });
+
     return {
       totalPins,
       totalCountries,
@@ -118,9 +159,11 @@ export function useStats(pins: Pin[]): CollectionStats {
       categories,
       uncategorized,
       countries,
-      extraCountries,
       years,
       pinsWithoutYear,
+      cumulative,
+      citiesPerCountry,
+      completeness,
     };
   }, [pins]);
 }

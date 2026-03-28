@@ -1,5 +1,6 @@
-import { useCallback } from 'react';
-import { View, Text, ScrollView, ActivityIndicator } from 'react-native';
+import { useCallback, useState } from 'react';
+import { View, Text, ScrollView, ActivityIndicator, TouchableOpacity } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { usePins } from '../../../hooks/usePins';
@@ -9,6 +10,9 @@ import DonutChart from '../../../components/stats/DonutChart';
 import CategorySection from '../../../components/stats/CategorySection';
 import CountryBars from '../../../components/stats/CountryBars';
 import YearColumns from '../../../components/stats/YearColumns';
+import YearLine from '../../../components/stats/YearLine';
+import CitiesDepth from '../../../components/stats/CitiesDepth';
+import Completeness from '../../../components/stats/Completeness';
 
 function SectionHeader({ title }: { title: string }) {
   return (
@@ -26,6 +30,7 @@ export default function StatsScreen() {
   const { pins, loading, error, refetch } = usePins();
   const stats = useStats(pins);
   const insets = useSafeAreaInsets();
+  const [barsExpanded, setBarsExpanded] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -43,8 +48,11 @@ export default function StatsScreen() {
 
   if (error) {
     return (
-      <View className="flex-1 bg-surface items-center justify-center px-8">
+      <View className="flex-1 bg-surface items-center justify-center px-8 gap-4">
         <Text className="text-text-secondary text-center">{error}</Text>
+        <TouchableOpacity onPress={refetch} activeOpacity={0.7} className="px-5 py-2.5 rounded-xl bg-surface-elevated">
+          <Text className="text-text-primary text-sm font-semibold">Reintentar</Text>
+        </TouchableOpacity>
       </View>
     );
   }
@@ -85,10 +93,26 @@ export default function StatsScreen() {
             />
             {stats.categories.length > 0 && (
               <View className="mt-4 pt-4" style={{ borderTopWidth: 1, borderTopColor: '#2a2a2a' }}>
-                <CategorySection
-                  categories={stats.categories}
-                  uncategorized={stats.uncategorized}
-                />
+                <TouchableOpacity
+                  onPress={() => setBarsExpanded((v) => !v)}
+                  activeOpacity={0.7}
+                  className="flex-row items-center justify-between px-4 pb-3"
+                >
+                  <Text className="text-text-muted text-xs uppercase tracking-widest">
+                    Por categoría
+                  </Text>
+                  <Ionicons
+                    name={barsExpanded ? 'chevron-up' : 'chevron-down'}
+                    size={14}
+                    color="#606060"
+                  />
+                </TouchableOpacity>
+                {barsExpanded && (
+                  <CategorySection
+                    categories={stats.categories}
+                    uncategorized={stats.uncategorized}
+                  />
+                )}
               </View>
             )}
           </Card>
@@ -99,10 +123,7 @@ export default function StatsScreen() {
           <View className="mt-6">
             <SectionHeader title="Por País" />
             <Card>
-              <CountryBars
-                countries={stats.countries}
-                extraCountries={stats.extraCountries}
-              />
+              <CountryBars countries={stats.countries} />
             </Card>
           </View>
         )}
@@ -116,6 +137,34 @@ export default function StatsScreen() {
             </Card>
           </View>
         )}
+
+        {/* Cumulative growth */}
+        {stats.cumulative.length > 1 && (
+          <View className="mt-6">
+            <SectionHeader title="Evolución" />
+            <Card>
+              <YearLine data={stats.cumulative} />
+            </Card>
+          </View>
+        )}
+
+        {/* Geographic depth */}
+        {stats.citiesPerCountry.length > 0 && (
+          <View className="mt-6">
+            <SectionHeader title="Ciudades por País" />
+            <Card>
+              <CitiesDepth data={stats.citiesPerCountry} />
+            </Card>
+          </View>
+        )}
+
+        {/* Completeness */}
+        <View className="mt-6">
+          <SectionHeader title="Completitud" />
+          <Card>
+            <Completeness data={stats.completeness} />
+          </Card>
+        </View>
       </ScrollView>
     </View>
   );

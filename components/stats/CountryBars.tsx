@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { View, Text } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
 import Animated, {
   useSharedValue,
   withTiming,
@@ -11,6 +11,7 @@ import { CountryStat } from '../../hooks/useStats';
 const ANIMATION_DURATION = 800;
 const STAGGER_MS = 50;
 const BAR_COLOR = '#e8c97e';
+const DEFAULT_LIMIT = 10;
 
 interface BarRowProps {
   country: string;
@@ -58,19 +59,21 @@ function BarRow({ country, count, ratio, rank, containerWidth }: BarRowProps) {
 
 interface Props {
   countries: CountryStat[];
-  extraCountries: number;
 }
 
-export default function CountryBars({ countries, extraCountries }: Props) {
+export default function CountryBars({ countries }: Props) {
+  const [showAll, setShowAll] = useState(false);
   const [containerWidth, setContainerWidth] = useState(0);
   const maxCount = countries.length > 0 ? countries[0].count : 1;
+  const visible = showAll ? countries : countries.slice(0, DEFAULT_LIMIT);
+  const hasMore = countries.length > DEFAULT_LIMIT;
 
   return (
     <View
       className="px-4"
       onLayout={(e) => setContainerWidth(e.nativeEvent.layout.width - 32 - 36 - 32)}
     >
-      {countries.map((c, i) => (
+      {visible.map((c, i) => (
         <BarRow
           key={c.country}
           country={c.country}
@@ -80,10 +83,14 @@ export default function CountryBars({ countries, extraCountries }: Props) {
           containerWidth={containerWidth}
         />
       ))}
-      {extraCountries > 0 && (
-        <Text className="text-text-muted text-xs mt-2">
-          y {extraCountries} {extraCountries === 1 ? 'país más' : 'países más'}
-        </Text>
+      {hasMore && (
+        <TouchableOpacity onPress={() => setShowAll((v) => !v)} activeOpacity={0.7} className="mt-2">
+          <Text className="text-accent text-xs">
+            {showAll
+              ? 'Ver menos'
+              : `Ver ${countries.length - DEFAULT_LIMIT} países más`}
+          </Text>
+        </TouchableOpacity>
       )}
     </View>
   );
