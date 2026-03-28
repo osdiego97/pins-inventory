@@ -96,22 +96,9 @@ export default function MapScreen() {
           <Marker
             key={pin.id}
             coordinate={{ latitude: pin.latitude!, longitude: pin.longitude! }}
+            pinColor="#e8c97e"
             tracksViewChanges={false}
           >
-            <View
-              style={{
-                width: 24,
-                height: 24,
-                borderRadius: 12,
-                backgroundColor: '#e8c97e',
-                alignItems: 'center',
-                justifyContent: 'center',
-                borderWidth: 1.5,
-                borderColor: '#0f0f0f',
-              }}
-            >
-              <Ionicons name="pin" size={12} color="#0f0f0f" />
-            </View>
             <Callout onPress={() => router.push(`/(app)/pin/${pin.id}` as any)}>
               <View style={{ width: 200, padding: 4 }}>
                 <Text
