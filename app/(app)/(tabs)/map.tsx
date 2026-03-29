@@ -1,5 +1,5 @@
 import { useState, useMemo, useRef, useCallback } from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import MapView, { Marker, Callout, Region } from 'react-native-maps';
 import ClusteredMapView from 'react-native-map-clustering';
 import { router, useFocusEffect } from 'expo-router';
@@ -29,7 +29,6 @@ interface PinGroup {
 function applyFilters(pins: Pin[], filters: FilterState): Pin[] {
   const { l1, l2, country, city, year } = filters;
   let result = pins;
-
   const selectedTags = [...l1, ...l2];
   if (selectedTags.length > 0) {
     result = result.filter((p) => (p.tags ?? []).some((t) => selectedTags.includes(t.name)));
@@ -37,7 +36,6 @@ function applyFilters(pins: Pin[], filters: FilterState): Pin[] {
   if (country) result = result.filter((p) => p.country === country);
   if (city) result = result.filter((p) => p.city === city);
   if (year) result = result.filter((p) => p.acquired_year === year);
-
   return result;
 }
 
@@ -63,16 +61,16 @@ const CALLOUT_STYLES = {
     borderWidth: 1,
     borderColor: '#2a2a2a',
   },
-  divider: {
-    height: 1,
-    backgroundColor: '#2a2a2a',
-    marginVertical: 6,
-  },
-  row: {
-    flexDirection: 'row' as const,
-    alignItems: 'center' as const,
-  },
+  divider: { height: 1, backgroundColor: '#2a2a2a', marginVertical: 6 },
+  row: { flexDirection: 'row' as const, alignItems: 'center' as const },
 };
+
+const clusterStyles = StyleSheet.create({
+  container: { display: 'flex', justifyContent: 'center', alignItems: 'center' },
+  wrapper: { position: 'absolute', opacity: 0.5, zIndex: 0 },
+  cluster: { display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1 },
+  text: { fontWeight: 'bold' },
+});
 
 export default function MapScreen() {
   const { pins, loading, refetch } = usePins();
@@ -81,6 +79,8 @@ export default function MapScreen() {
   const [filterSheetVisible, setFilterSheetVisible] = useState(false);
   const insets = useSafeAreaInsets();
   const mapRef = useRef<MapView>(null);
+  const superClusterRef = useRef<any>(null);
+  const pinGroupsRef = useRef<PinGroup[]>([]);
   const [tracksViewChanges, setTracksViewChanges] = useState(true);
   const pendingNavRef = useRef<string | null>(null);
 
@@ -95,20 +95,15 @@ export default function MapScreen() {
     () => pins.filter((p) => p.latitude != null && p.longitude != null),
     [pins]
   );
-
-  const filteredPins = useMemo(
-    () => applyFilters(geocodedPins, filters),
-    [geocodedPins, filters]
-  );
-
+  const filteredPins = useMemo(() => applyFilters(geocodedPins, filters), [geocodedPins, filters]);
   const pinGroups = useMemo(() => groupByLocation(filteredPins), [filteredPins]);
 
+  // Always in sync — renderCluster reads this to compute correct pin totals
+  pinGroupsRef.current = pinGroups;
+
   const activeFilterCount = [
-    filters.l1.length > 0,
-    filters.l2.length > 0,
-    filters.country,
-    filters.city,
-    filters.year,
+    filters.l1.length > 0, filters.l2.length > 0,
+    filters.country, filters.city, filters.year,
   ].filter(Boolean).length;
 
   const isFiltering = activeFilterCount > 0;
@@ -117,8 +112,7 @@ export default function MapScreen() {
     setFilters(next);
     if (mapRef.current) {
       const coords = applyFilters(geocodedPins, next).map((p) => ({
-        latitude: p.latitude!,
-        longitude: p.longitude!,
+        latitude: p.latitude!, longitude: p.longitude!,
       }));
       if (coords.length > 0) {
         mapRef.current.fitToCoordinates(coords, {
@@ -129,10 +123,63 @@ export default function MapScreen() {
     }
   }
 
+  function renderCluster(cluster: any) {
+    const { id, geometry, onPress, properties } = cluster;
+    const { point_count } = properties;
+    const [longitude, latitude] = geometry.coordinates;
+
+    // Sum actual pin counts across all groups in this cluster
+    let totalPins = point_count;
+    try {
+      const leaves = superClusterRef.current?.getLeaves(id, Infinity) ?? [];
+      if (leaves.length > 0) {
+        const sum = leaves.reduce((acc: number, leaf: any) => {
+          const group = pinGroupsRef.current[leaf.properties.index];
+          return acc + (group?.pins.length ?? 1);
+        }, 0);
+        if (sum > 0) totalPins = sum;
+      }
+    } catch (_) {}
+
+    // Exact same structure as ClusteredMarker — required for Text to render on Android
+    const size = 36;
+    const outer = 48;
+
+    return (
+      <Marker
+        key={`${longitude}_${latitude}`}
+        coordinate={{ latitude, longitude }}
+        style={{ zIndex: point_count + 1 }}
+        onPress={onPress}
+        tracksViewChanges={tracksViewChanges}
+      >
+        <TouchableOpacity
+          activeOpacity={0.5}
+          style={[clusterStyles.container, { width: outer, height: outer }]}
+        >
+          <View style={[clusterStyles.wrapper, {
+            backgroundColor: '#e8c97e',
+            width: outer, height: outer, borderRadius: outer / 2,
+          }]} />
+          <View style={[clusterStyles.cluster, {
+            backgroundColor: '#e8c97e',
+            width: size, height: size, borderRadius: size / 2,
+          }]}>
+            <Text style={[clusterStyles.text, { color: '#0f0f0f', fontSize: 15 }]}>
+              {totalPins}
+            </Text>
+          </View>
+        </TouchableOpacity>
+      </Marker>
+    );
+  }
+
   return (
     <View className="flex-1 bg-surface">
       <ClusteredMapView
         ref={mapRef}
+        superClusterRef={superClusterRef}
+        renderCluster={renderCluster}
         style={{ flex: 1 }}
         initialRegion={INITIAL_REGION}
         mapType="standard"
@@ -143,7 +190,6 @@ export default function MapScreen() {
       >
         {pinGroups.map((group) => {
           const isMulti = group.pins.length > 1;
-
           return (
             <Marker
               key={group.key}
@@ -154,20 +200,10 @@ export default function MapScreen() {
                 <Ionicons name="location-sharp" size={40} color="#e8c97e" style={{ zIndex: 0 }} />
                 {isMulti && (
                   <View style={{
-                    position: 'absolute',
-                    top: 0,
-                    right: 0,
-                    zIndex: 1,
-                    elevation: 1,
-                    backgroundColor: '#f5f5f5',
-                    borderRadius: 8,
-                    minWidth: 16,
-                    height: 16,
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    paddingHorizontal: 3,
-                    borderWidth: 1,
-                    borderColor: '#0f0f0f',
+                    position: 'absolute', top: 0, right: 0, zIndex: 1, elevation: 1,
+                    backgroundColor: '#f5f5f5', borderRadius: 8, minWidth: 16, height: 16,
+                    alignItems: 'center', justifyContent: 'center', paddingHorizontal: 3,
+                    borderWidth: 1, borderColor: '#0f0f0f',
                   }}>
                     <Text style={{ fontSize: 9, fontWeight: '700', color: '#0f0f0f' }}>
                       {group.pins.length}
@@ -175,7 +211,6 @@ export default function MapScreen() {
                   </View>
                 )}
               </View>
-
               <Callout
                 tooltip
                 onPress={() => {
@@ -208,7 +243,6 @@ export default function MapScreen() {
         })}
       </ClusteredMapView>
 
-      {/* Header overlay */}
       <View
         className="absolute left-0 right-0 flex-row items-center justify-between px-4"
         style={{ top: insets.top + 12 }}
@@ -222,7 +256,6 @@ export default function MapScreen() {
             </Text>
           )}
         </View>
-
         <TouchableOpacity
           onPress={() => setFilterSheetVisible(true)}
           className={`flex-row items-center px-3 py-2 rounded-xl gap-1.5 ${
@@ -240,7 +273,6 @@ export default function MapScreen() {
         </TouchableOpacity>
       </View>
 
-      {/* Empty state overlay */}
       {!loading && geocodedPins.length === 0 && (
         <View className="absolute inset-0 items-center justify-center px-8 pointer-events-none">
           <View className="bg-surface-elevated rounded-2xl px-6 py-5 items-center">
@@ -262,7 +294,6 @@ export default function MapScreen() {
         </View>
       )}
 
-      {/* Filter sheet */}
       <FilterBottomSheet
         visible={filterSheetVisible}
         filters={filters}
