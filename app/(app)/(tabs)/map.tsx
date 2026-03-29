@@ -51,8 +51,8 @@ function groupByLocation(pins: Pin[]): PinGroup[] {
   return Array.from(map.values());
 }
 
-const CALLOUT_STYLES = {
-  container: {
+const styles = StyleSheet.create({
+  callout: {
     backgroundColor: '#1a1a1a',
     borderRadius: 12,
     paddingHorizontal: 14,
@@ -62,14 +62,11 @@ const CALLOUT_STYLES = {
     borderColor: '#2a2a2a',
   },
   divider: { height: 1, backgroundColor: '#2a2a2a', marginVertical: 6 },
-  row: { flexDirection: 'row' as const, alignItems: 'center' as const },
-};
-
-const clusterStyles = StyleSheet.create({
-  container: { display: 'flex', justifyContent: 'center', alignItems: 'center' },
-  wrapper: { position: 'absolute', opacity: 0.5, zIndex: 0 },
-  cluster: { display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1 },
-  text: { fontWeight: 'bold' },
+  row: { flexDirection: 'row', alignItems: 'center' },
+  clusterContainer: { display: 'flex', justifyContent: 'center', alignItems: 'center' },
+  clusterWrapper: { position: 'absolute', opacity: 0.5, zIndex: 0 },
+  clusterInner: { display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1 },
+  clusterText: { fontWeight: 'bold' },
 });
 
 export default function MapScreen() {
@@ -82,12 +79,14 @@ export default function MapScreen() {
   const superClusterRef = useRef<any>(null);
   const pinGroupsRef = useRef<PinGroup[]>([]);
   const [tracksViewChanges, setTracksViewChanges] = useState(true);
+  const [markerEpoch, setMarkerEpoch] = useState(0);
   const pendingNavRef = useRef<string | null>(null);
 
   useFocusEffect(useCallback(() => {
     refetch();
     setTracksViewChanges(true);
-    const timer = setTimeout(() => setTracksViewChanges(false), 500);
+    setMarkerEpoch((e) => e + 1);
+    const timer = setTimeout(() => setTracksViewChanges(false), 1000);
     return () => clearTimeout(timer);
   }, []));
 
@@ -141,7 +140,6 @@ export default function MapScreen() {
       }
     } catch (_) {}
 
-    // Exact same structure as ClusteredMarker — required for Text to render on Android
     const size = 36;
     const outer = 48;
 
@@ -155,17 +153,17 @@ export default function MapScreen() {
       >
         <TouchableOpacity
           activeOpacity={0.5}
-          style={[clusterStyles.container, { width: outer, height: outer }]}
+          style={[styles.clusterContainer, { width: outer, height: outer }]}
         >
-          <View style={[clusterStyles.wrapper, {
+          <View style={[styles.clusterWrapper, {
             backgroundColor: '#e8c97e',
             width: outer, height: outer, borderRadius: outer / 2,
           }]} />
-          <View style={[clusterStyles.cluster, {
+          <View style={[styles.clusterInner, {
             backgroundColor: '#e8c97e',
             width: size, height: size, borderRadius: size / 2,
           }]}>
-            <Text style={[clusterStyles.text, { color: '#0f0f0f', fontSize: 15 }]}>
+            <Text style={[styles.clusterText, { color: '#0f0f0f', fontSize: 15 }]}>
               {totalPins}
             </Text>
           </View>
@@ -192,7 +190,7 @@ export default function MapScreen() {
           const isMulti = group.pins.length > 1;
           return (
             <Marker
-              key={group.key}
+              key={`${group.key}-${markerEpoch}`}
               coordinate={{ latitude: group.latitude, longitude: group.longitude }}
               tracksViewChanges={tracksViewChanges}
             >
@@ -219,21 +217,23 @@ export default function MapScreen() {
                   router.push(`/(app)/pin/${id}` as any);
                 }}
               >
-                <View collapsable={false} style={CALLOUT_STYLES.container}>
+                <View collapsable={false} style={styles.callout}>
                   {group.pins.map((pin, i) => (
-                    <View key={pin.id}>
-                      {i > 0 && <View style={CALLOUT_STYLES.divider} />}
-                      <TouchableOpacity onPress={() => { pendingNavRef.current = pin.id; }}>
-                        <Text style={{ fontSize: 13, fontWeight: '600', color: '#f5f5f5' }} numberOfLines={1}>
-                          {pin.description}
+                    <View
+                      key={pin.id}
+                      // onTouchStart fires at touch-down, before Callout.onPress fires at touch-up
+                      onTouchStart={() => { pendingNavRef.current = pin.id; }}
+                    >
+                      {i > 0 && <View style={styles.divider} />}
+                      <Text style={{ fontSize: 13, fontWeight: '600', color: '#f5f5f5' }} numberOfLines={1}>
+                        {pin.description}
+                      </Text>
+                      <View style={{ ...styles.row, marginTop: 4 }}>
+                        <Text style={{ fontSize: 11, color: '#909090', flex: 1 }} numberOfLines={1}>
+                          #{pin.collection_number} · {pin.city}, {pin.country}
                         </Text>
-                        <View style={{ ...CALLOUT_STYLES.row, marginTop: 4 }}>
-                          <Text style={{ fontSize: 11, color: '#909090', flex: 1 }} numberOfLines={1}>
-                            #{pin.collection_number} · {pin.city}, {pin.country}
-                          </Text>
-                          <Ionicons name="chevron-forward" size={11} color="#e8c97e" />
-                        </View>
-                      </TouchableOpacity>
+                        <Ionicons name="chevron-forward" size={11} color="#e8c97e" />
+                      </View>
                     </View>
                   ))}
                 </View>
