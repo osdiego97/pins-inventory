@@ -9,6 +9,7 @@ import { usePins } from '../../../hooks/usePins';
 import { useTags } from '../../../hooks/useTags';
 import { FilterState, Pin } from '../../../lib/types';
 import FilterBottomSheet from '../../../components/pins/FilterBottomSheet';
+import TagIcon from '../../../components/ui/TagIcon';
 
 const EMPTY_FILTERS: FilterState = { l1: [], l2: [], country: null, city: null, year: null };
 
@@ -50,6 +51,7 @@ function groupByLocation(pins: Pin[]): PinGroup[] {
   });
   return Array.from(map.values());
 }
+
 
 const styles = StyleSheet.create({
   callout: {
@@ -218,24 +220,30 @@ export default function MapScreen() {
                 }}
               >
                 <View collapsable={false} style={styles.callout}>
-                  {group.pins.map((pin, i) => (
-                    <View
-                      key={pin.id}
-                      // onTouchStart fires at touch-down, before Callout.onPress fires at touch-up
-                      onTouchStart={() => { pendingNavRef.current = pin.id; }}
-                    >
-                      {i > 0 && <View style={styles.divider} />}
-                      <Text style={{ fontSize: 13, fontWeight: '600', color: '#f5f5f5' }} numberOfLines={1}>
-                        {pin.description}
-                      </Text>
-                      <View style={{ ...styles.row, marginTop: 4 }}>
-                        <Text style={{ fontSize: 11, color: '#909090', flex: 1 }} numberOfLines={1}>
-                          #{pin.collection_number} · {pin.city}, {pin.country}
-                        </Text>
-                        <Ionicons name="chevron-forward" size={11} color="#e8c97e" />
+                  {group.pins.map((pin, i) => {
+                    const l1 = (pin.tags ?? []).find((t) => !t.parent_id)?.name;
+                    return (
+                      <View
+                        key={pin.id}
+                        // onTouchStart fires at touch-down, before Callout.onPress fires at touch-up
+                        onTouchStart={() => { pendingNavRef.current = pin.id; }}
+                      >
+                        {i > 0 && <View style={styles.divider} />}
+                        <View style={{ ...styles.row, gap: 6 }}>
+                          {l1 && <TagIcon tagName={l1} size={12} color="#909090" />}
+                          <Text style={{ fontSize: 13, fontWeight: '600', color: '#f5f5f5', flex: 1 }} numberOfLines={1}>
+                            {pin.description}
+                          </Text>
+                        </View>
+                        <View style={{ ...styles.row, marginTop: 4 }}>
+                          <Text style={{ fontSize: 11, color: '#909090', flex: 1 }} numberOfLines={1}>
+                            #{pin.collection_number} · {pin.city}, {pin.country}
+                          </Text>
+                          <Ionicons name="chevron-forward" size={11} color="#e8c97e" />
+                        </View>
                       </View>
-                    </View>
-                  ))}
+                    );
+                  })}
                 </View>
               </Callout>
             </Marker>
