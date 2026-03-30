@@ -10,6 +10,7 @@ import {
 import { router, useFocusEffect } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { normalize } from '../../../lib/utils';
 import { usePins } from '../../../hooks/usePins';
 import { usePinDelete } from '../../../hooks/usePinDelete';
 import { useTags } from '../../../hooks/useTags';
@@ -40,12 +41,12 @@ export default function CollectionScreen() {
     let result = pins;
 
     if (search.trim()) {
-      const q = search.toLowerCase();
+      const q = normalize(search);
       result = result.filter(
         (p) =>
-          p.description.toLowerCase().includes(q) ||
-          p.country?.toLowerCase().includes(q) ||
-          p.city?.toLowerCase().includes(q)
+          normalize(p.description).includes(q) ||
+          (p.country && normalize(p.country).includes(q)) ||
+          (p.city && normalize(p.city).includes(q))
       );
     }
 

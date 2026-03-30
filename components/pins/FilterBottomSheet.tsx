@@ -12,6 +12,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import TagIcon from '../ui/TagIcon';
+import { normalize } from '../../lib/utils';
 import { TAG_ICONS } from '../../lib/tagIcons';
 import { TagGroup } from '../../hooks/useTags';
 import { FilterState, Pin } from '../../lib/types';
@@ -40,12 +41,12 @@ function applyFilters(
   let result = pins;
 
   if (search.trim()) {
-    const q = search.toLowerCase();
+    const q = normalize(search);
     result = result.filter(
       (p) =>
-        p.description.toLowerCase().includes(q) ||
-        p.country?.toLowerCase().includes(q) ||
-        p.city?.toLowerCase().includes(q)
+        normalize(p.description).includes(q) ||
+        (p.country && normalize(p.country).includes(q)) ||
+        (p.city && normalize(p.city).includes(q))
     );
   }
 
@@ -244,14 +245,14 @@ function FilterBottomSheet({
 
   const countrySuggestions = useMemo(() => {
     if (!countryInput.trim()) return distinctCountries;
-    const q = countryInput.toLowerCase();
-    return distinctCountries.filter((c) => c.toLowerCase().includes(q));
+    const q = normalize(countryInput);
+    return distinctCountries.filter((c) => normalize(c).includes(q));
   }, [distinctCountries, countryInput]);
 
   const citySuggestions = useMemo(() => {
     if (!cityInput.trim()) return distinctCities;
-    const q = cityInput.toLowerCase();
-    return distinctCities.filter((c) => c.toLowerCase().includes(q));
+    const q = normalize(cityInput);
+    return distinctCities.filter((c) => normalize(c).includes(q));
   }, [distinctCities, cityInput]);
 
   const activeCount = [l1.length > 0, l2.length > 0, country, city, year].filter(Boolean).length;
