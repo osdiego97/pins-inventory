@@ -10,6 +10,7 @@ import {
 import { router, useFocusEffect } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { normalize } from '../../../lib/utils';
 import { usePins } from '../../../hooks/usePins';
 import { usePinDelete } from '../../../hooks/usePinDelete';
 import { useTags } from '../../../hooks/useTags';
@@ -40,12 +41,15 @@ export default function CollectionScreen() {
     let result = pins;
 
     if (search.trim()) {
-      const q = search.toLowerCase();
+      const q = normalize(search);
       result = result.filter(
         (p) =>
-          p.description.toLowerCase().includes(q) ||
-          p.country?.toLowerCase().includes(q) ||
-          p.city?.toLowerCase().includes(q)
+          normalize(p.description).includes(q) ||
+          (p.country && normalize(p.country).includes(q)) ||
+          (p.city && normalize(p.city).includes(q)) ||
+          (p.region && normalize(p.region).includes(q)) ||
+          (p.tags ?? []).some((t) => normalize(t.name).includes(q)) ||
+          (p.collection_number !== null && String(p.collection_number).includes(q))
       );
     }
 
@@ -99,7 +103,7 @@ export default function CollectionScreen() {
           <Ionicons name="search" size={16} color="#606060" />
           <TextInput
             className="flex-1 ml-2 py-3 text-text-primary text-sm"
-            placeholder="Buscar pins..."
+            placeholder="Descripción, país, etiqueta, #42..."
             placeholderTextColor="#606060"
             value={search}
             onChangeText={setSearch}
