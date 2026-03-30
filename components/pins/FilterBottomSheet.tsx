@@ -46,7 +46,10 @@ function applyFilters(
       (p) =>
         normalize(p.description).includes(q) ||
         (p.country && normalize(p.country).includes(q)) ||
-        (p.city && normalize(p.city).includes(q))
+        (p.city && normalize(p.city).includes(q)) ||
+        (p.region && normalize(p.region).includes(q)) ||
+        (p.tags ?? []).some((t) => normalize(t.name).includes(q)) ||
+        (p.collection_number !== null && String(p.collection_number).includes(q))
     );
   }
 

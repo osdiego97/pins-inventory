@@ -46,7 +46,10 @@ export default function CollectionScreen() {
         (p) =>
           normalize(p.description).includes(q) ||
           (p.country && normalize(p.country).includes(q)) ||
-          (p.city && normalize(p.city).includes(q))
+          (p.city && normalize(p.city).includes(q)) ||
+          (p.region && normalize(p.region).includes(q)) ||
+          (p.tags ?? []).some((t) => normalize(t.name).includes(q)) ||
+          (p.collection_number !== null && String(p.collection_number).includes(q))
       );
     }
 
@@ -100,7 +103,7 @@ export default function CollectionScreen() {
           <Ionicons name="search" size={16} color="#606060" />
           <TextInput
             className="flex-1 ml-2 py-3 text-text-primary text-sm"
-            placeholder="Buscar pins..."
+            placeholder="Descripción, país, etiqueta, #42..."
             placeholderTextColor="#606060"
             value={search}
             onChangeText={setSearch}
