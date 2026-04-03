@@ -114,6 +114,7 @@ export default function MapScreen() {
   const mapRegionRef = useRef<Region>(INITIAL_REGION);
   const containerRef = useRef({ width: 0, height: 0 });
   const selectedGroupRef = useRef<PinGroup | null>(null);
+  const suppressMapPressRef = useRef(false);
 
   // Animated values — updated via setValue (no re-renders)
   const animLeft = useRef(new Animated.Value(0)).current;
@@ -128,6 +129,7 @@ export default function MapScreen() {
   }
 
   function selectGroup(group: PinGroup | null) {
+    if (group) suppressMapPressRef.current = true;
     selectedGroupRef.current = group;
     setSelectedGroup(group);
     if (group) updateOverlay(group, mapRegionRef.current);
@@ -250,6 +252,10 @@ export default function MapScreen() {
         initialRegion={INITIAL_REGION}
         onRegionChange={handleRegionChange}
         onRegionChangeComplete={handleRegionChangeComplete}
+        onPress={() => {
+          if (suppressMapPressRef.current) { suppressMapPressRef.current = false; return; }
+          if (selectedGroupRef.current) selectGroup(null);
+        }}
         mapType="standard"
         userInterfaceStyle="dark"
         clusterColor="#e8c97e"
