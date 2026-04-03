@@ -1,5 +1,5 @@
 import { useState, useMemo, useRef, useCallback, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Animated } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Animated, ScrollView } from 'react-native';
 import MapView, { Marker, Callout, Region } from 'react-native-maps';
 import ClusteredMapView from 'react-native-map-clustering';
 import { router, useFocusEffect } from 'expo-router';
@@ -26,6 +26,8 @@ const ROW_H = 37;
 const DIVIDER_H = 13;
 const MARKER_HEIGHT = 44;
 const CALLOUT_GAP = 6;
+const MAX_VISIBLE_PINS = 5;
+const MAX_LIST_H = MAX_VISIBLE_PINS * ROW_H + (MAX_VISIBLE_PINS - 1) * DIVIDER_H;
 
 interface PinGroup {
   key: string;
@@ -323,33 +325,39 @@ export default function MapScreen() {
               <Ionicons name="close" size={14} color="#606060" />
             </TouchableOpacity>
           </View>
-          {selectedGroup.pins.map((pin, i) => {
-            const l1 = (pin.tags ?? []).find((t) => !t.parent_id)?.name;
-            return (
-              <TouchableOpacity
-                key={pin.id}
-                activeOpacity={0.7}
-                onPress={() => {
-                  selectGroup(null);
-                  router.push(`/(app)/pin/${pin.id}` as any);
-                }}
-              >
-                {i > 0 && <View style={styles.divider} />}
-                <View style={{ ...styles.row, gap: 6 }}>
-                  {l1 && <TagIcon tagName={l1} size={12} color="#909090" />}
-                  <Text style={{ fontSize: 13, fontWeight: '600', color: '#f5f5f5', flex: 1 }} numberOfLines={1}>
-                    {pin.description}
-                  </Text>
-                </View>
-                <View style={{ ...styles.row, marginTop: 4 }}>
-                  <Text style={{ fontSize: 11, color: '#909090', flex: 1 }} numberOfLines={1}>
-                    #{pin.collection_number} · {pin.city}, {pin.country}
-                  </Text>
-                  <Ionicons name="chevron-forward" size={11} color="#e8c97e" />
-                </View>
-              </TouchableOpacity>
-            );
-          })}
+          <ScrollView
+            style={{ maxHeight: MAX_LIST_H }}
+            showsVerticalScrollIndicator={false}
+            nestedScrollEnabled
+          >
+            {selectedGroup.pins.map((pin, i) => {
+              const l1 = (pin.tags ?? []).find((t) => !t.parent_id)?.name;
+              return (
+                <TouchableOpacity
+                  key={pin.id}
+                  activeOpacity={0.7}
+                  onPress={() => {
+                    selectGroup(null);
+                    router.push(`/(app)/pin/${pin.id}` as any);
+                  }}
+                >
+                  {i > 0 && <View style={styles.divider} />}
+                  <View style={{ ...styles.row, gap: 6 }}>
+                    {l1 && <TagIcon tagName={l1} size={12} color="#909090" />}
+                    <Text style={{ fontSize: 13, fontWeight: '600', color: '#f5f5f5', flex: 1 }} numberOfLines={1}>
+                      {pin.description}
+                    </Text>
+                  </View>
+                  <View style={{ ...styles.row, marginTop: 4 }}>
+                    <Text style={{ fontSize: 11, color: '#909090', flex: 1 }} numberOfLines={1}>
+                      #{pin.collection_number} · {pin.city}, {pin.country}
+                    </Text>
+                    <Ionicons name="chevron-forward" size={11} color="#e8c97e" />
+                  </View>
+                </TouchableOpacity>
+              );
+            })}
+          </ScrollView>
         </Animated.View>
       )}
 
