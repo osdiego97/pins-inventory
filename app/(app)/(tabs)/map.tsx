@@ -323,14 +323,9 @@ export default function MapScreen() {
       {/* Multi-pin overlay — tracks marker via Animated.Value.setValue on region change */}
       {selectedGroup && (
         <Animated.View style={[styles.calloutBox, { position: 'absolute', left: animLeft, bottom: animBottom, elevation: 10, zIndex: 10 }]}>
-          <View style={{ ...styles.row, justifyContent: 'space-between', marginBottom: 6 }}>
-            <Text style={{ fontSize: 11, color: '#606060', fontWeight: '600' }}>
-              {selectedGroup.pins.length} pins aquí
-            </Text>
-            <TouchableOpacity onPress={() => selectGroup(null)} hitSlop={{ top: 8, right: 8, bottom: 8, left: 8 }}>
-              <Ionicons name="close" size={14} color="#606060" />
-            </TouchableOpacity>
-          </View>
+          <Text style={{ fontSize: 11, color: '#606060', fontWeight: '600', marginBottom: 6 }}>
+            {selectedGroup.pins.length} pins aquí
+          </Text>
           <ScrollView
             style={{ maxHeight: MAX_LIST_H }}
             showsVerticalScrollIndicator={false}
