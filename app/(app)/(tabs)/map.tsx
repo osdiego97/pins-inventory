@@ -13,6 +13,9 @@ import TagIcon from '../../../components/ui/TagIcon';
 
 const EMPTY_FILTERS: FilterState = { l1: [], l2: [], country: null, city: null, year: null };
 
+// Persists across navigations (module-level, survives component unmount)
+let savedRegion: Region | null = null;
+
 const INITIAL_REGION: Region = {
   latitude: 20,
   longitude: 0,
@@ -143,6 +146,7 @@ export default function MapScreen() {
 
   function handleRegionChangeComplete(r: Region) {
     mapRegionRef.current = r;
+    savedRegion = r;
     const g = selectedGroupRef.current;
     if (g) updateOverlay(g, r);
   }
@@ -151,7 +155,8 @@ export default function MapScreen() {
     refetch();
     setTracksViewChanges(true);
     setMarkerEpoch((e) => e + 1);
-    const timer = setTimeout(() => setTracksViewChanges(false), 1000);
+    if (savedRegion) mapRef.current?.animateToRegion(savedRegion, 0);
+    const timer = setTimeout(() => setTracksViewChanges(false), 500);
     return () => { clearTimeout(timer); selectGroup(null); };
   }, []));
 
