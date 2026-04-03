@@ -1,5 +1,5 @@
-import { useState, useMemo, useRef, useCallback, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Animated } from 'react-native';
+import { useState, useMemo, useRef, useCallback } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import MapView, { Marker, Callout, Region } from 'react-native-maps';
 import ClusteredMapView from 'react-native-map-clustering';
 import { router, useFocusEffect } from 'expo-router';
@@ -19,13 +19,6 @@ const INITIAL_REGION: Region = {
   latitudeDelta: 120,
   longitudeDelta: 120,
 };
-
-const CALLOUT_WIDTH = 220;
-const CALLOUT_PADDING_V = 10;
-const ROW_H = 37;
-const DIVIDER_H = 13;
-const MARKER_HEIGHT = 44;
-const CALLOUT_GAP = 6;
 
 interface PinGroup {
   key: string;
@@ -59,31 +52,14 @@ function groupByLocation(pins: Pin[]): PinGroup[] {
   return Array.from(map.values());
 }
 
-function geoToScreen(
-  lat: number, lng: number, region: Region, W: number, H: number
-): { x: number; y: number } {
-  const x = ((lng - region.longitude) / region.longitudeDelta) * W + W / 2;
-  const y = ((region.latitude - lat) / region.latitudeDelta) * H + H / 2;
-  return { x, y };
-}
-
-function calloutPosition(group: PinGroup, region: Region, W: number, H: number) {
-  const { x, y } = geoToScreen(group.latitude, group.longitude, region, W, H);
-  const calloutH = CALLOUT_PADDING_V * 2 + group.pins.length * ROW_H + (group.pins.length - 1) * DIVIDER_H;
-  const left = Math.max(8, Math.min(x - CALLOUT_WIDTH / 2, W - CALLOUT_WIDTH - 8));
-  // bottom = distance from container bottom to overlay bottom edge
-  // overlay bottom sits MARKER_HEIGHT + GAP above marker tip
-  const bottom = H - y + MARKER_HEIGHT + CALLOUT_GAP;
-  return { left, bottom, calloutH };
-}
 
 const styles = StyleSheet.create({
-  calloutBox: {
+  callout: {
     backgroundColor: '#1a1a1a',
     borderRadius: 12,
     paddingHorizontal: 14,
-    paddingVertical: CALLOUT_PADDING_V,
-    width: CALLOUT_WIDTH,
+    paddingVertical: 10,
+    width: 220,
     borderWidth: 1,
     borderColor: '#2a2a2a',
   },
@@ -100,55 +76,20 @@ export default function MapScreen() {
   const { tagGroups } = useTags();
   const [filters, setFilters] = useState<FilterState>(EMPTY_FILTERS);
   const [filterSheetVisible, setFilterSheetVisible] = useState(false);
-  const [selectedGroup, setSelectedGroup] = useState<PinGroup | null>(null);
   const insets = useSafeAreaInsets();
   const mapRef = useRef<MapView>(null);
   const superClusterRef = useRef<any>(null);
   const pinGroupsRef = useRef<PinGroup[]>([]);
   const [tracksViewChanges, setTracksViewChanges] = useState(true);
   const [markerEpoch, setMarkerEpoch] = useState(0);
-
-  // Refs so onRegionChange never has stale closures
-  const mapRegionRef = useRef<Region>(INITIAL_REGION);
-  const containerRef = useRef({ width: 0, height: 0 });
-  const selectedGroupRef = useRef<PinGroup | null>(null);
-
-  // Animated values — updated via setValue (no re-renders)
-  const animLeft = useRef(new Animated.Value(0)).current;
-  const animBottom = useRef(new Animated.Value(0)).current;
-
-  function updateOverlay(group: PinGroup, region: Region) {
-    const { width: W, height: H } = containerRef.current;
-    if (W === 0) return;
-    const { left, bottom } = calloutPosition(group, region, W, H);
-    animLeft.setValue(left);
-    animBottom.setValue(bottom);
-  }
-
-  function selectGroup(group: PinGroup | null) {
-    selectedGroupRef.current = group;
-    setSelectedGroup(group);
-    if (group) updateOverlay(group, mapRegionRef.current);
-  }
-
-  function handleRegionChange(r: Region) {
-    mapRegionRef.current = r;
-    const g = selectedGroupRef.current;
-    if (g) updateOverlay(g, r);
-  }
-
-  function handleRegionChangeComplete(r: Region) {
-    mapRegionRef.current = r;
-    const g = selectedGroupRef.current;
-    if (g) updateOverlay(g, r);
-  }
+  const pendingNavRef = useRef<string | null>(null);
 
   useFocusEffect(useCallback(() => {
     refetch();
     setTracksViewChanges(true);
     setMarkerEpoch((e) => e + 1);
     const timer = setTimeout(() => setTracksViewChanges(false), 1000);
-    return () => { clearTimeout(timer); selectGroup(null); };
+    return () => clearTimeout(timer);
   }, []));
 
   const geocodedPins = useMemo(
@@ -158,6 +99,7 @@ export default function MapScreen() {
   const filteredPins = useMemo(() => applyFilters(geocodedPins, filters), [geocodedPins, filters]);
   const pinGroups = useMemo(() => groupByLocation(filteredPins), [filteredPins]);
 
+  // Always in sync — renderCluster reads this to compute correct pin totals
   pinGroupsRef.current = pinGroups;
 
   const activeFilterCount = [
@@ -169,7 +111,6 @@ export default function MapScreen() {
 
   function handleFiltersChange(next: FilterState) {
     setFilters(next);
-    selectGroup(null);
     if (mapRef.current) {
       const coords = applyFilters(geocodedPins, next).map((p) => ({
         latitude: p.latitude!, longitude: p.longitude!,
@@ -188,6 +129,7 @@ export default function MapScreen() {
     const { point_count } = properties;
     const [longitude, latitude] = geometry.coordinates;
 
+    // Sum actual pin counts across all groups in this cluster
     let totalPins = point_count;
     try {
       const leaves = superClusterRef.current?.getLeaves(id, Infinity) ?? [];
@@ -233,21 +175,13 @@ export default function MapScreen() {
   }
 
   return (
-    <View
-      className="flex-1 bg-surface"
-      onLayout={(e) => {
-        const { width, height } = e.nativeEvent.layout;
-        containerRef.current = { width, height };
-      }}
-    >
+    <View className="flex-1 bg-surface">
       <ClusteredMapView
         ref={mapRef}
         superClusterRef={superClusterRef}
         renderCluster={renderCluster}
         style={{ flex: 1 }}
         initialRegion={INITIAL_REGION}
-        onRegionChange={handleRegionChange}
-        onRegionChangeComplete={handleRegionChangeComplete}
         mapType="standard"
         userInterfaceStyle="dark"
         clusterColor="#e8c97e"
@@ -261,9 +195,8 @@ export default function MapScreen() {
               key={`${group.key}-${markerEpoch}`}
               coordinate={{ latitude: group.latitude, longitude: group.longitude }}
               tracksViewChanges={tracksViewChanges}
-              {...(isMulti ? { onPress: () => selectGroup(group) } : {})}
             >
-              <View collapsable={false} style={{ width: 40, height: MARKER_HEIGHT }}>
+              <View collapsable={false} style={{ width: 40, height: 44 }}>
                 <Ionicons name="location-sharp" size={40} color="#e8c97e" style={{ zIndex: 0 }} />
                 {isMulti && (
                   <View style={{
@@ -278,80 +211,45 @@ export default function MapScreen() {
                   </View>
                 )}
               </View>
-              {!isMulti && (
-                <Callout
-                  tooltip
-                  onPress={() => router.push(`/(app)/pin/${group.pins[0].id}` as any)}
-                >
-                  <View collapsable={false} style={styles.calloutBox}>
-                    {(() => {
-                      const pin = group.pins[0];
-                      const l1 = (pin.tags ?? []).find((t) => !t.parent_id)?.name;
-                      return (
-                        <>
-                          <View style={{ ...styles.row, gap: 6 }}>
-                            {l1 && <TagIcon tagName={l1} size={12} color="#909090" />}
-                            <Text style={{ fontSize: 13, fontWeight: '600', color: '#f5f5f5', flex: 1 }} numberOfLines={1}>
-                              {pin.description}
-                            </Text>
-                          </View>
-                          <View style={{ ...styles.row, marginTop: 4 }}>
-                            <Text style={{ fontSize: 11, color: '#909090', flex: 1 }} numberOfLines={1}>
-                              #{pin.collection_number} · {pin.city}, {pin.country}
-                            </Text>
-                            <Ionicons name="chevron-forward" size={11} color="#e8c97e" />
-                          </View>
-                        </>
-                      );
-                    })()}
-                  </View>
-                </Callout>
-              )}
+              <Callout
+                tooltip
+                onPress={() => {
+                  const id = pendingNavRef.current ?? group.pins[0].id;
+                  pendingNavRef.current = null;
+                  router.push(`/(app)/pin/${id}` as any);
+                }}
+              >
+                <View collapsable={false} style={styles.callout}>
+                  {group.pins.map((pin, i) => {
+                    const l1 = (pin.tags ?? []).find((t) => !t.parent_id)?.name;
+                    return (
+                      <View
+                        key={pin.id}
+                        // onTouchStart fires at touch-down, before Callout.onPress fires at touch-up
+                        onTouchStart={() => { pendingNavRef.current = pin.id; }}
+                      >
+                        {i > 0 && <View style={styles.divider} />}
+                        <View style={{ ...styles.row, gap: 6 }}>
+                          {l1 && <TagIcon tagName={l1} size={12} color="#909090" />}
+                          <Text style={{ fontSize: 13, fontWeight: '600', color: '#f5f5f5', flex: 1 }} numberOfLines={1}>
+                            {pin.description}
+                          </Text>
+                        </View>
+                        <View style={{ ...styles.row, marginTop: 4 }}>
+                          <Text style={{ fontSize: 11, color: '#909090', flex: 1 }} numberOfLines={1}>
+                            #{pin.collection_number} · {pin.city}, {pin.country}
+                          </Text>
+                          <Ionicons name="chevron-forward" size={11} color="#e8c97e" />
+                        </View>
+                      </View>
+                    );
+                  })}
+                </View>
+              </Callout>
             </Marker>
           );
         })}
       </ClusteredMapView>
-
-      {/* Multi-pin overlay — tracks marker via Animated.Value.setValue on region change */}
-      {selectedGroup && (
-        <Animated.View style={[styles.calloutBox, { position: 'absolute', left: animLeft, bottom: animBottom, elevation: 10, zIndex: 10 }]}>
-          <View style={{ ...styles.row, justifyContent: 'space-between', marginBottom: 6 }}>
-            <Text style={{ fontSize: 11, color: '#606060', fontWeight: '600' }}>
-              {selectedGroup.pins.length} pins aquí
-            </Text>
-            <TouchableOpacity onPress={() => selectGroup(null)} hitSlop={{ top: 8, right: 8, bottom: 8, left: 8 }}>
-              <Ionicons name="close" size={14} color="#606060" />
-            </TouchableOpacity>
-          </View>
-          {selectedGroup.pins.map((pin, i) => {
-            const l1 = (pin.tags ?? []).find((t) => !t.parent_id)?.name;
-            return (
-              <TouchableOpacity
-                key={pin.id}
-                activeOpacity={0.7}
-                onPress={() => {
-                  selectGroup(null);
-                  router.push(`/(app)/pin/${pin.id}` as any);
-                }}
-              >
-                {i > 0 && <View style={styles.divider} />}
-                <View style={{ ...styles.row, gap: 6 }}>
-                  {l1 && <TagIcon tagName={l1} size={12} color="#909090" />}
-                  <Text style={{ fontSize: 13, fontWeight: '600', color: '#f5f5f5', flex: 1 }} numberOfLines={1}>
-                    {pin.description}
-                  </Text>
-                </View>
-                <View style={{ ...styles.row, marginTop: 4 }}>
-                  <Text style={{ fontSize: 11, color: '#909090', flex: 1 }} numberOfLines={1}>
-                    #{pin.collection_number} · {pin.city}, {pin.country}
-                  </Text>
-                  <Ionicons name="chevron-forward" size={11} color="#e8c97e" />
-                </View>
-              </TouchableOpacity>
-            );
-          })}
-        </Animated.View>
-      )}
 
       <View
         className="absolute left-0 right-0 flex-row items-center justify-between px-4"
