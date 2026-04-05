@@ -8,8 +8,9 @@ DROP POLICY IF EXISTS "Users can update own tags" ON tags;
 DROP POLICY IF EXISTS "Users can delete own tags" ON tags;
 
 -- Restore original read-only policy
-CREATE POLICY "Tags readable by all authenticated users" ON tags
-  FOR SELECT USING (auth.role() = 'authenticated');
+CREATE POLICY "tags: authenticated read" ON tags
+  FOR SELECT TO authenticated
+  USING (true);
 
 -- Drop user-scoped unique constraint
 ALTER TABLE tags DROP CONSTRAINT IF EXISTS tags_name_parent_id_user_id_key;

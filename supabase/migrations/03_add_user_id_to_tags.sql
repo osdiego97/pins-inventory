@@ -20,7 +20,7 @@ ALTER TABLE tags DROP CONSTRAINT IF EXISTS tags_name_parent_id_key;
 ALTER TABLE tags ADD CONSTRAINT tags_name_parent_id_user_id_key UNIQUE (name, parent_id, user_id);
 
 -- 5. Drop the old authenticated read-only policy and replace with user-scoped policies
-DROP POLICY IF EXISTS "Tags readable by all authenticated users" ON tags;
+DROP POLICY IF EXISTS "tags: authenticated read" ON tags;
 
 CREATE POLICY "Users can read own tags" ON tags
   FOR SELECT USING (auth.uid() = user_id);
