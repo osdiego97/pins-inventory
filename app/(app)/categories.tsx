@@ -202,6 +202,9 @@ export default function CategoriesScreen() {
         </View>
 
         {/* L1 groups */}
+        <Text className="text-text-muted text-xs font-medium uppercase tracking-wider mb-2">
+          Categorías
+        </Text>
         {tagGroups.map((group) => (
           <View key={group.category.id} className="mb-4">
             {/* L1 row */}
