@@ -221,7 +221,7 @@ export default function CategoriesScreen() {
         {standaloneTags.length > 0 && (
           <View className="mb-4">
             <Text className="text-text-muted text-xs font-medium uppercase tracking-wider mb-2">
-              Sin categoría padre
+              Subcategorías compartidas
             </Text>
             <View className="bg-surface-card rounded-2xl overflow-hidden">
               {standaloneTags.map((tag, idx) => (
@@ -250,7 +250,7 @@ export default function CategoriesScreen() {
           className="bg-surface-card rounded-2xl px-4 py-4 flex-row items-center justify-center" style={{ gap: 8 }}
         >
           <Ionicons name="add-circle-outline" size={18} color="#606060" />
-          <Text className="text-text-muted text-sm">Añadir etiqueta sin categoría</Text>
+          <Text className="text-text-muted text-sm">Añadir subcategoría compartida</Text>
         </TouchableOpacity>
       </ScrollView>
 
