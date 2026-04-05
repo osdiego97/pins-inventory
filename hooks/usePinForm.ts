@@ -13,6 +13,7 @@ export const COLOR_OPTIONS = [
   { label: 'Blanco', value: 'blanco', hex: '#f5f5f5' },
   { label: 'Dorado', value: 'dorado', hex: '#e8c97e' },
   { label: 'Plateado', value: 'plateado', hex: '#a0a0a0' },
+  { label: 'Arcoíris', value: 'arcoiris', hex: 'rainbow' },
   { label: 'Multicolor', value: 'multicolor', hex: '#9b5de5' },
   { label: 'Otro', value: 'otro', hex: '#606060' },
 ] as const;

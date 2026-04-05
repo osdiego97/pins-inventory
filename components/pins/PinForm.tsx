@@ -274,6 +274,7 @@ export default function PinForm({ pinId }: PinFormProps) {
             <View className="flex-row flex-wrap" style={{ gap: 10 }}>
               {COLOR_OPTIONS.map((opt) => {
                 const selected = form.color.includes(opt.value);
+                const isRainbow = opt.value === 'arcoiris';
                 return (
                   <TouchableOpacity
                     key={opt.value}
@@ -282,13 +283,21 @@ export default function PinForm({ pinId }: PinFormProps) {
                       width: 40,
                       height: 40,
                       borderRadius: 20,
-                      backgroundColor: opt.hex,
+                      overflow: 'hidden',
                       alignItems: 'center',
                       justifyContent: 'center',
                       borderWidth: selected ? 2 : 1,
                       borderColor: selected ? '#e8c97e' : '#2a2a2a',
+                      ...(!isRainbow && { backgroundColor: opt.hex }),
                     }}
                   >
+                    {isRainbow && (
+                      <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, flexDirection: 'row' }}>
+                        {['#e05c5c', '#e8874f', '#e8c97e', '#5ce07a', '#5c8de0', '#9b5de5'].map((c, i) => (
+                          <View key={i} style={{ flex: 1, backgroundColor: c }} />
+                        ))}
+                      </View>
+                    )}
                     {selected && (
                       <Ionicons
                         name="checkmark"
