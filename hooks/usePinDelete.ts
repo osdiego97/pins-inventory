@@ -7,8 +7,8 @@ export function usePinDelete(onSuccess: () => void) {
   const confirmDelete = useCallback(
     (pinId: string) => {
       Alert.alert(
-        'Eliminar pin',
-        '¿Seguro que quieres eliminar este pin? Esta acción no se puede deshacer.',
+        'Eliminar elemento',
+        '¿Seguro que quieres eliminar este elemento? Esta acción no se puede deshacer.',
         [
           { text: 'Cancelar', style: 'cancel' },
           { text: 'Eliminar', style: 'destructive', onPress: () => handleDelete(pinId) },
@@ -19,31 +19,31 @@ export function usePinDelete(onSuccess: () => void) {
   );
 
   async function handleDelete(pinId: string) {
-    const { data: pin } = await supabase
-      .from('pins')
+    const { data: item } = await supabase
+      .from('items')
       .select('image_url, collection_number')
       .eq('id', pinId)
       .single();
 
-    await supabase.from('pin_tags').delete().eq('pin_id', pinId);
-    const { error } = await supabase.from('pins').delete().eq('id', pinId);
+    await supabase.from('item_tags').delete().eq('item_id', pinId);
+    const { error } = await supabase.from('items').delete().eq('id', pinId);
 
     if (error) {
-      Alert.alert('Error', 'No se pudo eliminar el pin. Inténtalo de nuevo.');
+      Alert.alert('Error', 'No se pudo eliminar el elemento. Inténtalo de nuevo.');
       return;
     }
 
-    if (pin?.image_url) {
-      await deleteImage(pin.image_url);
+    if (item?.image_url) {
+      await deleteImage(item.image_url);
     }
 
-    if (pin?.collection_number != null) {
+    if (item?.collection_number != null) {
       const {
         data: { user },
       } = await supabase.auth.getUser();
       if (user) {
         await supabase.rpc('decrement_collection_numbers_after', {
-          p_deleted_number: pin.collection_number,
+          p_deleted_number: item.collection_number,
           p_user_id: user.id,
         });
       }

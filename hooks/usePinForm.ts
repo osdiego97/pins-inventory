@@ -4,6 +4,19 @@ import * as ImagePicker from 'expo-image-picker';
 import { supabase } from '../lib/supabase';
 import { uploadPinImage, getSignedImageUrl } from '../lib/storage';
 
+export const COLOR_OPTIONS = [
+  { label: 'Rojo', value: 'rojo', hex: '#e05c5c' },
+  { label: 'Azul', value: 'azul', hex: '#5c8de0' },
+  { label: 'Verde', value: 'verde', hex: '#5cb85c' },
+  { label: 'Amarillo', value: 'amarillo', hex: '#e0c95c' },
+  { label: 'Negro', value: 'negro', hex: '#1a1a1a' },
+  { label: 'Blanco', value: 'blanco', hex: '#f5f5f5' },
+  { label: 'Dorado', value: 'dorado', hex: '#e8c97e' },
+  { label: 'Plateado', value: 'plateado', hex: '#a0a0a0' },
+  { label: 'Multicolor', value: 'multicolor', hex: '#9b5de5' },
+  { label: 'Otro', value: 'otro', hex: '#606060' },
+] as const;
+
 interface FormState {
   description: string;
   country: string;
@@ -17,6 +30,8 @@ interface FormState {
   mapLocationName: string | null;
   latitude: number | null;
   longitude: number | null;
+  material: string;
+  color: string[];
 }
 
 interface FormErrors {
@@ -39,6 +54,8 @@ const INITIAL_STATE: FormState = {
   mapLocationName: null,
   latitude: null,
   longitude: null,
+  material: '',
+  color: [],
 };
 
 export function usePinForm(pinId?: string) {
@@ -66,8 +83,8 @@ export function usePinForm(pinId?: string) {
   async function loadPin(id: string) {
     setInitialLoading(true);
     const { data, error } = await supabase
-      .from('pins')
-      .select('*, pin_tags(tag_id)')
+      .from('items')
+      .select('*, item_tags(tag_id)')
       .eq('id', id)
       .single();
 
@@ -83,12 +100,14 @@ export function usePinForm(pinId?: string) {
       region: data.region ?? '',
       acquired_year: data.acquired_year?.toString() ?? '',
       is_commemorative: data.is_commemorative ?? false,
-      selectedTagIds: (data.pin_tags as { tag_id: string }[]).map((pt) => pt.tag_id),
+      selectedTagIds: (data.item_tags as { tag_id: string }[]).map((pt) => pt.tag_id),
       localImageUri: null,
       existingImagePath: data.image_url ?? null,
       mapLocationName: null,
       latitude: data.latitude ?? null,
       longitude: data.longitude ?? null,
+      material: data.material ?? '',
+      color: data.color ?? [],
     });
     setInitialLoading(false);
   }
@@ -100,12 +119,12 @@ export function usePinForm(pinId?: string) {
     }
   }
 
-  function toggleTag(tagId: string) {
+  function toggleColor(value: string) {
     setForm((prev) => ({
       ...prev,
-      selectedTagIds: prev.selectedTagIds.includes(tagId)
-        ? prev.selectedTagIds.filter((id) => id !== tagId)
-        : [...prev.selectedTagIds, tagId],
+      color: prev.color.includes(value)
+        ? prev.color.filter((c) => c !== value)
+        : [...prev.color, value],
     }));
   }
 
@@ -182,7 +201,7 @@ export function usePinForm(pinId?: string) {
       imagePath = path;
     }
 
-    const pinData = {
+    const itemData = {
       description: form.description.trim(),
       country: form.country.trim() || null,
       city: form.city.trim() || null,
@@ -192,21 +211,23 @@ export function usePinForm(pinId?: string) {
       image_url: imagePath,
       latitude: form.latitude,
       longitude: form.longitude,
+      material: form.material.trim() || null,
+      color: form.color.length > 0 ? form.color : null,
     };
 
-    let savedPinId: string;
+    let savedItemId: string;
 
     if (isEdit && pinId) {
-      const { error } = await supabase.from('pins').update(pinData).eq('id', pinId);
+      const { error } = await supabase.from('items').update(itemData).eq('id', pinId);
       if (error) {
-        setSubmitError('No se pudo guardar el pin. Inténtalo de nuevo.');
+        setSubmitError('No se pudo guardar el elemento. Inténtalo de nuevo.');
         setSubmitting(false);
         return;
       }
-      savedPinId = pinId;
+      savedItemId = pinId;
     } else {
       const { data: maxData } = await supabase
-        .from('pins')
+        .from('items')
         .select('collection_number')
         .order('collection_number', { ascending: false, nullsFirst: false })
         .limit(1)
@@ -215,33 +236,33 @@ export function usePinForm(pinId?: string) {
       const nextNumber = maxData?.collection_number ? maxData.collection_number + 1 : 1;
 
       const { data, error } = await supabase
-        .from('pins')
-        .insert({ ...pinData, user_id: user.id, collection_number: nextNumber })
+        .from('items')
+        .insert({ ...itemData, user_id: user.id, collection_number: nextNumber })
         .select('id')
         .single();
 
       if (error || !data) {
-        setSubmitError('No se pudo guardar el pin. Inténtalo de nuevo.');
+        setSubmitError('No se pudo guardar el elemento. Inténtalo de nuevo.');
         setSubmitting(false);
         return;
       }
-      savedPinId = data.id;
+      savedItemId = data.id;
     }
 
     if (isEdit) {
-      await supabase.from('pin_tags').delete().eq('pin_id', savedPinId);
+      await supabase.from('item_tags').delete().eq('item_id', savedItemId);
     }
 
     if (form.selectedTagIds.length > 0) {
-      const { error: tagError } = await supabase.from('pin_tags').insert(
+      const { error: tagError } = await supabase.from('item_tags').insert(
         form.selectedTagIds.map((tagId) => ({
-          pin_id: savedPinId,
+          item_id: savedItemId,
           tag_id: tagId,
           user_id: user.id,
         }))
       );
       if (tagError) {
-        setSubmitError('No se pudo guardar el pin. Inténtalo de nuevo.');
+        setSubmitError('No se pudo guardar el elemento. Inténtalo de nuevo.');
         setSubmitting(false);
         return;
       }
@@ -256,6 +277,7 @@ export function usePinForm(pinId?: string) {
   return {
     form,
     setField,
+    toggleColor,
     pickImage,
     submit,
     errors,

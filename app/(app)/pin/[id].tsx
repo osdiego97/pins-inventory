@@ -112,6 +112,26 @@ export default function PinDetailScreen() {
                 )}
               </View>
 
+              {/* Material + Color */}
+              {(pin.material || (pin.color ?? []).length > 0) && (
+                <View className="mt-3" style={{ gap: 6 }}>
+                  {pin.material && (
+                    <View className="flex-row items-center" style={{ gap: 6 }}>
+                      <Ionicons name="construct-outline" size={14} color="#a0a0a0" />
+                      <Text className="text-text-secondary text-sm">{pin.material}</Text>
+                    </View>
+                  )}
+                  {(pin.color ?? []).length > 0 && (
+                    <View className="flex-row items-center flex-wrap" style={{ gap: 6 }}>
+                      <Ionicons name="color-palette-outline" size={14} color="#a0a0a0" />
+                      <Text className="text-text-secondary text-sm">
+                        {pin.color!.map((c) => c.charAt(0).toUpperCase() + c.slice(1)).join(', ')}
+                      </Text>
+                    </View>
+                  )}
+                </View>
+              )}
+
               {/* Tags */}
               {(pin.tags ?? []).length > 0 && (
                 <View className="mt-4">

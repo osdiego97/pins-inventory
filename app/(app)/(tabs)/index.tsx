@@ -14,6 +14,7 @@ import { normalize } from '../../../lib/utils';
 import { usePins } from '../../../hooks/usePins';
 import { usePinDelete } from '../../../hooks/usePinDelete';
 import { useTags } from '../../../hooks/useTags';
+import { useUserSettings } from '../../../hooks/useUserSettings';
 import { FilterState } from '../../../lib/types';
 import PinCard from '../../../components/pins/PinCard';
 import FilterBottomSheet from '../../../components/pins/FilterBottomSheet';
@@ -23,7 +24,8 @@ const EMPTY_FILTERS: FilterState = { l1: [], l2: [], country: null, city: null, 
 export default function CollectionScreen() {
   const { pins, loading, error, refetch } = usePins();
   const { confirmDelete } = usePinDelete(refetch);
-  const { tagGroups } = useTags();
+  const { tagGroups, standaloneTags } = useTags();
+  const { settings } = useUserSettings();
   const [search, setSearch] = useState('');
   const [filters, setFilters] = useState<FilterState>(EMPTY_FILTERS);
   const [filterSheetVisible, setFilterSheetVisible] = useState(false);
@@ -49,7 +51,9 @@ export default function CollectionScreen() {
           (p.city && normalize(p.city).includes(q)) ||
           (p.region && normalize(p.region).includes(q)) ||
           (p.tags ?? []).some((t) => normalize(t.name).includes(q)) ||
-          (p.collection_number !== null && String(p.collection_number).includes(q))
+          (p.collection_number !== null && String(p.collection_number).includes(q)) ||
+          (p.material && normalize(p.material).includes(q)) ||
+          (p.color ?? []).some((c) => normalize(c).includes(q))
       );
     }
 
@@ -88,13 +92,23 @@ export default function CollectionScreen() {
       {/* Padded content area */}
       <View className="flex-1" style={{ paddingTop: insets.top }}>
       {/* Header */}
-      <View className="px-4 pt-4 pb-2">
-        <Text className="text-text-primary text-2xl font-bold">Mi Colección</Text>
-        {!loading && (
-          <Text className="text-text-muted text-sm mt-0.5">
-            {isFiltering ? `${filtered.length} de ${pins.length} pins` : `${pins.length} pins`}
+      <View className="px-4 pt-4 pb-2 flex-row items-start justify-between">
+        <View className="flex-1 mr-3">
+          <Text className="text-text-primary text-2xl font-bold" numberOfLines={1}>
+            {settings?.collection_name ?? 'Mi Colección'}
           </Text>
-        )}
+          {!loading && (
+            <Text className="text-text-muted text-sm mt-0.5">
+              {isFiltering ? `${filtered.length} de ${pins.length} elementos` : `${pins.length} elementos`}
+            </Text>
+          )}
+        </View>
+        <TouchableOpacity
+          onPress={() => router.push('/(app)/settings' as any)}
+          className="mt-1"
+        >
+          <Ionicons name="settings-outline" size={22} color="#606060" />
+        </TouchableOpacity>
       </View>
 
       {/* Search bar + Filter button */}
@@ -103,7 +117,7 @@ export default function CollectionScreen() {
           <Ionicons name="search" size={16} color="#606060" />
           <TextInput
             className="flex-1 ml-2 py-3 text-text-primary text-sm"
-            placeholder="Descripción, país, etiqueta, #42..."
+            placeholder="Descripción, país, material, #42..."
             placeholderTextColor="#606060"
             value={search}
             onChangeText={setSearch}
@@ -145,8 +159,8 @@ export default function CollectionScreen() {
         <View className="flex-1 items-center justify-center px-8">
           <Text className="text-text-secondary text-center">
             {isFiltering
-              ? 'No hay pins que coincidan con los filtros activos.'
-              : 'Aún no tienes pins. ¡Añade el primero!'}
+              ? 'No hay elementos que coincidan con los filtros activos.'
+              : 'Aún no tienes elementos. ¡Añade el primero!'}
           </Text>
         </View>
       ) : (
@@ -181,6 +195,7 @@ data={filtered}
         visible={filterSheetVisible}
         filters={filters}
         onFiltersChange={setFilters}
+        standaloneTags={standaloneTags}
         onClose={() => setFilterSheetVisible(false)}
         pins={pins}
         tagGroups={tagGroups}

@@ -1,14 +1,14 @@
 import { useRef, memo } from 'react';
 import { View, Text, TouchableOpacity, PanResponder, Animated } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { Pin } from '../../lib/types';
+import { Item } from '../../lib/types';
 import TagIcon from '../ui/TagIcon';
 
 const SWIPE_THRESHOLD = 80;
 const MAX_TRANSLATE = 100;
 
 interface PinCardProps {
-  pin: Pin;
+  pin: Item;
   onPress: (id: string) => void;
   onEdit: (id: string) => void;
   onDelete: (id: string) => void;

@@ -1,15 +1,28 @@
 import { View, Text, TouchableOpacity } from 'react-native';
 import { TagGroup } from '../../hooks/useTags';
-import { TAG_ICONS } from '../../lib/tagIcons';
 import TagIcon from '../ui/TagIcon';
+import { Tag } from '../../lib/types';
 
 interface TagPickerProps {
   tagGroups: TagGroup[];
+  standaloneTags?: Tag[];
   selectedIds: string[];
   onToggle: (tagId: string) => void;
 }
 
-export default function TagPicker({ tagGroups, selectedIds, onToggle }: TagPickerProps) {
+export default function TagPicker({ tagGroups, standaloneTags = [], selectedIds, onToggle }: TagPickerProps) {
+  const isEmpty = tagGroups.length === 0 && standaloneTags.length === 0;
+
+  if (isEmpty) {
+    return (
+      <View className="bg-surface-card rounded-xl px-4 py-3">
+        <Text className="text-text-muted text-sm text-center">
+          Aún no tienes categorías. Crea una desde Ajustes.
+        </Text>
+      </View>
+    );
+  }
+
   return (
     <View style={{ gap: 16 }}>
       {tagGroups.map(({ category, subcategories }) => (
@@ -58,6 +71,34 @@ export default function TagPicker({ tagGroups, selectedIds, onToggle }: TagPicke
           )}
         </View>
       ))}
+
+      {/* Standalone L2 tags (no L1 parent) */}
+      {standaloneTags.length > 0 && (
+        <View>
+          <Text className="text-text-muted text-xs font-medium uppercase tracking-wider mb-2">
+            Otras etiquetas
+          </Text>
+          <View className="flex-row flex-wrap" style={{ gap: 8 }}>
+            {standaloneTags.map((tag) => (
+              <TouchableOpacity
+                key={tag.id}
+                onPress={() => onToggle(tag.id)}
+                className={`rounded-full px-3 py-1.5 ${
+                  selectedIds.includes(tag.id) ? 'bg-accent-muted' : 'bg-surface-card'
+                }`}
+              >
+                <Text
+                  className={`text-sm ${
+                    selectedIds.includes(tag.id) ? 'text-surface' : 'text-text-secondary'
+                  }`}
+                >
+                  {tag.name}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+      )}
     </View>
   );
 }

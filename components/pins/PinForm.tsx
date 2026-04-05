@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { usePinForm } from '../../hooks/usePinForm';
+import { usePinForm, COLOR_OPTIONS } from '../../hooks/usePinForm';
 import { useTags } from '../../hooks/useTags';
 import TagPicker from './TagPicker';
 import PlaceSearch from './PlaceSearch';
@@ -26,6 +26,7 @@ export default function PinForm({ pinId }: PinFormProps) {
   const {
     form,
     setField,
+    toggleColor,
     pickImage,
     submit,
     errors,
@@ -34,16 +35,16 @@ export default function PinForm({ pinId }: PinFormProps) {
     submitError,
     previewImageUri,
   } = usePinForm(pinId);
-  const { tagGroups, loading: tagsLoading } = useTags();
+  const { tagGroups, standaloneTags, loading: tagsLoading } = useTags();
 
   function handleToggleTag(tagId: string) {
     const l1Group = tagGroups.find((g) => g.category.id === tagId);
     const l2Group = tagGroups.find((g) => g.subcategories.some((s) => s.id === tagId));
+    const isStandalone = standaloneTags.some((t) => t.id === tagId);
     let newIds = [...form.selectedTagIds];
 
     if (l1Group) {
       if (newIds.includes(tagId)) {
-        // Deselect L1 + all its L2 children
         const childIds = l1Group.subcategories.map((s) => s.id);
         newIds = newIds.filter((id) => id !== tagId && !childIds.includes(id));
       } else {
@@ -52,7 +53,6 @@ export default function PinForm({ pinId }: PinFormProps) {
     } else if (l2Group) {
       const parentId = l2Group.category.id;
       if (newIds.includes(tagId)) {
-        // Deselect L2 — also deselect L1 parent if no siblings remain
         const remainingSiblings = l2Group.subcategories.filter(
           (s) => s.id !== tagId && newIds.includes(s.id)
         );
@@ -61,10 +61,14 @@ export default function PinForm({ pinId }: PinFormProps) {
           newIds = newIds.filter((id) => id !== parentId);
         }
       } else {
-        // Select L2 + auto-select L1 parent
         if (!newIds.includes(parentId)) newIds = [...newIds, parentId];
         newIds = [...newIds, tagId];
       }
+    } else if (isStandalone) {
+      // Standalone L2: simple toggle, no parent side-effect
+      newIds = newIds.includes(tagId)
+        ? newIds.filter((id) => id !== tagId)
+        : [...newIds, tagId];
     }
 
     setField('selectedTagIds', newIds);
@@ -247,6 +251,65 @@ export default function PinForm({ pinId }: PinFormProps) {
             />
           </View>
 
+          {/* Material */}
+          <View>
+            <Text className="text-text-secondary text-xs font-medium uppercase tracking-wider mb-1.5">
+              Material
+            </Text>
+            <TextInput
+              className="bg-surface-card rounded-xl px-4 py-3 text-text-primary text-sm"
+              placeholder="Ej. Esmalte, Metal, Madera..."
+              placeholderTextColor="#606060"
+              value={form.material}
+              onChangeText={(v) => setField('material', v)}
+              maxLength={50}
+            />
+          </View>
+
+          {/* Color */}
+          <View>
+            <Text className="text-text-secondary text-xs font-medium uppercase tracking-wider mb-3">
+              Color
+            </Text>
+            <View className="flex-row flex-wrap" style={{ gap: 10 }}>
+              {COLOR_OPTIONS.map((opt) => {
+                const selected = form.color.includes(opt.value);
+                return (
+                  <TouchableOpacity
+                    key={opt.value}
+                    onPress={() => toggleColor(opt.value)}
+                    style={{
+                      width: 40,
+                      height: 40,
+                      borderRadius: 20,
+                      backgroundColor: opt.hex,
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      borderWidth: selected ? 2 : 1,
+                      borderColor: selected ? '#e8c97e' : '#2a2a2a',
+                    }}
+                  >
+                    {selected && (
+                      <Ionicons
+                        name="checkmark"
+                        size={16}
+                        color={opt.value === 'blanco' || opt.value === 'amarillo' ? '#0f0f0f' : '#f5f5f5'}
+                      />
+                    )}
+                    {opt.value === 'otro' && !selected && (
+                      <Text style={{ fontSize: 14, color: '#f5f5f5', fontWeight: '600' }}>?</Text>
+                    )}
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+            {form.color.length > 0 && (
+              <Text className="text-text-muted text-xs mt-2">
+                {form.color.map((c) => c.charAt(0).toUpperCase() + c.slice(1)).join(', ')}
+              </Text>
+            )}
+          </View>
+
           {/* Tags */}
           <View>
             <Text className="text-text-secondary text-xs font-medium uppercase tracking-wider mb-3">
@@ -257,6 +320,7 @@ export default function PinForm({ pinId }: PinFormProps) {
             ) : (
               <TagPicker
                 tagGroups={tagGroups}
+                standaloneTags={standaloneTags}
                 selectedIds={form.selectedTagIds}
                 onToggle={handleToggleTag}
               />
@@ -284,7 +348,7 @@ export default function PinForm({ pinId }: PinFormProps) {
           {submitting ? (
             <ActivityIndicator color="#0f0f0f" />
           ) : (
-            <Text className="text-surface font-semibold text-base">Guardar pin</Text>
+            <Text className="text-surface font-semibold text-base">Guardar elemento</Text>
           )}
         </TouchableOpacity>
       </View>

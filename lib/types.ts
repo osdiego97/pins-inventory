@@ -1,4 +1,4 @@
-export interface Pin {
+export interface Item {
   id: string;
   user_id: string;
   description: string;
@@ -13,6 +13,8 @@ export interface Pin {
   tags?: Tag[];
   latitude?: number;
   longitude?: number;
+  material?: string;
+  color?: string[];
 }
 
 export interface Tag {
@@ -20,11 +22,12 @@ export interface Tag {
   name: string;
   parent_id?: string;
   parent?: Tag;
+  user_id?: string;
 }
 
-export interface PinTag {
+export interface ItemTag {
   id: string;
-  pin_id: string;
+  item_id: string;
   tag_id: string;
   user_id: string;
 }
@@ -35,4 +38,11 @@ export interface FilterState {
   country: string | null;
   city: string | null;
   year: number | null;
+}
+
+export interface UserSettings {
+  user_id: string;
+  collection_name: string;
+  collection_icon: string | null;
+  theme: 'dark' | 'light' | 'system';
 }

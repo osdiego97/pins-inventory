@@ -1,17 +1,17 @@
 import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
-import { Pin, Tag } from '../lib/types';
+import { Item, Tag } from '../lib/types';
 
-type RawPinTag = {
+type RawItemTag = {
   tags: Tag | null;
 };
 
-type RawPin = Omit<Pin, 'tags'> & {
-  pin_tags: RawPinTag[];
+type RawItem = Omit<Item, 'tags'> & {
+  item_tags: RawItemTag[];
 };
 
 export function usePins() {
-  const [pins, setPins] = useState<Pin[]>([]);
+  const [pins, setPins] = useState<Item[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -24,10 +24,10 @@ export function usePins() {
     setError(null);
 
     const { data, error: fetchError } = await supabase
-      .from('pins')
+      .from('items')
       .select(`
         *,
-        pin_tags (
+        item_tags (
           tags (
             id,
             name,
@@ -38,12 +38,12 @@ export function usePins() {
       .order('collection_number', { ascending: true, nullsFirst: false });
 
     if (fetchError) {
-      setError('No se pudieron cargar los pins.');
+      setError('No se pudieron cargar los elementos.');
       setLoading(false);
       return;
     }
 
-    const mapped: Pin[] = (data as RawPin[]).map((row) => ({
+    const mapped: Item[] = (data as RawItem[]).map((row) => ({
       id: row.id,
       user_id: row.user_id,
       description: row.description,
@@ -57,7 +57,9 @@ export function usePins() {
       created_at: row.created_at,
       latitude: row.latitude,
       longitude: row.longitude,
-      tags: row.pin_tags.map((pt) => pt.tags).filter((t): t is Tag => t !== null),
+      material: row.material,
+      color: row.color,
+      tags: row.item_tags.map((pt) => pt.tags).filter((t): t is Tag => t !== null),
     }));
 
     setPins(mapped);
