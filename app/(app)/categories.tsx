@@ -167,6 +167,50 @@ export default function CategoriesScreen() {
           </View>
         ) : null}
 
+        {/* Subcategorías compartidas */}
+        <View className="mb-4">
+          <View className="flex-row items-center justify-between mb-2">
+            <Text className="text-text-muted text-xs font-medium uppercase tracking-wider">
+              Subcategorías compartidas
+            </Text>
+            <TouchableOpacity
+              onPress={() => { setNewName(''); setCreateModal({ type: 'l2', parentId: null }); }}
+              className="flex-row items-center" style={{ gap: 4 }}
+            >
+              <Ionicons name="add" size={14} color="#a0a0a0" />
+              <Text className="text-text-muted text-xs font-medium">Añadir</Text>
+            </TouchableOpacity>
+          </View>
+          <View className="bg-surface-card rounded-2xl overflow-hidden">
+            {standaloneTags.length === 0 ? (
+              <View className="px-4 py-4">
+                <Text className="text-text-muted text-sm">
+                  Las subcategorías compartidas aparecen bajo todas tus categorías en el selector de etiquetas.
+                </Text>
+              </View>
+            ) : (
+              <>
+                {standaloneTags.map((tag, idx) => (
+                  <View key={tag.id}>
+                    {idx > 0 && <View className="h-px bg-surface-elevated" />}
+                    <View className="px-4 py-3 flex-row items-center justify-between">
+                      <Text className="text-text-secondary text-sm flex-1">{tag.name}</Text>
+                      <View className="flex-row items-center" style={{ gap: 12 }}>
+                        <TouchableOpacity onPress={() => { setRenameValue(tag.name); setRenameModal({ type: 'tag', tag }); }}>
+                          <Ionicons name="pencil-outline" size={14} color="#a0a0a0" />
+                        </TouchableOpacity>
+                        <TouchableOpacity onPress={() => handleDelete(tag)}>
+                          <Ionicons name="trash-outline" size={14} color="#e05c5c" />
+                        </TouchableOpacity>
+                      </View>
+                    </View>
+                  </View>
+                ))}
+              </>
+            )}
+          </View>
+        </View>
+
         {/* L1 groups */}
         {tagGroups.map((group) => (
           <View key={group.category.id} className="mb-4">
