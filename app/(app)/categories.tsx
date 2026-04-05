@@ -265,12 +265,25 @@ export default function CategoriesScreen() {
       >
         <View className="flex-1 items-center justify-center" style={{ backgroundColor: 'rgba(0,0,0,0.6)' }}>
           <View className="bg-surface-card rounded-2xl mx-6 p-6 w-full" style={{ maxWidth: 380 }}>
-            <Text className="text-text-primary text-lg font-semibold mb-4">
-              {createModal.type === 'l1' ? 'Nueva categoría' : 'Nueva subcategoría'}
+            <Text className="text-text-primary text-lg font-semibold mb-3">
+              {createModal.type === 'l1'
+                ? 'Nueva categoría'
+                : createModal.type === 'l2' && createModal.parentId === null
+                  ? 'Nueva subcategoría compartida'
+                  : 'Nueva subcategoría'}
             </Text>
+            {createModal.type === 'l2' && createModal.parentId === null && (
+              <Text className="text-text-muted text-sm mb-4">
+                Aparecerá como opción bajo todas tus categorías. Útil para etiquetas universales como "Edición limitada" o "Vintage".
+              </Text>
+            )}
             <TextInput
               className="bg-surface-elevated rounded-xl px-4 py-3 text-text-primary text-sm mb-4"
-              placeholder="Nombre de la categoría"
+              placeholder={
+                createModal.type === 'l2' && createModal.parentId === null
+                  ? 'Nombre de la subcategoría compartida'
+                  : 'Nombre de la categoría'
+              }
               placeholderTextColor="#606060"
               value={newName}
               onChangeText={setNewName}
