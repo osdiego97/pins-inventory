@@ -24,6 +24,40 @@
 ## Entries
 
 
+### 2026-04-05 Vitrina — generic collectibles platform pivot
+
+**Context:** Oscar's sister wanted to use the app. Forking creates two codebases; the right call is to evolve pins-inventory in place into a generic platform any collector can use. Core constraint: preserving all existing data and functionality while unlocking new users.
+
+**Onboarding gate placement:**
+- Option A: `(app)/_layout.tsx` with `<Redirect>` — causes a re-render loop on Android. Expo Router layouts re-evaluate when routes change, triggering infinite redirects.
+- Option B: `app/index.tsx` (entry point) — checks `user_settings` once on session resolve, uses `<Redirect>` to route to onboarding or collection. Clean, no loop.
+
+**Decision:** Onboarding gate in `app/index.tsx`. Layout files must not contain conditional `<Redirect>` that depends on async state.
+
+**User-scoped tags:**
+- Option A: Keep shared global taxonomy (seeded) — works only for pins. Any new user gets Oscar's category vocabulary.
+- Option B: Add `user_id` to `tags`, each user owns their taxonomy — requires migration + backfill, but unlocks any collection type.
+
+**Decision:** Option B. Tags scoped per user. Migration 03 backfills Oscar's UUID on all existing tags.
+
+**user_settings table:**
+- Presence of a row = onboarding complete. Absence = first login.
+- Stores: `collection_name`, `collection_icon`, `theme`. No boolean flag needed — the row itself is the flag.
+
+**Table rename (pins → items):**
+- "Pins" is collection-specific vocabulary. "Items" is neutral.
+- Migration 01 renames the table, FK column, junction table, and RPC atomically.
+
+**New fields (material, color):**
+- `material text` (nullable, max 50) — universally relevant physical descriptor.
+- `color text[]` (nullable) — multi-select from 10 predefined values. Swatch grid UX over text chips — faster to scan, more visual.
+
+**Rationale:** Evolving in place avoids a split codebase. User-scoped tags is the minimum change that unlocks any new collector. The onboarding pattern (row-as-flag) keeps the schema simple — no boolean field that can get out of sync.
+
+**Trade-off accepted:** Existing Oscar tags required a one-time UUID backfill. All new categories must be created via the app — no seeded vocabulary for new users.
+
+---
+
 ### 2026-03-28 Map view — architecture and key decisions
 
 **Context:** Building the map feature (user story: see pins plotted on a world map). Multiple connected decisions: how coordinates are stored, how they're set on each pin, which map library to use, filter behaviour, and marker design.
