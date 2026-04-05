@@ -100,7 +100,6 @@ export default function OnboardingScreen() {
                 setError(null);
               }}
               maxLength={50}
-              autoFocus
             />
             {error ? (
               <Text className="text-danger text-xs mt-1">{error}</Text>

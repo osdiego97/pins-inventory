@@ -148,7 +148,7 @@ export default function CategoriesScreen() {
           className="flex-row items-center bg-accent rounded-xl px-3 py-2" style={{ gap: 6 }}
         >
           <Ionicons name="add" size={16} color="#0f0f0f" />
-          <Text className="text-surface text-sm font-semibold">Nueva L1</Text>
+          <Text className="text-surface text-sm font-semibold">Nueva Categoría</Text>
         </TouchableOpacity>
       </View>
 
@@ -264,7 +264,7 @@ export default function CategoriesScreen() {
         <View className="flex-1 items-center justify-center" style={{ backgroundColor: 'rgba(0,0,0,0.6)' }}>
           <View className="bg-surface-card rounded-2xl mx-6 p-6 w-full" style={{ maxWidth: 380 }}>
             <Text className="text-text-primary text-lg font-semibold mb-4">
-              {createModal.type === 'l1' ? 'Nueva categoría L1' : 'Nueva subcategoría L2'}
+              {createModal.type === 'l1' ? 'Nueva categoría' : 'Nueva subcategoría'}
             </Text>
             <TextInput
               className="bg-surface-elevated rounded-xl px-4 py-3 text-text-primary text-sm mb-4"
