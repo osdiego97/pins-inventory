@@ -53,10 +53,12 @@ export default function CategoriesScreen() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { setSaving(false); return; }
 
-    const payload: { name: string; parent_id: string | null; user_id: string } = {
+    const isShared = createModal.type === 'l2' && createModal.parentId === null;
+    const payload: { name: string; parent_id: string | null; user_id: string; is_shared: boolean } = {
       name,
       parent_id: createModal.type === 'l2' ? createModal.parentId : null,
       user_id: user.id,
+      is_shared: isShared,
     };
 
     const { error } = await supabase.from('tags').insert(payload);

@@ -23,6 +23,7 @@ export interface Tag {
   parent_id?: string;
   parent?: Tag;
   user_id?: string;
+  is_shared?: boolean;
 }
 
 export interface ItemTag {

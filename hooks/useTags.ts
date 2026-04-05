@@ -27,7 +27,7 @@ export function useTags() {
 
     const { data, error } = await supabase
       .from('tags')
-      .select('id, name, parent_id, user_id')
+      .select('id, name, parent_id, user_id, is_shared')
       .eq('user_id', user.id)
       .order('name', { ascending: true });
 
@@ -37,9 +37,9 @@ export function useTags() {
     }
 
     const all = data as Tag[];
-    const l1Tags = all.filter((t) => !t.parent_id);
-    const l2WithParent = all.filter((t) => !!t.parent_id && l1Tags.some((l) => l.id === t.parent_id));
-    const standaloneL2 = all.filter((t) => !!t.parent_id && !l1Tags.some((l) => l.id === t.parent_id));
+    const l1Tags = all.filter((t) => !t.parent_id && !t.is_shared);
+    const l2WithParent = all.filter((t) => !!t.parent_id);
+    const standaloneL2 = all.filter((t) => !t.parent_id && !!t.is_shared);
 
     const groups: TagGroup[] = l1Tags.map((cat) => ({
       category: cat,
