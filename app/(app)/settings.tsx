@@ -186,21 +186,34 @@ export default function SettingsScreen() {
           Tema
         </Text>
         <View className="bg-surface-card rounded-2xl overflow-hidden mb-6">
-          {THEME_OPTIONS.map((option, idx) => (
-            <TouchableOpacity
-              key={option.value}
-              onPress={() => handleThemeSelect(option.value)}
-              className="px-4 py-4 flex-row items-center justify-between"
-            >
-              <Text className="text-text-primary text-base">{option.label}</Text>
-              {currentTheme === option.value && (
-                <Ionicons name="checkmark" size={18} color="#e8c97e" />
-              )}
-              {idx < THEME_OPTIONS.length - 1 && (
-                <View className="absolute bottom-0 left-4 right-4 h-px bg-surface-elevated" />
-              )}
-            </TouchableOpacity>
-          ))}
+          {THEME_OPTIONS.map((option, idx) => {
+            const isAvailable = option.value === 'dark';
+            return (
+              <TouchableOpacity
+                key={option.value}
+                onPress={() => isAvailable && handleThemeSelect(option.value)}
+                activeOpacity={isAvailable ? 0.7 : 1}
+                className="px-4 py-4 flex-row items-center justify-between"
+              >
+                <Text className={`text-base ${isAvailable ? 'text-text-primary' : 'text-text-muted'}`}>
+                  {option.label}
+                </Text>
+                <View className="flex-row items-center" style={{ gap: 8 }}>
+                  {!isAvailable && (
+                    <View className="bg-surface-elevated rounded-full px-2 py-0.5">
+                      <Text className="text-text-muted text-xs">Próximamente</Text>
+                    </View>
+                  )}
+                  {isAvailable && currentTheme === option.value && (
+                    <Ionicons name="checkmark" size={18} color="#e8c97e" />
+                  )}
+                </View>
+                {idx < THEME_OPTIONS.length - 1 && (
+                  <View className="absolute bottom-0 left-4 right-4 h-px bg-surface-elevated" />
+                )}
+              </TouchableOpacity>
+            );
+          })}
         </View>
 
         {/* Sign out */}
