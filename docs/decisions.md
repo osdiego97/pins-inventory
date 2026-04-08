@@ -24,6 +24,38 @@
 ## Entries
 
 
+### 2026-04-08 L1 icon storage — tag record vs static map
+
+**Context:** Adding a user-facing icon picker for L1 categories. Icons were previously hardcoded in `lib/tagIcons.ts` (a name → Ionicons/FontAwesome6 map). Needed to decide where to store user-selected icons.
+
+**Options considered:**
+  - Extend `TAG_ICONS` static map: no schema change, but requires a code deploy every time a user wants a new icon — defeats the purpose
+  - Store icon name on the `tags` row (`icon text` column): one migration, fully dynamic, user can change icons without any code change
+
+**Decision:** Store as `icon text` (nullable) on the `tags` table (migration 06).
+
+**Rationale:** Users managing their own categories need to assign icons without a code deploy. The static `TAG_ICONS` map remains as a fallback for legacy categories that predate the feature. `TagIcon` component checks `tagIcon` prop first, falls back to `TAG_ICONS` by name — backward compatible with zero data migration.
+
+**Trade-off accepted:** Icons are limited to the 32 Ionicons names offered in the picker. FontAwesome6 icons (used by some legacy categories) can't be chosen by users — acceptable since the picker is intentionally curated.
+
+---
+
+### 2026-04-08 Shared subcategory selection model
+
+**Context:** Shared subcategories (`is_shared = true`, no `parent_id`) are displayed under every L1 group in the tag picker as a convenience. Since all copies share the same `tag_id`, selecting one caused all copies to highlight simultaneously — wrong UX.
+
+**Options considered:**
+  - Change data model: create a separate tag record per L1 instance — solves the identity problem but changes how shared tags work semantically
+  - Visual scoping with context: keep the flat data model, scope the active state to `selectedIds.includes(tag.id) && selectedIds.includes(L1.id)`, pass `parentId` through `onToggle` so selection auto-picks the parent L1
+
+**Decision:** Visual scoping with context (no data model change).
+
+**Rationale:** The flat model is correct — a shared tag is one entity. The bug was in the display logic, not the schema. Passing `parentId` through `onToggle` gives L2-equivalent behaviour (auto-select parent, deselect parent if no siblings remain) without any DB change.
+
+**Trade-off accepted:** If a user selects the same shared tag under both L1-A and L1-B, deselecting it from L1-A removes the tag entirely. Acceptable edge case — the common usage is selecting the tag once under one L1.
+
+---
+
 ### 2026-04-05 Vitrina — generic collectibles platform pivot
 
 **Context:** Oscar's sister wanted to use the app. Forking creates two codebases; the right call is to evolve pins-inventory in place into a generic platform any collector can use. Core constraint: preserving all existing data and functionality while unlocking new users.

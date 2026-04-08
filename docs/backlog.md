@@ -10,10 +10,6 @@
 - **iOS support** — Expo already targets iOS. Requires Mac + Apple developer account for distribution. Natural follow-on after Android MVP is stable.
 - **Web version** — React Native Web via Expo. No blocker — magic link auth already supports cross-device access.
 
-## Tags
-
-- **Add new tags from the app** — tag list is hardcoded/seeded for MVP. Allow users to create new tags from within the app in a future iteration.
-
 ## Pin Form
 
 - **Camera support for pin photos** — allow taking a photo directly from the camera when adding/editing a pin, in addition to picking from the gallery. `expo-image-picker` already supports this via `launchCameraAsync` — low effort to add.
@@ -25,7 +21,7 @@
 
 ## UI
 
-- **Icons for L2 tags** — L1 categories already have icons. Extend the icon system to L2 subcategories, prioritising: Escudo de Ciudad, Escudo de País, Bandera de País, Religión, Club, Selección. Requires mapping each L2 to an icon — FontAwesome6 likely has better coverage for the more specific ones (shields, flags, religious symbols).
+- **Icons for L2 tags** — L1 categories now have a user-facing icon picker (PR #14). Extend to L2 subcategories if useful — though L2s are typically text labels and icons may add noise rather than clarity. Worth revisiting once the category taxonomy matures.
 - **Pin badges / special icons on cards** — show small contextual icons on pin cards based on attributes: gift (e.g. gift icon), Hard Rock category (e.g. music note or HR logo), premium/rare pins, and other user-defined special statuses. Requires deciding whether these map to existing fields (tags, is_commemorative) or need new schema fields (e.g. `is_gift`, `is_rare`). Design decision needed before implementation.
 - **Light mode / dark mode switch** — dark mode is the MVP default. Add an in-app toggle to switch between dark and light mode in a future iteration.
 - **Sortable collection** — add a sort selector to switch between collection number order, alphabetical by description, and by country. Natural follow-on once the collection grows and browsing by name becomes useful.
