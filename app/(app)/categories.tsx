@@ -85,10 +85,11 @@ export default function CategoriesScreen() {
     const name = renameValue.trim();
     if (!name) return;
 
+    const isL1 = !renameModal.tag.parent_id && !renameModal.tag.is_shared;
     setSaving(true);
     const { error } = await supabase
       .from('tags')
-      .update({ name })
+      .update({ name, ...(isL1 && { icon: selectedIcon }) })
       .eq('id', renameModal.tag.id);
     setSaving(false);
 
@@ -222,7 +223,7 @@ export default function CategoriesScreen() {
                   <Text className="text-text-muted text-xs">{group.subcategories.length} subcats</Text>
                 </View>
                 <View className="flex-row items-center" style={{ gap: 12 }}>
-                  <TouchableOpacity onPress={() => { setRenameValue(group.category.name); setRenameModal({ type: 'tag', tag: group.category }); }}>
+                  <TouchableOpacity onPress={() => { setRenameValue(group.category.name); setSelectedIcon(group.category.icon ?? 'star-outline'); setRenameModal({ type: 'tag', tag: group.category }); }}>
                     <Ionicons name="pencil-outline" size={16} color="#a0a0a0" />
                   </TouchableOpacity>
                   <TouchableOpacity onPress={() => handleDelete(group.category)}>
@@ -352,7 +353,29 @@ export default function CategoriesScreen() {
       >
         <View className="flex-1 items-center justify-center" style={{ backgroundColor: 'rgba(0,0,0,0.6)' }}>
           <View className="bg-surface-card rounded-2xl mx-6 p-6 w-full" style={{ maxWidth: 380 }}>
-            <Text className="text-text-primary text-lg font-semibold mb-4">Renombrar</Text>
+            <Text className="text-text-primary text-lg font-semibold mb-4">Editar categoría</Text>
+            {renameModal.type === 'tag' && !renameModal.tag.parent_id && !renameModal.tag.is_shared && (
+              <View className="mb-4">
+                <Text className="text-text-muted text-xs font-medium uppercase tracking-wider mb-2">Icono</Text>
+                <View className="flex-row flex-wrap" style={{ gap: 8 }}>
+                  {L1_ICONS.map((iconName) => (
+                    <TouchableOpacity
+                      key={iconName}
+                      onPress={() => setSelectedIcon(iconName)}
+                      className={`w-10 h-10 rounded-xl items-center justify-center ${
+                        selectedIcon === iconName ? 'bg-accent' : 'bg-surface-elevated'
+                      }`}
+                    >
+                      <Ionicons
+                        name={iconName as any}
+                        size={20}
+                        color={selectedIcon === iconName ? '#0f0f0f' : '#a0a0a0'}
+                      />
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </View>
+            )}
             <TextInput
               className="bg-surface-elevated rounded-xl px-4 py-3 text-text-primary text-sm mb-4"
               value={renameValue}
