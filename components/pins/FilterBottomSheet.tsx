@@ -186,10 +186,6 @@ function FilterBottomSheet({
 
   const { l1, l2, country, city, year } = draft;
 
-  const pinsForTags = useMemo(
-    () => applyFilters(pins, search, [], [], country, city, year),
-    [pins, search, country, city, year]
-  );
   const pinsForCountry = useMemo(
     () => applyFilters(pins, search, l1, l2, null, city, year),
     [pins, search, l1, l2, city, year]
@@ -203,30 +199,12 @@ function FilterBottomSheet({
     [pins, search, l1, l2, country, city]
   );
 
-  const availableL1Names = useMemo(() => {
-    const set = new Set<string>();
-    pinsForTags.forEach((p) =>
-      (p.tags ?? []).filter((t) => !t.parent_id).forEach((t) => set.add(t.name))
-    );
-    return set;
-  }, [pinsForTags]);
+  const availableTagGroups = tagGroups;
 
-  const availableL2Names = useMemo(() => {
-    const set = new Set<string>();
-    pinsForTags.forEach((p) =>
-      (p.tags ?? []).filter((t) => t.parent_id).forEach((t) => set.add(t.name))
-    );
-    return set;
-  }, [pinsForTags]);
-
-  const availableTagGroups = useMemo(
-    () => tagGroups.filter((g) => availableL1Names.has(g.category.name)),
-    [tagGroups, availableL1Names]
+  const subcategories = useMemo(
+    () => tagGroups.flatMap((g) => g.subcategories),
+    [tagGroups]
   );
-
-  const subcategories = useMemo(() => {
-    return tagGroups.flatMap((g) => g.subcategories).filter((s) => availableL2Names.has(s.name));
-  }, [tagGroups, availableL2Names]);
 
   const distinctCountries = useMemo(() => {
     const set = new Set(pinsForCountry.map((p) => p.country).filter(Boolean) as string[]);
