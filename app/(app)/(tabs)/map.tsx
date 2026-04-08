@@ -11,7 +11,7 @@ import { FilterState, Item } from '../../../lib/types';
 import FilterBottomSheet from '../../../components/pins/FilterBottomSheet';
 import TagIcon from '../../../components/ui/TagIcon';
 
-const EMPTY_FILTERS: FilterState = { l1: [], l2: [], country: null, city: null, year: null };
+const EMPTY_FILTERS: FilterState = { l1: [], l2: [], country: null, city: null, year: null, material: [], color: [] };
 
 // Persists across navigations (module-level, survives component unmount)
 let savedRegion: Region | null = null;
@@ -40,7 +40,7 @@ interface PinGroup {
 }
 
 function applyFilters(pins: Item[], filters: FilterState): Item[] {
-  const { l1, l2, country, city, year } = filters;
+  const { l1, l2, country, city, year, material, color } = filters;
   let result = pins;
   const selectedTags = [...l1, ...l2];
   if (selectedTags.length > 0) {
@@ -49,6 +49,8 @@ function applyFilters(pins: Item[], filters: FilterState): Item[] {
   if (country) result = result.filter((p) => p.country === country);
   if (city) result = result.filter((p) => p.city === city);
   if (year) result = result.filter((p) => p.acquired_year === year);
+  if (material.length > 0) result = result.filter((p) => p.material && material.includes(p.material));
+  if (color.length > 0) result = result.filter((p) => (p.color ?? []).some((c) => color.includes(c)));
   return result;
 }
 
@@ -172,6 +174,7 @@ export default function MapScreen() {
   const activeFilterCount = [
     filters.l1.length > 0, filters.l2.length > 0,
     filters.country, filters.city, filters.year,
+    filters.material.length > 0, filters.color.length > 0,
   ].filter(Boolean).length;
 
   const isFiltering = activeFilterCount > 0;

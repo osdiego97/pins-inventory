@@ -7,7 +7,7 @@ interface TagPickerProps {
   tagGroups: TagGroup[];
   standaloneTags?: Tag[];
   selectedIds: string[];
-  onToggle: (tagId: string) => void;
+  onToggle: (tagId: string, parentId?: string) => void;
 }
 
 export default function TagPicker({ tagGroups, standaloneTags = [], selectedIds, onToggle }: TagPickerProps) {
@@ -36,6 +36,7 @@ export default function TagPicker({ tagGroups, standaloneTags = [], selectedIds,
           >
             <TagIcon
               tagName={category.name}
+              tagIcon={category.icon}
               size={13}
               color={selectedIds.includes(category.id) ? '#0f0f0f' : '#f5f5f5'}
             />
@@ -67,23 +68,29 @@ export default function TagPicker({ tagGroups, standaloneTags = [], selectedIds,
                   </Text>
                 </TouchableOpacity>
               ))}
-              {standaloneTags.map((tag) => (
-                <TouchableOpacity
-                  key={tag.id}
-                  onPress={() => onToggle(tag.id)}
-                  className={`rounded-full px-3 py-1.5 ${
-                    selectedIds.includes(tag.id) ? 'bg-accent-muted' : 'bg-surface-card'
-                  }`}
-                >
-                  <Text
-                    className={`text-sm ${
-                      selectedIds.includes(tag.id) ? 'text-surface' : 'text-text-secondary'
+              {standaloneTags.map((tag) => {
+                // A shared tag appears selected under this L1 only if both the tag
+                // and this L1 are selected — prevents all copies lighting up at once
+                const selectedInThisContext =
+                  selectedIds.includes(tag.id) && selectedIds.includes(category.id);
+                return (
+                  <TouchableOpacity
+                    key={tag.id}
+                    onPress={() => onToggle(tag.id, category.id)}
+                    className={`rounded-full px-3 py-1.5 ${
+                      selectedInThisContext ? 'bg-accent-muted' : 'bg-surface-card'
                     }`}
                   >
-                    {tag.name}
-                  </Text>
-                </TouchableOpacity>
-              ))}
+                    <Text
+                      className={`text-sm ${
+                        selectedInThisContext ? 'text-surface' : 'text-text-secondary'
+                      }`}
+                    >
+                      {tag.name}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
             </View>
           )}
         </View>
