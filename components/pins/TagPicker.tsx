@@ -36,6 +36,7 @@ export default function TagPicker({ tagGroups, standaloneTags = [], selectedIds,
           >
             <TagIcon
               tagName={category.name}
+              tagIcon={category.icon}
               size={13}
               color={selectedIds.includes(category.id) ? '#0f0f0f' : '#f5f5f5'}
             />

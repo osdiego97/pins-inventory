@@ -370,9 +370,10 @@ function FilterBottomSheet({
                     active={l1.includes(g.category.name)}
                     onPress={() => setL1(g.category.name)}
                     icon={
-                      TAG_ICONS[g.category.name] ? (
+                      (g.category.icon || TAG_ICONS[g.category.name]) ? (
                         <TagIcon
                           tagName={g.category.name}
+                          tagIcon={g.category.icon}
                           size={12}
                           color={l1.includes(g.category.name) ? '#0f0f0f' : '#909090'}
                         />

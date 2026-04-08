@@ -22,6 +22,10 @@ const L1_ICONS = [
   'musical-notes-outline', 'camera-outline', 'car-outline', 'leaf-outline',
   'planet-outline', 'paw-outline', 'trophy-outline', 'book-outline',
   'diamond-outline', 'cube-outline', 'shirt-outline', 'hammer-outline',
+  'globe-outline', 'film-outline', 'pricetag-outline', 'shapes-outline',
+  'rocket-outline', 'bicycle-outline', 'airplane-outline', 'train-outline',
+  'pizza-outline', 'wine-outline', 'basketball-outline', 'tennisball-outline',
+  'game-controller-outline', 'brush-outline', 'color-palette-outline', 'code-slash-outline',
 ] as const;
 
 type CreateModalState =
@@ -54,11 +58,12 @@ export default function CategoriesScreen() {
     if (!user) { setSaving(false); return; }
 
     const isShared = createModal.type === 'l2' && createModal.parentId === null;
-    const payload: { name: string; parent_id: string | null; user_id: string; is_shared: boolean } = {
+    const payload: { name: string; parent_id: string | null; user_id: string; is_shared: boolean; icon: string | null } = {
       name,
       parent_id: createModal.type === 'l2' ? createModal.parentId : null,
       user_id: user.id,
       is_shared: isShared,
+      icon: createModal.type === 'l1' ? selectedIcon : null,
     };
 
     const { error } = await supabase.from('tags').insert(payload);
@@ -70,6 +75,7 @@ export default function CategoriesScreen() {
     }
 
     setNewName('');
+    setSelectedIcon('star-outline');
     setCreateModal({ type: null });
     refetch();
   }
@@ -146,7 +152,7 @@ export default function CategoriesScreen() {
         </TouchableOpacity>
         <Text className="text-text-primary text-lg font-semibold flex-1">Categorías</Text>
         <TouchableOpacity
-          onPress={() => { setNewName(''); setCreateModal({ type: 'l1' }); }}
+          onPress={() => { setNewName(''); setSelectedIcon('star-outline'); setCreateModal({ type: 'l1' }); }}
           className="flex-row items-center bg-accent rounded-xl px-3 py-2" style={{ gap: 6 }}
         >
           <Ionicons name="add" size={16} color="#0f0f0f" />
@@ -211,7 +217,7 @@ export default function CategoriesScreen() {
             <View className="bg-surface-card rounded-2xl overflow-hidden">
               <View className="px-4 py-3 flex-row items-center justify-between">
                 <View className="flex-row items-center flex-1" style={{ gap: 10 }}>
-                  <TagIcon tagName={group.category.name} size={16} color="#a0a0a0" />
+                  <TagIcon tagName={group.category.name} tagIcon={group.category.icon} size={16} color="#a0a0a0" />
                   <Text className="text-text-primary text-base font-semibold">{group.category.name}</Text>
                   <Text className="text-text-muted text-xs">{group.subcategories.length} subcats</Text>
                 </View>
@@ -278,6 +284,28 @@ export default function CategoriesScreen() {
               <Text className="text-text-muted text-sm mb-4">
                 Aparecerá como opción bajo todas tus categorías. Útil para etiquetas universales como "Edición limitada" o "Vintage".
               </Text>
+            )}
+            {createModal.type === 'l1' && (
+              <View className="mb-4">
+                <Text className="text-text-muted text-xs font-medium uppercase tracking-wider mb-2">Icono</Text>
+                <View className="flex-row flex-wrap" style={{ gap: 8 }}>
+                  {L1_ICONS.map((iconName) => (
+                    <TouchableOpacity
+                      key={iconName}
+                      onPress={() => setSelectedIcon(iconName)}
+                      className={`w-10 h-10 rounded-xl items-center justify-center ${
+                        selectedIcon === iconName ? 'bg-accent' : 'bg-surface-elevated'
+                      }`}
+                    >
+                      <Ionicons
+                        name={iconName as any}
+                        size={20}
+                        color={selectedIcon === iconName ? '#0f0f0f' : '#a0a0a0'}
+                      />
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </View>
             )}
             <TextInput
               className="bg-surface-elevated rounded-xl px-4 py-3 text-text-primary text-sm mb-4"

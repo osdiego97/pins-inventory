@@ -34,7 +34,8 @@ export function usePinDetail(id: string | string[] | undefined) {
           tags (
             id,
             name,
-            parent_id
+            parent_id,
+            icon
           )
         )
       `)

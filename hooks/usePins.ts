@@ -31,7 +31,8 @@ export function usePins() {
           tags (
             id,
             name,
-            parent_id
+            parent_id,
+            icon
           )
         )
       `)

@@ -27,7 +27,7 @@ export function useTags() {
 
     const { data, error } = await supabase
       .from('tags')
-      .select('id, name, parent_id, user_id, is_shared')
+      .select('id, name, parent_id, user_id, is_shared, icon')
       .eq('user_id', user.id)
       .order('name', { ascending: true });
 

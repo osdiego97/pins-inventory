@@ -24,6 +24,7 @@ export interface Tag {
   parent?: Tag;
   user_id?: string;
   is_shared?: boolean;
+  icon?: string | null;
 }
 
 export interface ItemTag {
