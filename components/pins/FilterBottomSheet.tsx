@@ -15,7 +15,7 @@ import TagIcon from '../ui/TagIcon';
 import { normalize } from '../../lib/utils';
 import { TAG_ICONS } from '../../lib/tagIcons';
 import { TagGroup } from '../../hooks/useTags';
-import { FilterState, Pin } from '../../lib/types';
+import { FilterState, Item, Tag } from '../../lib/types';
 
 const EMPTY_FILTERS: FilterState = { l1: [], l2: [], country: null, city: null, year: null };
 
@@ -24,20 +24,21 @@ interface Props {
   filters: FilterState;
   onFiltersChange: (filters: FilterState) => void;
   onClose: () => void;
-  pins: Pin[];
+  pins: Item[];
   tagGroups: TagGroup[];
+  standaloneTags?: Tag[];
   search: string;
 }
 
 function applyFilters(
-  pins: Pin[],
+  pins: Item[],
   search: string,
   l1: string[],
   l2: string[],
   country: string | null,
   city: string | null,
   year: number | null
-): Pin[] {
+): Item[] {
   let result = pins;
 
   if (search.trim()) {
@@ -135,6 +136,7 @@ function FilterBottomSheet({
   onClose,
   pins,
   tagGroups,
+  standaloneTags = [],
   search,
 }: Props) {
   const insets = useSafeAreaInsets();

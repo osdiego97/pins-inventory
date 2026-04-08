@@ -48,3 +48,4 @@
 ## V2 Direction — Multi-collection platform
 
 - **Support multiple collection types** — extend the app to host collections beyond pins (e.g. thimbles, stamps, coins). This is a meaningful architectural pivot: the current schema is pins-specific (geographic fields, `is_commemorative`, tag taxonomy). Doing this right requires a flexible schema per collection type (or a generic schema with custom fields), multi-collection management per user, per-collection taxonomies, and likely a rebrand. **Do not bolt onto the MVP schema — design from scratch when the time comes.**
+- [ ] Light mode (v2): define light color tokens in tailwind.config.js, add dark: class variants to all components, wire useColorScheme to user_settings.theme

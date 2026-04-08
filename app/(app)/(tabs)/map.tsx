@@ -7,7 +7,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { usePins } from '../../../hooks/usePins';
 import { useTags } from '../../../hooks/useTags';
-import { FilterState, Pin } from '../../../lib/types';
+import { FilterState, Item } from '../../../lib/types';
 import FilterBottomSheet from '../../../components/pins/FilterBottomSheet';
 import TagIcon from '../../../components/ui/TagIcon';
 
@@ -36,10 +36,10 @@ interface PinGroup {
   key: string;
   latitude: number;
   longitude: number;
-  pins: Pin[];
+  pins: Item[];
 }
 
-function applyFilters(pins: Pin[], filters: FilterState): Pin[] {
+function applyFilters(pins: Item[], filters: FilterState): Item[] {
   const { l1, l2, country, city, year } = filters;
   let result = pins;
   const selectedTags = [...l1, ...l2];
@@ -52,7 +52,7 @@ function applyFilters(pins: Pin[], filters: FilterState): Pin[] {
   return result;
 }
 
-function groupByLocation(pins: Pin[]): PinGroup[] {
+function groupByLocation(pins: Item[]): PinGroup[] {
   const map = new Map<string, PinGroup>();
   pins.forEach((pin) => {
     const key = `${pin.latitude},${pin.longitude}`;
@@ -102,7 +102,7 @@ const styles = StyleSheet.create({
 
 export default function MapScreen() {
   const { pins, loading, refetch } = usePins();
-  const { tagGroups } = useTags();
+  const { tagGroups, standaloneTags } = useTags();
   const [filters, setFilters] = useState<FilterState>(EMPTY_FILTERS);
   const [filterSheetVisible, setFilterSheetVisible] = useState(false);
   const [selectedGroup, setSelectedGroup] = useState<PinGroup | null>(null);
@@ -329,7 +329,7 @@ export default function MapScreen() {
       {selectedGroup && (
         <Animated.View style={[styles.calloutBox, { position: 'absolute', left: animLeft, bottom: animBottom, elevation: 10, zIndex: 10 }]}>
           <Text style={{ fontSize: 11, color: '#606060', fontWeight: '600', marginBottom: 6 }}>
-            {selectedGroup.pins.length} pins aquí
+            {selectedGroup.pins.length} elementos aquí
           </Text>
           <ScrollView
             style={{ maxHeight: MAX_LIST_H }}
@@ -375,8 +375,8 @@ export default function MapScreen() {
           {!loading && (
             <Text className="text-text-primary text-sm font-semibold">
               {isFiltering
-                ? `${filteredPins.length} de ${geocodedPins.length} pins`
-                : `${geocodedPins.length} pins`}
+                ? `${filteredPins.length} de ${geocodedPins.length} elementos`
+                : `${geocodedPins.length} elementos`}
             </Text>
           )}
         </View>
@@ -425,6 +425,7 @@ export default function MapScreen() {
         onClose={() => setFilterSheetVisible(false)}
         pins={pins}
         tagGroups={tagGroups}
+        standaloneTags={standaloneTags}
         search=""
       />
     </View>

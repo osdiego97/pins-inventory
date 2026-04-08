@@ -17,7 +17,7 @@ export default function LoginScreen() {
     const { error } = await supabase.auth.signInWithOtp({
       email: trimmed,
       options: {
-        shouldCreateUser: false,
+        shouldCreateUser: true,
         emailRedirectTo: 'pins-inventory://',
       },
     });
@@ -52,7 +52,7 @@ export default function LoginScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <View className="flex-1 items-center justify-center px-8">
-        <Text className="text-text-primary text-3xl font-bold mb-2">Pins</Text>
+        <Text className="text-text-primary text-3xl font-bold mb-2">Vitrina</Text>
         <Text className="text-text-secondary text-base mb-12">Tu colección, siempre contigo</Text>
 
         <View className="w-full mb-4">

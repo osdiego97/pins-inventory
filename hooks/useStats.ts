@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Pin } from '../lib/types';
+import { Item } from '../lib/types';
 
 export interface L2Stat {
   name: string;
@@ -53,7 +53,7 @@ export interface CollectionStats {
   completeness: Completeness;
 }
 
-export function useStats(pins: Pin[]): CollectionStats {
+export function useStats(pins: Item[]): CollectionStats {
   return useMemo(() => {
     const totalPins = pins.length;
     const totalCountries = new Set(pins.map((p) => p.country).filter(Boolean)).size;
