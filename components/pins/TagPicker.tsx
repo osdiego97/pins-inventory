@@ -7,7 +7,7 @@ interface TagPickerProps {
   tagGroups: TagGroup[];
   standaloneTags?: Tag[];
   selectedIds: string[];
-  onToggle: (tagId: string) => void;
+  onToggle: (tagId: string, parentId?: string) => void;
 }
 
 export default function TagPicker({ tagGroups, standaloneTags = [], selectedIds, onToggle }: TagPickerProps) {
@@ -48,7 +48,7 @@ export default function TagPicker({ tagGroups, standaloneTags = [], selectedIds,
             </Text>
           </TouchableOpacity>
 
-          {subcategories.length > 0 && (
+          {(subcategories.length > 0 || standaloneTags.length > 0) && (
             <View className="flex-row flex-wrap pl-2" style={{ gap: 8 }}>
               {subcategories.map((sub) => (
                 <TouchableOpacity
@@ -67,13 +67,36 @@ export default function TagPicker({ tagGroups, standaloneTags = [], selectedIds,
                   </Text>
                 </TouchableOpacity>
               ))}
+              {standaloneTags.map((tag) => {
+                // A shared tag appears selected under this L1 only if both the tag
+                // and this L1 are selected — prevents all copies lighting up at once
+                const selectedInThisContext =
+                  selectedIds.includes(tag.id) && selectedIds.includes(category.id);
+                return (
+                  <TouchableOpacity
+                    key={tag.id}
+                    onPress={() => onToggle(tag.id, category.id)}
+                    className={`rounded-full px-3 py-1.5 ${
+                      selectedInThisContext ? 'bg-accent-muted' : 'bg-surface-card'
+                    }`}
+                  >
+                    <Text
+                      className={`text-sm ${
+                        selectedInThisContext ? 'text-surface' : 'text-text-secondary'
+                      }`}
+                    >
+                      {tag.name}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
             </View>
           )}
         </View>
       ))}
 
-      {/* Shared subcategories — always shown in their own section */}
-      {standaloneTags.length > 0 && (
+      {/* Shared subcategories shown standalone when there are no L1 groups */}
+      {tagGroups.length === 0 && standaloneTags.length > 0 && (
         <View>
           <Text className="text-text-muted text-xs font-medium uppercase tracking-wider mb-2">
             Subcategorías compartidas

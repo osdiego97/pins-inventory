@@ -37,7 +37,7 @@ export default function PinForm({ pinId }: PinFormProps) {
   } = usePinForm(pinId);
   const { tagGroups, standaloneTags, loading: tagsLoading } = useTags();
 
-  function handleToggleTag(tagId: string) {
+  function handleToggleTag(tagId: string, parentId?: string) {
     const l1Group = tagGroups.find((g) => g.category.id === tagId);
     const l2Group = tagGroups.find((g) => g.subcategories.some((s) => s.id === tagId));
     const isStandalone = standaloneTags.some((t) => t.id === tagId);
@@ -51,21 +51,37 @@ export default function PinForm({ pinId }: PinFormProps) {
         newIds = [...newIds, tagId];
       }
     } else if (l2Group) {
-      const parentId = l2Group.category.id;
+      const resolvedParentId = l2Group.category.id;
       if (newIds.includes(tagId)) {
         const remainingSiblings = l2Group.subcategories.filter(
           (s) => s.id !== tagId && newIds.includes(s.id)
         );
         newIds = newIds.filter((id) => id !== tagId);
         if (remainingSiblings.length === 0) {
+          newIds = newIds.filter((id) => id !== resolvedParentId);
+        }
+      } else {
+        if (!newIds.includes(resolvedParentId)) newIds = [...newIds, resolvedParentId];
+        newIds = [...newIds, tagId];
+      }
+    } else if (isStandalone && parentId) {
+      // Shared subcategory tapped in context of a specific L1:
+      // behaves like a regular L2 — auto-selects/deselects the parent L1
+      const alreadySelected = newIds.includes(tagId) && newIds.includes(parentId);
+      if (alreadySelected) {
+        newIds = newIds.filter((id) => id !== tagId);
+        // Only deselect the L1 if no regular L2s of that group remain selected
+        const l1Group2 = tagGroups.find((g) => g.category.id === parentId);
+        const remainingSiblings = (l1Group2?.subcategories ?? []).filter((s) => newIds.includes(s.id));
+        if (remainingSiblings.length === 0) {
           newIds = newIds.filter((id) => id !== parentId);
         }
       } else {
         if (!newIds.includes(parentId)) newIds = [...newIds, parentId];
-        newIds = [...newIds, tagId];
+        if (!newIds.includes(tagId)) newIds = [...newIds, tagId];
       }
     } else if (isStandalone) {
-      // Standalone L2: simple toggle, no parent side-effect
+      // Standalone L2 with no L1 context: simple toggle
       newIds = newIds.includes(tagId)
         ? newIds.filter((id) => id !== tagId)
         : [...newIds, tagId];
