@@ -521,11 +521,20 @@ function FilterBottomSheet({
                         width: 10,
                         height: 10,
                         borderRadius: 5,
-                        backgroundColor: opt.hex === 'rainbow' ? '#9b5de5' : opt.hex,
+                        overflow: 'hidden',
                         borderWidth: opt.value === 'blanco' ? 1 : 0,
                         borderColor: '#606060',
+                        ...(opt.hex !== 'rainbow' && { backgroundColor: opt.hex }),
                       }}
-                    />
+                    >
+                      {opt.hex === 'rainbow' && (
+                        <View style={{ flex: 1, flexDirection: 'row' }}>
+                          {['#e05c5c', '#e8874f', '#e8c97e', '#5ce07a', '#5c8de0', '#9b5de5'].map((c, i) => (
+                            <View key={i} style={{ flex: 1, backgroundColor: c }} />
+                          ))}
+                        </View>
+                      )}
+                    </View>
                   }
                 />
               ))}

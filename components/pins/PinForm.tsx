@@ -290,7 +290,7 @@ export default function PinForm({ pinId }: PinFormProps) {
             <View className="flex-row flex-wrap" style={{ gap: 10 }}>
               {COLOR_OPTIONS.map((opt) => {
                 const selected = form.color.includes(opt.value);
-                const isRainbow = opt.value === 'arcoiris';
+                const isRainbow = opt.hex === 'rainbow';
                 return (
                   <TouchableOpacity
                     key={opt.value}
