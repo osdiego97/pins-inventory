@@ -279,74 +279,80 @@ export default function CategoriesScreen() {
           style={{ flex: 1 }}
         >
           <View className="flex-1 items-center justify-center" style={{ backgroundColor: 'rgba(0,0,0,0.6)' }}>
-          <View className="bg-surface-card rounded-2xl mx-6 p-6 w-full" style={{ maxWidth: 380 }}>
-            <Text className="text-text-primary text-lg font-semibold mb-3">
-              {createModal.type === 'l1'
-                ? 'Nueva categoría'
-                : createModal.type === 'l2' && createModal.parentId === null
-                  ? 'Nueva subcategoría compartida'
-                  : 'Nueva subcategoría'}
-            </Text>
-            {createModal.type === 'l2' && createModal.parentId === null && (
-              <Text className="text-text-muted text-sm mb-4">
-                Aparecerá como opción bajo todas tus categorías. Útil para etiquetas universales como "Edición limitada" o "Vintage".
-              </Text>
-            )}
-            {createModal.type === 'l1' && (
-              <View className="mb-4">
-                <Text className="text-text-muted text-xs font-medium uppercase tracking-wider mb-2">Icono</Text>
-                <View className="flex-row flex-wrap" style={{ gap: 8 }}>
-                  {L1_ICONS.map((iconName) => (
-                    <TouchableOpacity
-                      key={iconName}
-                      onPress={() => setSelectedIcon(iconName)}
-                      className={`w-10 h-10 rounded-xl items-center justify-center ${
-                        selectedIcon === iconName ? 'bg-accent' : 'bg-surface-elevated'
-                      }`}
-                    >
-                      <Ionicons
-                        name={iconName as any}
-                        size={20}
-                        color={selectedIcon === iconName ? '#0f0f0f' : '#a0a0a0'}
-                      />
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              </View>
-            )}
-            <TextInput
-              className="bg-surface-elevated rounded-xl px-4 py-3 text-text-primary text-sm mb-4"
-              placeholder={
-                createModal.type === 'l2' && createModal.parentId === null
-                  ? 'Nombre de la subcategoría compartida'
-                  : 'Nombre de la categoría'
-              }
-              placeholderTextColor="#606060"
-              value={newName}
-              onChangeText={setNewName}
-              autoFocus
-              maxLength={50}
-            />
-            <View className="flex-row" style={{ gap: 10 }}>
-              <TouchableOpacity
-                onPress={() => setCreateModal({ type: null })}
-                className="flex-1 bg-surface-elevated rounded-xl py-3 items-center"
+            <View className="bg-surface-card rounded-2xl mx-6 w-full" style={{ maxWidth: 380, maxHeight: '85%' }}>
+              <ScrollView
+                contentContainerStyle={{ padding: 24 }}
+                showsVerticalScrollIndicator={false}
+                keyboardShouldPersistTaps="handled"
               >
-                <Text className="text-text-secondary text-sm font-medium">Cancelar</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={handleCreateTag}
-                disabled={saving || !newName.trim()}
-                className={`flex-1 rounded-xl py-3 items-center ${saving || !newName.trim() ? 'bg-accent-muted' : 'bg-accent'}`}
-              >
-                {saving ? (
-                  <ActivityIndicator color="#0f0f0f" size="small" />
-                ) : (
-                  <Text className="text-surface text-sm font-semibold">Crear</Text>
+                <Text className="text-text-primary text-lg font-semibold mb-3">
+                  {createModal.type === 'l1'
+                    ? 'Nueva categoría'
+                    : createModal.type === 'l2' && createModal.parentId === null
+                      ? 'Nueva subcategoría compartida'
+                      : 'Nueva subcategoría'}
+                </Text>
+                {createModal.type === 'l2' && createModal.parentId === null && (
+                  <Text className="text-text-muted text-sm mb-4">
+                    Aparecerá como opción bajo todas tus categorías. Útil para etiquetas universales como "Edición limitada" o "Vintage".
+                  </Text>
                 )}
-              </TouchableOpacity>
+                {createModal.type === 'l1' && (
+                  <View className="mb-4">
+                    <Text className="text-text-muted text-xs font-medium uppercase tracking-wider mb-2">Icono</Text>
+                    <View className="flex-row flex-wrap" style={{ gap: 8 }}>
+                      {L1_ICONS.map((iconName) => (
+                        <TouchableOpacity
+                          key={iconName}
+                          onPress={() => setSelectedIcon(iconName)}
+                          className={`w-10 h-10 rounded-xl items-center justify-center ${
+                            selectedIcon === iconName ? 'bg-accent' : 'bg-surface-elevated'
+                          }`}
+                        >
+                          <Ionicons
+                            name={iconName as any}
+                            size={20}
+                            color={selectedIcon === iconName ? '#0f0f0f' : '#a0a0a0'}
+                          />
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+                  </View>
+                )}
+                <TextInput
+                  className="bg-surface-elevated rounded-xl px-4 py-3 text-text-primary text-sm mb-4"
+                  placeholder={
+                    createModal.type === 'l2' && createModal.parentId === null
+                      ? 'Nombre de la subcategoría compartida'
+                      : 'Nombre de la categoría'
+                  }
+                  placeholderTextColor="#606060"
+                  value={newName}
+                  onChangeText={setNewName}
+                  autoFocus
+                  maxLength={50}
+                />
+                <View className="flex-row" style={{ gap: 10 }}>
+                  <TouchableOpacity
+                    onPress={() => setCreateModal({ type: null })}
+                    className="flex-1 bg-surface-elevated rounded-xl py-3 items-center"
+                  >
+                    <Text className="text-text-secondary text-sm font-medium">Cancelar</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={handleCreateTag}
+                    disabled={saving || !newName.trim()}
+                    className={`flex-1 rounded-xl py-3 items-center ${saving || !newName.trim() ? 'bg-accent-muted' : 'bg-accent'}`}
+                  >
+                    {saving ? (
+                      <ActivityIndicator color="#0f0f0f" size="small" />
+                    ) : (
+                      <Text className="text-surface text-sm font-semibold">Crear</Text>
+                    )}
+                  </TouchableOpacity>
+                </View>
+              </ScrollView>
             </View>
-          </View>
           </View>
         </KeyboardAvoidingView>
       </Modal>
@@ -363,58 +369,64 @@ export default function CategoriesScreen() {
           style={{ flex: 1 }}
         >
           <View className="flex-1 items-center justify-center" style={{ backgroundColor: 'rgba(0,0,0,0.6)' }}>
-          <View className="bg-surface-card rounded-2xl mx-6 p-6 w-full" style={{ maxWidth: 380 }}>
-            <Text className="text-text-primary text-lg font-semibold mb-4">Editar categoría</Text>
-            {renameModal.type === 'tag' && !renameModal.tag.parent_id && !renameModal.tag.is_shared && (
-              <View className="mb-4">
-                <Text className="text-text-muted text-xs font-medium uppercase tracking-wider mb-2">Icono</Text>
-                <View className="flex-row flex-wrap" style={{ gap: 8 }}>
-                  {L1_ICONS.map((iconName) => (
-                    <TouchableOpacity
-                      key={iconName}
-                      onPress={() => setSelectedIcon(iconName)}
-                      className={`w-10 h-10 rounded-xl items-center justify-center ${
-                        selectedIcon === iconName ? 'bg-accent' : 'bg-surface-elevated'
-                      }`}
-                    >
-                      <Ionicons
-                        name={iconName as any}
-                        size={20}
-                        color={selectedIcon === iconName ? '#0f0f0f' : '#a0a0a0'}
-                      />
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              </View>
-            )}
-            <TextInput
-              className="bg-surface-elevated rounded-xl px-4 py-3 text-text-primary text-sm mb-4"
-              value={renameValue}
-              onChangeText={setRenameValue}
-              autoFocus
-              maxLength={50}
-              selectTextOnFocus
-            />
-            <View className="flex-row" style={{ gap: 10 }}>
-              <TouchableOpacity
-                onPress={() => setRenameModal({ type: null })}
-                className="flex-1 bg-surface-elevated rounded-xl py-3 items-center"
+            <View className="bg-surface-card rounded-2xl mx-6 w-full" style={{ maxWidth: 380, maxHeight: '85%' }}>
+              <ScrollView
+                contentContainerStyle={{ padding: 24 }}
+                showsVerticalScrollIndicator={false}
+                keyboardShouldPersistTaps="handled"
               >
-                <Text className="text-text-secondary text-sm font-medium">Cancelar</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={handleRename}
-                disabled={saving || !renameValue.trim()}
-                className={`flex-1 rounded-xl py-3 items-center ${saving || !renameValue.trim() ? 'bg-accent-muted' : 'bg-accent'}`}
-              >
-                {saving ? (
-                  <ActivityIndicator color="#0f0f0f" size="small" />
-                ) : (
-                  <Text className="text-surface text-sm font-semibold">Guardar</Text>
+                <Text className="text-text-primary text-lg font-semibold mb-4">Editar categoría</Text>
+                {renameModal.type === 'tag' && !renameModal.tag.parent_id && !renameModal.tag.is_shared && (
+                  <View className="mb-4">
+                    <Text className="text-text-muted text-xs font-medium uppercase tracking-wider mb-2">Icono</Text>
+                    <View className="flex-row flex-wrap" style={{ gap: 8 }}>
+                      {L1_ICONS.map((iconName) => (
+                        <TouchableOpacity
+                          key={iconName}
+                          onPress={() => setSelectedIcon(iconName)}
+                          className={`w-10 h-10 rounded-xl items-center justify-center ${
+                            selectedIcon === iconName ? 'bg-accent' : 'bg-surface-elevated'
+                          }`}
+                        >
+                          <Ionicons
+                            name={iconName as any}
+                            size={20}
+                            color={selectedIcon === iconName ? '#0f0f0f' : '#a0a0a0'}
+                          />
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+                  </View>
                 )}
-              </TouchableOpacity>
+                <TextInput
+                  className="bg-surface-elevated rounded-xl px-4 py-3 text-text-primary text-sm mb-4"
+                  value={renameValue}
+                  onChangeText={setRenameValue}
+                  autoFocus
+                  maxLength={50}
+                  selectTextOnFocus
+                />
+                <View className="flex-row" style={{ gap: 10 }}>
+                  <TouchableOpacity
+                    onPress={() => setRenameModal({ type: null })}
+                    className="flex-1 bg-surface-elevated rounded-xl py-3 items-center"
+                  >
+                    <Text className="text-text-secondary text-sm font-medium">Cancelar</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={handleRename}
+                    disabled={saving || !renameValue.trim()}
+                    className={`flex-1 rounded-xl py-3 items-center ${saving || !renameValue.trim() ? 'bg-accent-muted' : 'bg-accent'}`}
+                  >
+                    {saving ? (
+                      <ActivityIndicator color="#0f0f0f" size="small" />
+                    ) : (
+                      <Text className="text-surface text-sm font-semibold">Guardar</Text>
+                    )}
+                  </TouchableOpacity>
+                </View>
+              </ScrollView>
             </View>
-          </View>
           </View>
         </KeyboardAvoidingView>
       </Modal>
