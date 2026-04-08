@@ -48,7 +48,7 @@ export default function TagPicker({ tagGroups, standaloneTags = [], selectedIds,
             </Text>
           </TouchableOpacity>
 
-          {(subcategories.length > 0 || standaloneTags.length > 0) && (
+          {subcategories.length > 0 && (
             <View className="flex-row flex-wrap pl-2" style={{ gap: 8 }}>
               {subcategories.map((sub) => (
                 <TouchableOpacity
@@ -67,30 +67,13 @@ export default function TagPicker({ tagGroups, standaloneTags = [], selectedIds,
                   </Text>
                 </TouchableOpacity>
               ))}
-              {standaloneTags.map((tag) => (
-                <TouchableOpacity
-                  key={tag.id}
-                  onPress={() => onToggle(tag.id)}
-                  className={`rounded-full px-3 py-1.5 ${
-                    selectedIds.includes(tag.id) ? 'bg-accent-muted' : 'bg-surface-card'
-                  }`}
-                >
-                  <Text
-                    className={`text-sm ${
-                      selectedIds.includes(tag.id) ? 'text-surface' : 'text-text-secondary'
-                    }`}
-                  >
-                    {tag.name}
-                  </Text>
-                </TouchableOpacity>
-              ))}
             </View>
           )}
         </View>
       ))}
 
-      {/* Shared subcategories shown standalone when there are no L1 groups */}
-      {tagGroups.length === 0 && standaloneTags.length > 0 && (
+      {/* Shared subcategories — always shown in their own section */}
+      {standaloneTags.length > 0 && (
         <View>
           <Text className="text-text-muted text-xs font-medium uppercase tracking-wider mb-2">
             Subcategorías compartidas
