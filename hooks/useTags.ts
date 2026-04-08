@@ -31,7 +31,12 @@ export function useTags() {
       .eq('user_id', user.id)
       .order('name', { ascending: true });
 
-    if (error || !data) {
+    if (error) {
+      console.error('[useTags]', error.message);
+      setLoading(false);
+      return;
+    }
+    if (!data) {
       setLoading(false);
       return;
     }
