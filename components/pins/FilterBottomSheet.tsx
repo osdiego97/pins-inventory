@@ -364,7 +364,7 @@ function FilterBottomSheet({
             </Section>
           )}
 
-          {subcategories.length > 0 && (
+          {(subcategories.length > 0 || standaloneTags.length > 0) && (
             <Section title="Subcategoría">
               <ScrollView
                 horizontal
@@ -377,6 +377,14 @@ function FilterBottomSheet({
                     label={sub.name}
                     active={l2.includes(sub.name)}
                     onPress={() => setL2(sub.name)}
+                  />
+                ))}
+                {standaloneTags.map((tag) => (
+                  <Chip
+                    key={tag.id}
+                    label={tag.name}
+                    active={l2.includes(tag.name)}
+                    onPress={() => setL2(tag.name)}
                   />
                 ))}
               </ScrollView>
