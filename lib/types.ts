@@ -39,6 +39,8 @@ export interface FilterState {
   country: string | null;
   city: string | null;
   year: number | null;
+  material: string[];
+  color: string[];
 }
 
 export interface UserSettings {

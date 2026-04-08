@@ -16,8 +16,9 @@ import { normalize } from '../../lib/utils';
 import { TAG_ICONS } from '../../lib/tagIcons';
 import { TagGroup } from '../../hooks/useTags';
 import { FilterState, Item, Tag } from '../../lib/types';
+import { COLOR_OPTIONS } from '../../hooks/usePinForm';
 
-const EMPTY_FILTERS: FilterState = { l1: [], l2: [], country: null, city: null, year: null };
+const EMPTY_FILTERS: FilterState = { l1: [], l2: [], country: null, city: null, year: null, material: [], color: [] };
 
 interface Props {
   visible: boolean;
@@ -37,7 +38,9 @@ function applyFilters(
   l2: string[],
   country: string | null,
   city: string | null,
-  year: number | null
+  year: number | null,
+  material: string[] = [],
+  color: string[] = []
 ): Item[] {
   let result = pins;
 
@@ -61,6 +64,8 @@ function applyFilters(
   if (country) result = result.filter((p) => p.country === country);
   if (city) result = result.filter((p) => p.city === city);
   if (year) result = result.filter((p) => p.acquired_year === year);
+  if (material.length > 0) result = result.filter((p) => p.material && material.includes(p.material));
+  if (color.length > 0) result = result.filter((p) => (p.color ?? []).some((c) => color.includes(c)));
 
   return result;
 }
@@ -184,19 +189,19 @@ function FilterBottomSheet({
     }
   }, [visible]);
 
-  const { l1, l2, country, city, year } = draft;
+  const { l1, l2, country, city, year, material, color } = draft;
 
   const pinsForCountry = useMemo(
-    () => applyFilters(pins, search, l1, l2, null, city, year),
-    [pins, search, l1, l2, city, year]
+    () => applyFilters(pins, search, l1, l2, null, city, year, material, color),
+    [pins, search, l1, l2, city, year, material, color]
   );
   const pinsForCity = useMemo(
-    () => applyFilters(pins, search, l1, l2, country, null, year),
-    [pins, search, l1, l2, country, year]
+    () => applyFilters(pins, search, l1, l2, country, null, year, material, color),
+    [pins, search, l1, l2, country, year, material, color]
   );
   const pinsForYear = useMemo(
-    () => applyFilters(pins, search, l1, l2, country, city, null),
-    [pins, search, l1, l2, country, city]
+    () => applyFilters(pins, search, l1, l2, country, city, null, material, color),
+    [pins, search, l1, l2, country, city, material, color]
   );
 
   const availableTagGroups = tagGroups;
@@ -238,7 +243,12 @@ function FilterBottomSheet({
     return distinctCities.filter((c) => normalize(c).includes(q));
   }, [distinctCities, cityInput]);
 
-  const activeCount = [l1.length > 0, l2.length > 0, country, city, year].filter(Boolean).length;
+  const distinctMaterials = useMemo(() => {
+    const set = new Set(pins.map((p) => p.material).filter(Boolean) as string[]);
+    return [...set].sort();
+  }, [pins]);
+
+  const activeCount = [l1.length > 0, l2.length > 0, country, city, year, material.length > 0, color.length > 0].filter(Boolean).length;
 
   function setL1(name: string) {
     const newL1 = l1.includes(name) ? l1.filter((n) => n !== name) : [...l1, name];
@@ -256,6 +266,16 @@ function FilterBottomSheet({
       }
     }
     updateDraft({ ...draft, l1: newL1, l2: newL2 });
+  }
+
+  function toggleMaterial(value: string) {
+    const next = material.includes(value) ? material.filter((m) => m !== value) : [...material, value];
+    updateDraft({ ...draft, material: next });
+  }
+
+  function toggleColor(value: string) {
+    const next = color.includes(value) ? color.filter((c) => c !== value) : [...color, value];
+    updateDraft({ ...draft, color: next });
   }
 
   function selectCountry(value: string) {
@@ -463,6 +483,54 @@ function FilterBottomSheet({
               </ScrollView>
             </Section>
           )}
+
+          {distinctMaterials.length > 0 && (
+            <Section title="Material">
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={{ paddingHorizontal: 16, gap: 8 }}
+              >
+                {distinctMaterials.map((m) => (
+                  <Chip
+                    key={m}
+                    label={m}
+                    active={material.includes(m)}
+                    onPress={() => toggleMaterial(m)}
+                  />
+                ))}
+              </ScrollView>
+            </Section>
+          )}
+
+          <Section title="Color">
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={{ paddingHorizontal: 16, gap: 8 }}
+            >
+              {COLOR_OPTIONS.map((opt) => (
+                <Chip
+                  key={opt.value}
+                  label={opt.label}
+                  active={color.includes(opt.value)}
+                  onPress={() => toggleColor(opt.value)}
+                  icon={
+                    <View
+                      style={{
+                        width: 10,
+                        height: 10,
+                        borderRadius: 5,
+                        backgroundColor: opt.hex === 'rainbow' ? '#9b5de5' : opt.hex,
+                        borderWidth: opt.value === 'blanco' ? 1 : 0,
+                        borderColor: '#606060',
+                      }}
+                    />
+                  }
+                />
+              ))}
+            </ScrollView>
+          </Section>
         </ScrollView>
       </Animated.View>
     </View>

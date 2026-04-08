@@ -19,7 +19,7 @@ import { FilterState } from '../../../lib/types';
 import PinCard from '../../../components/pins/PinCard';
 import FilterBottomSheet from '../../../components/pins/FilterBottomSheet';
 
-const EMPTY_FILTERS: FilterState = { l1: [], l2: [], country: null, city: null, year: null };
+const EMPTY_FILTERS: FilterState = { l1: [], l2: [], country: null, city: null, year: null, material: [], color: [] };
 
 export default function CollectionScreen() {
   const { pins, loading, error, refetch } = usePins();
@@ -37,7 +37,7 @@ export default function CollectionScreen() {
     }, [])
   );
 
-  const { l1, l2, country, city, year } = filters;
+  const { l1, l2, country, city, year, material, color } = filters;
 
   const filtered = useMemo(() => {
     let result = pins;
@@ -64,11 +64,13 @@ export default function CollectionScreen() {
     if (country) result = result.filter((p) => p.country === country);
     if (city) result = result.filter((p) => p.city === city);
     if (year) result = result.filter((p) => p.acquired_year === year);
+    if (material.length > 0) result = result.filter((p) => p.material && material.includes(p.material));
+    if (color.length > 0) result = result.filter((p) => (p.color ?? []).some((c) => color.includes(c)));
 
     return result;
-  }, [pins, search, l1, l2, country, city, year]);
+  }, [pins, search, l1, l2, country, city, year, material, color]);
 
-  const activeFilterCount = [l1.length > 0, l2.length > 0, country, city, year].filter(Boolean).length;
+  const activeFilterCount = [l1.length > 0, l2.length > 0, country, city, year, material.length > 0, color.length > 0].filter(Boolean).length;
 
   const isFiltering = search.trim().length > 0 || activeFilterCount > 0;
 
