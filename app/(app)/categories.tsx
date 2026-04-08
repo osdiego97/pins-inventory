@@ -8,6 +8,8 @@ import {
   ActivityIndicator,
   Alert,
   Modal,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -272,7 +274,11 @@ export default function CategoriesScreen() {
         animationType="fade"
         onRequestClose={() => setCreateModal({ type: null })}
       >
-        <View className="flex-1 items-center justify-center" style={{ backgroundColor: 'rgba(0,0,0,0.6)' }}>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={{ flex: 1 }}
+        >
+          <View className="flex-1 items-center justify-center" style={{ backgroundColor: 'rgba(0,0,0,0.6)' }}>
           <View className="bg-surface-card rounded-2xl mx-6 p-6 w-full" style={{ maxWidth: 380 }}>
             <Text className="text-text-primary text-lg font-semibold mb-3">
               {createModal.type === 'l1'
@@ -341,7 +347,8 @@ export default function CategoriesScreen() {
               </TouchableOpacity>
             </View>
           </View>
-        </View>
+          </View>
+        </KeyboardAvoidingView>
       </Modal>
 
       {/* Rename modal */}
@@ -351,7 +358,11 @@ export default function CategoriesScreen() {
         animationType="fade"
         onRequestClose={() => setRenameModal({ type: null })}
       >
-        <View className="flex-1 items-center justify-center" style={{ backgroundColor: 'rgba(0,0,0,0.6)' }}>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={{ flex: 1 }}
+        >
+          <View className="flex-1 items-center justify-center" style={{ backgroundColor: 'rgba(0,0,0,0.6)' }}>
           <View className="bg-surface-card rounded-2xl mx-6 p-6 w-full" style={{ maxWidth: 380 }}>
             <Text className="text-text-primary text-lg font-semibold mb-4">Editar categoría</Text>
             {renameModal.type === 'tag' && !renameModal.tag.parent_id && !renameModal.tag.is_shared && (
@@ -404,7 +415,8 @@ export default function CategoriesScreen() {
               </TouchableOpacity>
             </View>
           </View>
-        </View>
+          </View>
+        </KeyboardAvoidingView>
       </Modal>
     </View>
   );
