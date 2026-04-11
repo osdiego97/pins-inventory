@@ -16,7 +16,7 @@ export default function EditPinScreen() {
           <TouchableOpacity onPress={() => router.back()} className="mr-3">
             <Ionicons name="close" size={24} color="#f5f5f5" />
           </TouchableOpacity>
-          <Text className="text-text-primary text-lg font-semibold">Editar pin</Text>
+          <Text className="text-text-primary text-lg font-semibold">Editar elemento</Text>
         </View>
         <PinForm pinId={id} />
       </View>

@@ -24,7 +24,7 @@ export default function SummaryCards({ stats }: Props) {
   return (
     <View className="px-4 gap-3">
       <View className="flex-row gap-3">
-        <StatCard value={String(stats.totalPins)} label="Pins" />
+        <StatCard value={String(stats.totalPins)} label="Elementos" />
         <StatCard value={String(stats.totalCountries)} label="Países" />
       </View>
       <View className="flex-row gap-3">

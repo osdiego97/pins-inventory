@@ -405,7 +405,7 @@ export default function MapScreen() {
           <View className="bg-surface-elevated rounded-2xl px-6 py-5 items-center">
             <Ionicons name="earth-outline" size={32} color="#606060" />
             <Text className="text-text-secondary text-sm text-center mt-3">
-              Ningún pin tiene ubicación todavía.{'\n'}Edita un pin para añadir su posición en el mapa.
+              Ningún elemento tiene ubicación todavía.{'\n'}Edita un elemento para añadir su posición en el mapa.
             </Text>
           </View>
         </View>
@@ -415,7 +415,7 @@ export default function MapScreen() {
         <View className="absolute inset-0 items-center justify-center px-8 pointer-events-none">
           <View className="bg-surface-elevated rounded-2xl px-6 py-5 items-center">
             <Text className="text-text-secondary text-sm text-center">
-              No hay pins con ubicación para estos filtros.
+              No hay elementos con ubicación para estos filtros.
             </Text>
           </View>
         </View>
