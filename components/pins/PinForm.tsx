@@ -12,6 +12,8 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { router, useFocusEffect } from 'expo-router';
+import { useCallback } from 'react';
 import { usePinForm, COLOR_OPTIONS } from '../../hooks/usePinForm';
 import { useTags } from '../../hooks/useTags';
 import TagPicker from './TagPicker';
@@ -35,7 +37,9 @@ export default function PinForm({ pinId }: PinFormProps) {
     submitError,
     previewImageUri,
   } = usePinForm(pinId);
-  const { tagGroups, standaloneTags, loading: tagsLoading } = useTags();
+  const { tagGroups, standaloneTags, loading: tagsLoading, refetch: refetchTags } = useTags();
+
+  useFocusEffect(useCallback(() => { refetchTags(); }, []));
 
   function handleToggleTag(tagId: string, parentId?: string) {
     const l1Group = tagGroups.find((g) => g.category.id === tagId);
@@ -337,11 +341,20 @@ export default function PinForm({ pinId }: PinFormProps) {
 
           {/* Tags */}
           <View>
-            <Text className="text-text-secondary text-xs font-medium uppercase tracking-wider mb-3">
-              Etiquetas
-            </Text>
+            <View className="flex-row items-center justify-between mb-3">
+              <Text className="text-text-secondary text-xs font-medium uppercase tracking-wider">
+                Etiquetas
+              </Text>
+              <TouchableOpacity onPress={() => router.push('/(app)/categories' as any)}>
+                <Text className="text-accent text-xs">Gestionar →</Text>
+              </TouchableOpacity>
+            </View>
             {tagsLoading ? (
               <ActivityIndicator color="#e8c97e" size="small" />
+            ) : tagGroups.length === 0 && standaloneTags.length === 0 ? (
+              <Text className="text-text-muted text-sm">
+                Aún no tienes categorías. Créalas desde Gestionar.
+              </Text>
             ) : (
               <TagPicker
                 tagGroups={tagGroups}
