@@ -8,6 +8,8 @@ import {
   Pressable,
   TextInput,
   InteractionManager,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -323,8 +325,9 @@ function FilterBottomSheet({
   if (!isRendered) return null;
 
   return (
-    <View
+    <KeyboardAvoidingView
       style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       pointerEvents={visible ? 'box-none' : 'none'}
     >
       {/* Backdrop — only interactive and visible when sheet is open */}
@@ -338,9 +341,11 @@ function FilterBottomSheet({
         onPress={onClose}
       />
 
+      {/* Sheet — sits at bottom of flex container; KAV shrinks it up when keyboard shows */}
+      <View style={{ flex: 1, justifyContent: 'flex-end' }} pointerEvents="box-none">
       <Animated.View
         style={[{ transform: [{ translateY: slideAnim }], paddingBottom: insets.bottom + 16 }]}
-        className="absolute bottom-0 left-0 right-0 bg-surface-elevated rounded-t-2xl"
+        className="bg-surface-elevated rounded-t-2xl"
       >
         <View className="items-center pt-3 pb-1">
           <View className="w-10 h-1 rounded-full bg-surface-card" />
@@ -543,7 +548,8 @@ function FilterBottomSheet({
           </Section>
         </ScrollView>
       </Animated.View>
-    </View>
+      </View>
+    </KeyboardAvoidingView>
   );
 }
 

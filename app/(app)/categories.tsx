@@ -171,7 +171,7 @@ export default function CategoriesScreen() {
           <View className="flex-1 items-center justify-center py-16">
             <Ionicons name="pricetags-outline" size={40} color="#606060" />
             <Text className="text-text-secondary text-base mt-4 text-center">
-              Aún no tienes categorías.{'\n'}Crea una L1 para empezar.
+              Aún no tienes categorías.{'\n'}Crea una categoría para empezar.
             </Text>
           </View>
         ) : null}

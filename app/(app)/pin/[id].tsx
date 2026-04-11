@@ -59,7 +59,7 @@ export default function PinDetailScreen() {
         ) : error || !pin ? (
           <View className="flex-1 items-center justify-center px-8">
             <Text className="text-text-secondary text-center">
-              {error ?? 'No se encontró el pin.'}
+              {error ?? 'No se encontró el elemento.'}
             </Text>
           </View>
         ) : (

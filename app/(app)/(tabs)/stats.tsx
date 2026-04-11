@@ -61,7 +61,7 @@ export default function StatsScreen() {
     return (
       <View className="flex-1 bg-surface items-center justify-center px-8">
         <Text className="text-text-secondary text-center">
-          Añade tu primer pin para ver estadísticas.
+          Añade tu primer elemento para ver estadísticas.
         </Text>
       </View>
     );

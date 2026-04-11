@@ -15,7 +15,7 @@ export default function NewPinScreen() {
           <TouchableOpacity onPress={() => router.back()} className="mr-3">
             <Ionicons name="close" size={24} color="#f5f5f5" />
           </TouchableOpacity>
-          <Text className="text-text-primary text-lg font-semibold">Nuevo pin</Text>
+          <Text className="text-text-primary text-lg font-semibold">Nuevo elemento</Text>
         </View>
         <PinForm />
       </View>

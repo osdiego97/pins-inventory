@@ -92,7 +92,7 @@ export default function OnboardingScreen() {
               className={`bg-surface-card rounded-xl px-4 py-3 text-text-primary text-base ${
                 error ? 'border border-danger' : ''
               }`}
-              placeholder="Ej. Mis Pins de Viaje"
+              placeholder="Ej. Mi Colección de Viaje"
               placeholderTextColor="#606060"
               value={collectionName}
               onChangeText={(v) => {

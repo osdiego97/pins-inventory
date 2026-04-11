@@ -24,16 +24,18 @@ const EMPTY_FILTERS: FilterState = { l1: [], l2: [], country: null, city: null, 
 export default function CollectionScreen() {
   const { pins, loading, error, refetch } = usePins();
   const { confirmDelete } = usePinDelete(refetch);
-  const { tagGroups, standaloneTags } = useTags();
+  const { tagGroups, standaloneTags, refetch: refetchTags } = useTags();
   const { settings } = useUserSettings();
   const [search, setSearch] = useState('');
   const [filters, setFilters] = useState<FilterState>(EMPTY_FILTERS);
   const [filterSheetVisible, setFilterSheetVisible] = useState(false);
+  const [showFilterHint, setShowFilterHint] = useState(false);
   const insets = useSafeAreaInsets();
 
   useFocusEffect(
     useCallback(() => {
       refetch();
+      refetchTags();
     }, [])
   );
 
@@ -132,7 +134,14 @@ export default function CollectionScreen() {
         </View>
 
         <TouchableOpacity
-          onPress={() => setFilterSheetVisible(true)}
+          onPress={() => {
+            if (pins.length === 0) {
+              setShowFilterHint(true);
+              setTimeout(() => setShowFilterHint(false), 2500);
+            } else {
+              setFilterSheetVisible(true);
+            }
+          }}
           className={`flex-row items-center px-3 py-3 rounded-xl gap-1.5 ${
             activeFilterCount > 0 ? 'bg-accent' : 'bg-surface-card'
           }`}
@@ -147,6 +156,11 @@ export default function CollectionScreen() {
           )}
         </TouchableOpacity>
       </View>
+      {showFilterHint && (
+        <Text className="text-text-muted text-xs mx-4 mb-2">
+          Añade elementos a tu colección para poder filtrar.
+        </Text>
+      )}
 
       {/* Content */}
       {loading && pins.length === 0 ? (
