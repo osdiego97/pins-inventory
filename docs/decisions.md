@@ -23,6 +23,22 @@
 
 ## Entries
 
+### 2026-04-11 KeyboardAvoidingView for filter bottom sheet
+
+**Context:** The filter sheet's País/Ciudad search inputs were hidden behind the keyboard when opened, making real-time suggestions unusable. The sheet used `position: absolute, bottom: 0` so it didn't respond to the keyboard.
+
+**Options considered:**
+  - Track keyboard height manually via `Keyboard` listeners and animate `marginBottom`: works but requires `useNativeDriver: false`, conflicting with the existing native-driven `translateY` slide animation
+  - Wrap with `KeyboardAvoidingView` + convert sheet from absolute to flex-end child: sheet stays in normal flow, KAV handles the upward shift natively on both iOS and Android
+
+**Decision:** `KeyboardAvoidingView` with `behavior="padding"` (iOS) / `behavior="height"` (Android) wrapping the full-screen overlay. Sheet changed from `absolute bottom-0` to `justifyContent: flex-end` child.
+
+**Rationale:** Avoids fighting the native driver. No additional state or listeners needed. The existing `translateY` slide animation is unaffected since it operates on the sheet element, not the container.
+
+**Trade-off accepted:** `KeyboardAvoidingView` behaviour can be inconsistent on some Android devices depending on `windowSoftInputMode`. Acceptable for the current Android-only scope.
+
+---
+
 
 ### 2026-04-08 L1 icon storage — tag record vs static map
 

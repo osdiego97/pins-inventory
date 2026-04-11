@@ -12,6 +12,7 @@
 
 ## Pin Form
 
+- **Country flag emoji in pin form** — show a flag emoji prefix in the country field as the user types, derived from a Spanish name → ISO code mapping. Pure Unicode, no native deps. Attempted in 2026-04-11 session but broke the app (likely a TS/syntax error in the mapping file) — needs a clean retry with proper testing before committing.
 - **Camera support for pin photos** — allow taking a photo directly from the camera when adding/editing a pin, in addition to picking from the gallery. `expo-image-picker` already supports this via `launchCameraAsync` — low effort to add.
 - **Auto-populate location from device GPS** — pre-fill country and city fields based on the device's current location using `expo-location` + reverse geocoding. Useful when adding a pin on the spot. Requires location permission request.
 
