@@ -104,7 +104,7 @@ const styles = StyleSheet.create({
 
 export default function MapScreen() {
   const { pins, loading, refetch } = usePins();
-  const { tagGroups, standaloneTags } = useTags();
+  const { tagGroups, standaloneTags, refetch: refetchTags } = useTags();
   const [filters, setFilters] = useState<FilterState>(EMPTY_FILTERS);
   const [filterSheetVisible, setFilterSheetVisible] = useState(false);
   const [selectedGroup, setSelectedGroup] = useState<PinGroup | null>(null);
@@ -155,6 +155,7 @@ export default function MapScreen() {
 
   useFocusEffect(useCallback(() => {
     refetch();
+    refetchTags();
     setTracksViewChanges(true);
     setMarkerEpoch((e) => e + 1);
     if (savedRegion) mapRef.current?.animateToRegion(savedRegion, 0);

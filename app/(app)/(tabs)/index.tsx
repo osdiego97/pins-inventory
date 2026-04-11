@@ -24,7 +24,7 @@ const EMPTY_FILTERS: FilterState = { l1: [], l2: [], country: null, city: null, 
 export default function CollectionScreen() {
   const { pins, loading, error, refetch } = usePins();
   const { confirmDelete } = usePinDelete(refetch);
-  const { tagGroups, standaloneTags } = useTags();
+  const { tagGroups, standaloneTags, refetch: refetchTags } = useTags();
   const { settings } = useUserSettings();
   const [search, setSearch] = useState('');
   const [filters, setFilters] = useState<FilterState>(EMPTY_FILTERS);
@@ -34,6 +34,7 @@ export default function CollectionScreen() {
   useFocusEffect(
     useCallback(() => {
       refetch();
+      refetchTags();
     }, [])
   );
 
