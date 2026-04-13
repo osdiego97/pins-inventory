@@ -23,6 +23,24 @@
 
 ## Entries
 
+### 2026-04-13 Color modes — CSS variable injection over NativeWind colorScheme.set()
+
+**Context:** Adding user-controlled light/dark/system theme switching. The feature needed to work across both NativeWind className-based styles (`bg-surface`, `text-text-primary`) and inline `style` props used for icon tints and placeholders — without refactoring every component.
+
+**Options considered:**
+  - `colorScheme.set('light' | 'dark' | 'system')` from NativeWind: Globally controls the `dark:` prefix behaviour. Requires every component to define both light and dark class variants (e.g. `bg-white dark:bg-surface`) — a full codebase refactor across 20+ components.
+  - CSS variable injection via `vars()` from NativeWind: Define all color tokens as CSS vars in `tailwind.config.js`. `global.css` sets dark values as `:root` defaults. `ThemeProvider` injects `DARK_VARS` or `LIGHT_VARS` at a root View. Both className and inline style consumers respond through a single mechanism.
+
+**Decision:** CSS variable injection via `vars()`. All color tokens in `tailwind.config.js` point to `var(--color-*)`. `ThemeContext` additionally provides typed JS color values via `useThemeColors()` for cases where a raw string is needed (icon tints, `placeholderTextColor`, `borderColor` in inline styles).
+
+**Rationale:** CSS vars handle both NativeWind className and inline style consumers without modifying existing components. `colorScheme.set()` would have required `dark:` variants throughout the codebase — significant churn for no architectural gain.
+
+**Critical constraint discovered:** `react-native-css-interop` marks a component for remount if CSS variables are added after the initial render (`SHOULD_UPGRADE` state). `DARK_VARS` and `LIGHT_VARS` must both be defined at module level, and `ThemeProvider` must always pass one of them to its wrapper View — never `undefined`. Applying `vars()` conditionally (only in light mode) causes a crash on the first theme switch.
+
+**Trade-off accepted:** All components that use raw color values (icon tints, placeholders) must call `useThemeColors()`. Components using only NativeWind className tokens need no changes.
+
+---
+
 ### 2026-04-11 KeyboardAvoidingView for filter bottom sheet
 
 **Context:** The filter sheet's País/Ciudad search inputs were hidden behind the keyboard when opened, making real-time suggestions unusable. The sheet used `position: absolute, bottom: 0` so it didn't respond to the keyboard.
