@@ -1,3 +1,19 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Dark mode is the default — these are the root CSS variable values.
+   Light mode overrides are applied at runtime via vars() in ThemeProvider. */
+:root {
+  --color-surface: #0f0f0f;
+  --color-surface-elevated: #1a1a1a;
+  --color-surface-card: #242424;
+  --color-accent: #e8c97e;
+  --color-accent-muted: #b89a5a;
+  --color-text-primary: #f5f5f5;
+  --color-text-secondary: #a0a0a0;
+  --color-text-muted: #606060;
+  --color-border: #2a2a2a;
+  --color-danger: #e05c5c;
+  --color-success: #5ce07a;
+}

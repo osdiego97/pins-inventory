@@ -7,6 +7,7 @@ import Animated, {
   useAnimatedStyle,
 } from 'react-native-reanimated';
 import { Completeness as CompletenessType } from '../../hooks/useStats';
+import { useThemeColors } from '../../contexts/ThemeContext';
 
 const ANIMATION_DURATION = 800;
 const STAGGER_MS = 100;
@@ -18,6 +19,7 @@ interface RowProps {
 }
 
 function CompletenessRow({ label, ratio, rank }: RowProps) {
+  const colors = useThemeColors();
   const progress = useSharedValue(0);
 
   useEffect(() => {
@@ -32,7 +34,7 @@ function CompletenessRow({ label, ratio, rank }: RowProps) {
   }));
 
   const pct = Math.round(ratio * 100);
-  const barColor = pct >= 80 ? '#5ce07a' : pct >= 50 ? '#e8c97e' : '#e05c5c';
+  const barColor = pct >= 80 ? colors.success : pct >= 50 ? colors.accent : colors.danger;
 
   return (
     <View className="py-2">

@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, PanResponder, Animated } from 'react-nati
 import { Ionicons } from '@expo/vector-icons';
 import { Item } from '../../lib/types';
 import TagIcon from '../ui/TagIcon';
+import { useThemeColors } from '../../contexts/ThemeContext';
 
 const SWIPE_THRESHOLD = 80;
 const MAX_TRANSLATE = 100;
@@ -15,6 +16,7 @@ interface PinCardProps {
 }
 
 function PinCard({ pin, onPress, onEdit, onDelete }: PinCardProps) {
+  const colors = useThemeColors();
   const location = [pin.city, pin.country].filter(Boolean).join(' · ');
   const tags = pin.tags ?? [];
   const visibleTags = tags.slice(0, 3);
@@ -64,7 +66,7 @@ function PinCard({ pin, onPress, onEdit, onDelete }: PinCardProps) {
           {
             position: 'absolute',
             inset: 0,
-            backgroundColor: '#b89a5a',
+            backgroundColor: colors.accentMuted,
             alignItems: 'flex-start',
             justifyContent: 'center',
             paddingLeft: 20,
@@ -72,7 +74,7 @@ function PinCard({ pin, onPress, onEdit, onDelete }: PinCardProps) {
           { opacity: editOpacity },
         ]}
       >
-        <Ionicons name="pencil-outline" size={22} color="#0f0f0f" />
+        <Ionicons name="pencil-outline" size={22} color={colors.surface} />
       </Animated.View>
 
       {/* Delete background */}
@@ -81,7 +83,7 @@ function PinCard({ pin, onPress, onEdit, onDelete }: PinCardProps) {
           {
             position: 'absolute',
             inset: 0,
-            backgroundColor: '#e05c5c',
+            backgroundColor: colors.danger,
             alignItems: 'flex-end',
             justifyContent: 'center',
             paddingRight: 20,
@@ -89,7 +91,7 @@ function PinCard({ pin, onPress, onEdit, onDelete }: PinCardProps) {
           { opacity: deleteOpacity },
         ]}
       >
-        <Ionicons name="trash-outline" size={22} color="#fff" />
+        <Ionicons name="trash-outline" size={22} color={colors.textPrimary} />
       </Animated.View>
 
       {/* Card */}
@@ -111,20 +113,20 @@ function PinCard({ pin, onPress, onEdit, onDelete }: PinCardProps) {
                 <Text className="text-text-muted text-xs">#{pin.collection_number}</Text>
               )}
               {pin.is_commemorative && (
-                <Ionicons name="ribbon" size={16} color="#e8c97e" />
+                <Ionicons name="ribbon" size={16} color={colors.accent} />
               )}
             </View>
           </View>
 
           {location ? (
             <View className="flex-row items-center mt-1" style={{ gap: 4 }}>
-              <Ionicons name="location-outline" size={13} color="#a0a0a0" />
+              <Ionicons name="location-outline" size={13} color={colors.textSecondary} />
               <Text className="text-text-secondary text-sm">{location}</Text>
             </View>
           ) : null}
           {pin.acquired_year ? (
             <View className="flex-row items-center mt-1" style={{ gap: 4 }}>
-              <Ionicons name="calendar-outline" size={13} color="#a0a0a0" />
+              <Ionicons name="calendar-outline" size={13} color={colors.textSecondary} />
               <Text className="text-text-secondary text-sm">{pin.acquired_year}</Text>
             </View>
           ) : null}
@@ -138,7 +140,7 @@ function PinCard({ pin, onPress, onEdit, onDelete }: PinCardProps) {
                   style={{ gap: 4 }}
                 >
                   {!tag.parent_id && (
-                    <TagIcon tagName={tag.name} size={11} color="#606060" />
+                    <TagIcon tagName={tag.name} size={11} color={colors.textMuted} />
                   )}
                   <Text className="text-text-muted text-xs">
                     {tag.parent_id ? tag.name : tag.name.toUpperCase()}

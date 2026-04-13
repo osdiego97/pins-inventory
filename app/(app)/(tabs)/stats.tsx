@@ -5,6 +5,7 @@ import { useFocusEffect } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { usePins } from '../../../hooks/usePins';
 import { useStats } from '../../../hooks/useStats';
+import { useThemeColors } from '../../../contexts/ThemeContext';
 import SummaryCards from '../../../components/stats/SummaryCards';
 import DonutChart from '../../../components/stats/DonutChart';
 import CategorySection from '../../../components/stats/CategorySection';
@@ -30,6 +31,7 @@ export default function StatsScreen() {
   const { pins, loading, error, refetch } = usePins();
   const stats = useStats(pins);
   const insets = useSafeAreaInsets();
+  const colors = useThemeColors();
   const [barsExpanded, setBarsExpanded] = useState(false);
 
   useFocusEffect(
@@ -41,7 +43,7 @@ export default function StatsScreen() {
   if (loading) {
     return (
       <View className="flex-1 bg-surface items-center justify-center">
-        <ActivityIndicator color="#e8c97e" />
+        <ActivityIndicator color={colors.accent} />
       </View>
     );
   }
@@ -92,7 +94,7 @@ export default function StatsScreen() {
               totalPins={stats.totalPins}
             />
             {stats.categories.length > 0 && (
-              <View className="mt-4 pt-4" style={{ borderTopWidth: 1, borderTopColor: '#2a2a2a' }}>
+              <View className="mt-4 pt-4" style={{ borderTopWidth: 1, borderTopColor: colors.border }}>
                 <TouchableOpacity
                   onPress={() => setBarsExpanded((v) => !v)}
                   activeOpacity={0.7}
@@ -104,7 +106,7 @@ export default function StatsScreen() {
                   <Ionicons
                     name={barsExpanded ? 'chevron-up' : 'chevron-down'}
                     size={14}
-                    color="#606060"
+                    color={colors.textMuted}
                   />
                 </TouchableOpacity>
                 {barsExpanded && (

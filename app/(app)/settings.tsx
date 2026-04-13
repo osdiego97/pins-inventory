@@ -12,7 +12,8 @@ import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '../../lib/supabase';
-import { useUserSettings } from '../../hooks/useUserSettings';
+import { useUserSettingsContext } from '../../contexts/UserSettingsContext';
+import { useThemeColors } from '../../contexts/ThemeContext';
 
 const COLLECTION_ICONS = [
   'albums-outline',
@@ -39,7 +40,8 @@ const THEME_OPTIONS: { label: string; value: 'dark' | 'light' | 'system' }[] = [
 
 export default function SettingsScreen() {
   const insets = useSafeAreaInsets();
-  const { settings, loading, saveSettings } = useUserSettings();
+  const { settings, loading, saveSettings } = useUserSettingsContext();
+  const colors = useThemeColors();
   const [collectionName, setCollectionName] = useState('');
   const [nameError, setNameError] = useState<string | null>(null);
   const [savingName, setSavingName] = useState(false);
@@ -83,7 +85,7 @@ export default function SettingsScreen() {
   if (loading) {
     return (
       <View className="flex-1 bg-surface items-center justify-center">
-        <ActivityIndicator color="#e8c97e" />
+        <ActivityIndicator color={colors.accent} />
       </View>
     );
   }
@@ -93,7 +95,7 @@ export default function SettingsScreen() {
       {/* Header */}
       <View className="flex-row items-center px-4 py-3">
         <TouchableOpacity onPress={() => router.back()} className="mr-3">
-          <Ionicons name="arrow-back" size={24} color="#f5f5f5" />
+          <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
         </TouchableOpacity>
         <Text className="text-text-primary text-lg font-semibold flex-1">Ajustes</Text>
       </View>
@@ -118,7 +120,7 @@ export default function SettingsScreen() {
                 nameError ? 'border border-danger' : ''
               }`}
               placeholder="Nuevo nombre..."
-              placeholderTextColor="#606060"
+              placeholderTextColor={colors.textMuted}
               value={collectionName}
               onChangeText={(v) => { setCollectionName(v); setNameError(null); }}
               maxLength={50}
@@ -132,7 +134,7 @@ export default function SettingsScreen() {
               }`}
             >
               {savingName ? (
-                <ActivityIndicator color="#0f0f0f" size="small" />
+                <ActivityIndicator color={colors.surface} size="small" />
               ) : (
                 <Text className="text-surface text-sm font-semibold">Guardar nombre</Text>
               )}
@@ -158,7 +160,7 @@ export default function SettingsScreen() {
                   <Ionicons
                     name={icon as any}
                     size={20}
-                    color={currentIcon === icon ? '#0f0f0f' : '#a0a0a0'}
+                    color={currentIcon === icon ? colors.surface : colors.textSecondary}
                   />
                 </TouchableOpacity>
               ))}
@@ -175,10 +177,10 @@ export default function SettingsScreen() {
           onPress={() => router.push('/(app)/categories' as any)}
         >
           <View className="flex-row items-center" style={{ gap: 12 }}>
-            <Ionicons name="pricetags-outline" size={20} color="#a0a0a0" />
+            <Ionicons name="pricetags-outline" size={20} color={colors.textSecondary} />
             <Text className="text-text-primary text-base">Gestionar categorías</Text>
           </View>
-          <Ionicons name="chevron-forward" size={16} color="#606060" />
+          <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
         </TouchableOpacity>
 
         {/* Theme */}
@@ -186,34 +188,24 @@ export default function SettingsScreen() {
           Tema
         </Text>
         <View className="bg-surface-card rounded-2xl overflow-hidden mb-6">
-          {THEME_OPTIONS.map((option, idx) => {
-            const isAvailable = option.value === 'dark';
-            return (
-              <TouchableOpacity
-                key={option.value}
-                onPress={() => isAvailable && handleThemeSelect(option.value)}
-                activeOpacity={isAvailable ? 0.7 : 1}
-                className="px-4 py-4 flex-row items-center justify-between"
-              >
-                <Text className={`text-base ${isAvailable ? 'text-text-primary' : 'text-text-muted'}`}>
-                  {option.label}
-                </Text>
-                <View className="flex-row items-center" style={{ gap: 8 }}>
-                  {!isAvailable && (
-                    <View className="bg-surface-elevated rounded-full px-2 py-0.5">
-                      <Text className="text-text-muted text-xs">Próximamente</Text>
-                    </View>
-                  )}
-                  {isAvailable && currentTheme === option.value && (
-                    <Ionicons name="checkmark" size={18} color="#e8c97e" />
-                  )}
-                </View>
-                {idx < THEME_OPTIONS.length - 1 && (
-                  <View className="absolute bottom-0 left-4 right-4 h-px bg-surface-elevated" />
+          {THEME_OPTIONS.map((option, idx) => (
+            <TouchableOpacity
+              key={option.value}
+              onPress={() => handleThemeSelect(option.value)}
+              activeOpacity={0.7}
+              className="px-4 py-4 flex-row items-center justify-between"
+            >
+              <Text className="text-text-primary text-base">{option.label}</Text>
+              <View className="flex-row items-center" style={{ gap: 8 }}>
+                {currentTheme === option.value && (
+                  <Ionicons name="checkmark" size={18} color={colors.accent} />
                 )}
-              </TouchableOpacity>
-            );
-          })}
+              </View>
+              {idx < THEME_OPTIONS.length - 1 && (
+                <View className="absolute bottom-0 left-4 right-4 h-px bg-surface-elevated" />
+              )}
+            </TouchableOpacity>
+          ))}
         </View>
 
         {/* Sign out */}
@@ -222,7 +214,7 @@ export default function SettingsScreen() {
           style={{ gap: 10 }}
           onPress={handleSignOut}
         >
-          <Ionicons name="log-out-outline" size={20} color="#e05c5c" />
+          <Ionicons name="log-out-outline" size={20} color={colors.danger} />
           <Text className="text-danger text-base font-medium">Cerrar sesión</Text>
         </TouchableOpacity>
       </ScrollView>

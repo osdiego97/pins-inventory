@@ -9,6 +9,7 @@ import Animated, {
 import { Ionicons } from '@expo/vector-icons';
 import { L1Stat } from '../../hooks/useStats';
 import { SEGMENT_COLORS } from '../../constants/chartColors';
+import { useThemeColors } from '../../contexts/ThemeContext';
 
 if (Platform.OS === 'android') {
   UIManager.setLayoutAnimationEnabledExperimental?.(true);
@@ -65,6 +66,7 @@ interface Props {
 }
 
 export default function CategorySection({ categories, uncategorized }: Props) {
+  const colors = useThemeColors();
   const [expandedL1, setExpandedL1] = useState<string | null>(null);
   const [containerWidth, setContainerWidth] = useState(0);
   const progress = useSharedValue(0);
@@ -132,7 +134,7 @@ export default function CategorySection({ categories, uncategorized }: Props) {
               <Ionicons
                 name={isExpanded ? 'chevron-up' : 'chevron-down'}
                 size={14}
-                color={hasL2 ? '#606060' : '#242424'}
+                color={hasL2 ? colors.textMuted : colors.surfaceCard}
               />
             </TouchableOpacity>
 

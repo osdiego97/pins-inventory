@@ -12,7 +12,8 @@ import {
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { useUserSettings } from '../../hooks/useUserSettings';
+import { useUserSettingsContext } from '../../contexts/UserSettingsContext';
+import { useThemeColors } from '../../contexts/ThemeContext';
 
 const COLLECTION_ICONS = [
   'albums-outline',
@@ -33,7 +34,8 @@ type CollectionIcon = (typeof COLLECTION_ICONS)[number];
 
 export default function OnboardingScreen() {
   const insets = useSafeAreaInsets();
-  const { saveSettings } = useUserSettings();
+  const { saveSettings } = useUserSettingsContext();
+  const colors = useThemeColors();
   const [collectionName, setCollectionName] = useState('');
   const [selectedIcon, setSelectedIcon] = useState<CollectionIcon>('albums-outline');
   const [saving, setSaving] = useState(false);
@@ -93,7 +95,7 @@ export default function OnboardingScreen() {
                 error ? 'border border-danger' : ''
               }`}
               placeholder="Ej. Mi Colección de Viaje"
-              placeholderTextColor="#606060"
+              placeholderTextColor={colors.textMuted}
               value={collectionName}
               onChangeText={(v) => {
                 setCollectionName(v);
@@ -127,7 +129,7 @@ export default function OnboardingScreen() {
                   <Ionicons
                     name={icon as any}
                     size={24}
-                    color={selectedIcon === icon ? '#0f0f0f' : '#a0a0a0'}
+                    color={selectedIcon === icon ? colors.surface : colors.textSecondary}
                   />
                 </TouchableOpacity>
               ))}
@@ -136,7 +138,7 @@ export default function OnboardingScreen() {
 
           {/* Info note */}
           <View className="bg-surface-card rounded-xl px-4 py-3 flex-row items-start" style={{ gap: 10 }}>
-            <Ionicons name="information-circle-outline" size={18} color="#606060" style={{ marginTop: 1 }} />
+            <Ionicons name="information-circle-outline" size={18} color={colors.textMuted} style={{ marginTop: 1 }} />
             <Text className="text-text-muted text-sm flex-1">
               Podrás configurar las categorías desde Ajustes después de empezar.
             </Text>
@@ -157,7 +159,7 @@ export default function OnboardingScreen() {
           }`}
         >
           {saving ? (
-            <ActivityIndicator color="#0f0f0f" />
+            <ActivityIndicator color={colors.surface} />
           ) : (
             <Text className="text-surface font-semibold text-base">Empezar</Text>
           )}

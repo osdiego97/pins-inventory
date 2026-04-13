@@ -11,6 +11,7 @@ import Animated, {
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
 import { SEGMENT_COLORS } from '../../constants/chartColors';
+import { useThemeColors } from '../../contexts/ThemeContext';
 
 const SIZE = 220;
 const CX = SIZE / 2;
@@ -68,6 +69,7 @@ interface Props {
 }
 
 export default function DonutChart({ categories, uncategorized, totalPins }: Props) {
+  const colors = useThemeColors();
   const progress = useSharedValue(0);
 
   useEffect(() => {
@@ -107,7 +109,7 @@ export default function DonutChart({ categories, uncategorized, totalPins }: Pro
             cy={CY}
             r={RADIUS}
             fill="transparent"
-            stroke="#2a2a2a"
+            stroke={colors.border}
             strokeWidth={STROKE_WIDTH}
           />
         </Svg>
