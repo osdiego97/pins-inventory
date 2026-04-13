@@ -168,20 +168,33 @@ export default function SettingsScreen() {
           </View>
         </View>
 
-        {/* Categories */}
+        {/* Data */}
         <Text className="text-text-muted text-xs font-medium uppercase tracking-wider mb-3">
-          Categorías
+          Datos
         </Text>
-        <TouchableOpacity
-          className="bg-surface-card rounded-2xl px-4 py-4 flex-row items-center justify-between mb-4"
-          onPress={() => router.push('/(app)/categories' as any)}
-        >
-          <View className="flex-row items-center" style={{ gap: 12 }}>
-            <Ionicons name="pricetags-outline" size={20} color={colors.textSecondary} />
-            <Text className="text-text-primary text-base">Gestionar categorías</Text>
-          </View>
-          <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
-        </TouchableOpacity>
+        <View className="bg-surface-card rounded-2xl overflow-hidden mb-4">
+          <TouchableOpacity
+            className="px-4 py-4 flex-row items-center justify-between"
+            onPress={() => router.push('/(app)/categories' as any)}
+          >
+            <View className="flex-row items-center" style={{ gap: 12 }}>
+              <Ionicons name="pricetags-outline" size={20} color={colors.textSecondary} />
+              <Text className="text-text-primary text-base">Gestionar categorías</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
+          </TouchableOpacity>
+          <View className="h-px bg-surface-elevated" />
+          <TouchableOpacity
+            className="px-4 py-4 flex-row items-center justify-between"
+            onPress={() => router.push('/(app)/import' as any)}
+          >
+            <View className="flex-row items-center" style={{ gap: 12 }}>
+              <Ionicons name="cloud-upload-outline" size={20} color={colors.textSecondary} />
+              <Text className="text-text-primary text-base">Importar colección</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
+          </TouchableOpacity>
+        </View>
 
         {/* Theme */}
         <Text className="text-text-muted text-xs font-medium uppercase tracking-wider mb-3">
