@@ -18,6 +18,7 @@ import { normalize } from '../../lib/utils';
 import { TAG_ICONS } from '../../lib/tagIcons';
 import { TagGroup } from '../../hooks/useTags';
 import { FilterState, Item, Tag } from '../../lib/types';
+import { useThemeColors } from '../../contexts/ThemeContext';
 import { COLOR_OPTIONS } from '../../hooks/usePinForm';
 
 const EMPTY_FILTERS: FilterState = { l1: [], l2: [], country: null, city: null, year: null, material: [], color: [] };
@@ -117,19 +118,20 @@ function SearchInput({
   onChangeText: (text: string) => void;
   onClear: () => void;
 }) {
+  const colors = useThemeColors();
   return (
     <View className="mx-4 mb-2 flex-row items-center bg-surface-card rounded-xl px-3">
-      <Ionicons name="search" size={14} color="#606060" />
+      <Ionicons name="search" size={14} color={colors.textMuted} />
       <TextInput
         className="flex-1 ml-2 py-2.5 text-text-primary text-sm"
         placeholder={placeholder}
-        placeholderTextColor="#606060"
+        placeholderTextColor={colors.textMuted}
         value={value}
         onChangeText={onChangeText}
       />
       {value.length > 0 && (
         <TouchableOpacity onPress={onClear}>
-          <Ionicons name="close-circle" size={14} color="#606060" />
+          <Ionicons name="close-circle" size={14} color={colors.textMuted} />
         </TouchableOpacity>
       )}
     </View>
@@ -147,6 +149,7 @@ function FilterBottomSheet({
   search,
 }: Props) {
   const insets = useSafeAreaInsets();
+  const colors = useThemeColors();
   const slideAnim = useRef(new Animated.Value(600)).current;
 
   // Pre-render the sheet via InteractionManager so native views exist before first open.
@@ -380,7 +383,7 @@ function FilterBottomSheet({
                           tagName={g.category.name}
                           tagIcon={g.category.icon}
                           size={12}
-                          color={l1.includes(g.category.name) ? '#0f0f0f' : '#909090'}
+                          color={l1.includes(g.category.name) ? colors.surface : colors.textSecondary}
                         />
                       ) : undefined
                     }
@@ -529,7 +532,7 @@ function FilterBottomSheet({
                         borderRadius: 5,
                         overflow: 'hidden',
                         borderWidth: opt.value === 'blanco' ? 1 : 0,
-                        borderColor: '#606060',
+                        borderColor: colors.textMuted,
                         ...(opt.hex !== 'rainbow' && { backgroundColor: opt.hex }),
                       }}
                     >

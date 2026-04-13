@@ -8,12 +8,15 @@ import {
 } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import { Ionicons } from '@expo/vector-icons';
+import { useTheme, useThemeColors } from '../../contexts/ThemeContext';
 
 const PLACES_API_KEY = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY;
 
 const MAP_DELTA = { latitudeDelta: 0.01, longitudeDelta: 0.01 };
 
 function LocationMap({ latitude, longitude }: { latitude: number; longitude: number }) {
+  const colors = useThemeColors();
+  const { resolvedTheme } = useTheme();
   return (
     <View collapsable={false} className="rounded-xl overflow-hidden mt-2" style={{ height: 130 }}>
       <MapView
@@ -24,10 +27,10 @@ function LocationMap({ latitude, longitude }: { latitude: number; longitude: num
         pitchEnabled={false}
         rotateEnabled={false}
         mapType="standard"
-        userInterfaceStyle="dark"
+        userInterfaceStyle={resolvedTheme}
       >
         <Marker coordinate={{ latitude, longitude }}>
-          <Ionicons name="location-sharp" size={28} color="#e8c97e" />
+          <Ionicons name="location-sharp" size={28} color={colors.accent} />
         </Marker>
       </MapView>
     </View>
@@ -55,6 +58,7 @@ interface Props {
 
 
 export default function PlaceSearch({ value, onChange, hasExistingCoords, existingLatitude, existingLongitude }: Props) {
+  const colors = useThemeColors();
   const [query, setQuery] = useState('');
   const [predictions, setPredictions] = useState<Prediction[]>([]);
   const [searching, setSearching] = useState(false);
@@ -165,12 +169,12 @@ export default function PlaceSearch({ value, onChange, hasExistingCoords, existi
     return (
       <View>
         <View className="bg-surface-card rounded-xl px-4 py-3 flex-row items-center">
-          <Ionicons name="location" size={16} color="#e8c97e" style={{ marginRight: 8 }} />
+          <Ionicons name="location" size={16} color={colors.accent} style={{ marginRight: 8 }} />
           <Text className="text-text-primary text-sm flex-1" numberOfLines={1}>
             {value.name}
           </Text>
           <TouchableOpacity onPress={handleClear} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-            <Ionicons name="close-circle" size={18} color="#606060" />
+            <Ionicons name="close-circle" size={18} color={colors.textMuted} />
           </TouchableOpacity>
         </View>
         <LocationMap latitude={value.latitude} longitude={value.longitude} />
@@ -183,16 +187,16 @@ export default function PlaceSearch({ value, onChange, hasExistingCoords, existi
     return (
       <View>
         <View className="bg-surface-card rounded-xl px-4 py-3 flex-row items-center">
-          <Ionicons name="location" size={16} color="#e8c97e" style={{ marginRight: 8 }} />
+          <Ionicons name="location" size={16} color={colors.accent} style={{ marginRight: 8 }} />
           {reverseGeocoding ? (
-            <ActivityIndicator size="small" color="#606060" style={{ flex: 1 }} />
+            <ActivityIndicator size="small" color={colors.textMuted} style={{ flex: 1 }} />
           ) : (
             <Text className="text-text-primary text-sm flex-1" numberOfLines={1}>
               {reverseGeocodedName ?? 'Posición guardada'}
             </Text>
           )}
           <TouchableOpacity onPress={handleClear} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-            <Ionicons name="close-circle" size={18} color="#606060" />
+            <Ionicons name="close-circle" size={18} color={colors.textMuted} />
           </TouchableOpacity>
         </View>
         {existingLatitude != null && existingLongitude != null && (
@@ -205,16 +209,16 @@ export default function PlaceSearch({ value, onChange, hasExistingCoords, existi
   return (
     <View>
       <View className="bg-surface-card rounded-xl px-4 flex-row items-center">
-        <Ionicons name="search-outline" size={16} color="#606060" style={{ marginRight: 8 }} />
+        <Ionicons name="search-outline" size={16} color={colors.textMuted} style={{ marginRight: 8 }} />
         <TextInput
           className="flex-1 py-3 text-text-primary text-sm"
           placeholder="Buscar lugar (ej. Hard Rock Cafe Madrid)..."
-          placeholderTextColor="#606060"
+          placeholderTextColor={colors.textMuted}
           value={query}
           onChangeText={handleChangeText}
           autoCorrect={false}
         />
-        {searching && <ActivityIndicator size="small" color="#606060" />}
+        {searching && <ActivityIndicator size="small" color={colors.textMuted} />}
       </View>
 
       {error && (
@@ -231,7 +235,7 @@ export default function PlaceSearch({ value, onChange, hasExistingCoords, existi
                 i < predictions.length - 1 ? 'border-b border-surface-elevated' : ''
               }`}
             >
-              <Ionicons name="location-outline" size={14} color="#606060" style={{ marginRight: 8 }} />
+              <Ionicons name="location-outline" size={14} color={colors.textMuted} style={{ marginRight: 8 }} />
               <Text className="text-text-primary text-sm flex-1" numberOfLines={2}>
                 {p.description}
               </Text>

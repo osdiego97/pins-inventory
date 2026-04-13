@@ -16,6 +16,7 @@ import { router, useFocusEffect } from 'expo-router';
 import { useCallback } from 'react';
 import { usePinForm, COLOR_OPTIONS } from '../../hooks/usePinForm';
 import { useTags } from '../../hooks/useTags';
+import { useThemeColors } from '../../contexts/ThemeContext';
 import TagPicker from './TagPicker';
 import PlaceSearch from './PlaceSearch';
 
@@ -25,6 +26,7 @@ interface PinFormProps {
 
 export default function PinForm({ pinId }: PinFormProps) {
   const insets = useSafeAreaInsets();
+  const colors = useThemeColors();
   const {
     form,
     setField,
@@ -97,7 +99,7 @@ export default function PinForm({ pinId }: PinFormProps) {
   if (initialLoading) {
     return (
       <View className="flex-1 items-center justify-center">
-        <ActivityIndicator color="#e8c97e" />
+        <ActivityIndicator color={colors.accent} />
       </View>
     );
   }
@@ -121,14 +123,14 @@ export default function PinForm({ pinId }: PinFormProps) {
             <Image source={{ uri: previewImageUri }} className="w-full h-full" resizeMode="cover" />
           ) : (
             <View className="items-center">
-              <Ionicons name="camera-outline" size={36} color="#606060" />
+              <Ionicons name="camera-outline" size={36} color={colors.textMuted} />
               <Text className="text-text-muted text-sm mt-2">Añadir foto</Text>
             </View>
           )}
         </TouchableOpacity>
         {previewImageUri && (
           <TouchableOpacity onPress={pickImage} className="mx-4 mt-1.5 flex-row items-center">
-            <Ionicons name="refresh-outline" size={14} color="#b89a5a" />
+            <Ionicons name="refresh-outline" size={14} color={colors.accentMuted} />
             <Text className="text-accent-muted text-xs ml-1">Cambiar foto</Text>
           </TouchableOpacity>
         )}
@@ -144,7 +146,7 @@ export default function PinForm({ pinId }: PinFormProps) {
                 errors.description ? 'border border-danger' : ''
               }`}
               placeholder="Ej. Pin Tokio 1964 Olimpiadas"
-              placeholderTextColor="#606060"
+              placeholderTextColor={colors.textMuted}
               value={form.description}
               onChangeText={(v) => setField('description', v)}
               maxLength={100}
@@ -168,7 +170,7 @@ export default function PinForm({ pinId }: PinFormProps) {
                 errors.country ? 'border border-danger' : ''
               }`}
               placeholder="Ej. España"
-              placeholderTextColor="#606060"
+              placeholderTextColor={colors.textMuted}
               value={form.country}
               onChangeText={(v) => setField('country', v)}
             />
@@ -188,7 +190,7 @@ export default function PinForm({ pinId }: PinFormProps) {
                   errors.city ? 'border border-danger' : ''
                 }`}
                 placeholder="Ej. Madrid"
-                placeholderTextColor="#606060"
+                placeholderTextColor={colors.textMuted}
                 value={form.city}
                 onChangeText={(v) => setField('city', v)}
               />
@@ -203,7 +205,7 @@ export default function PinForm({ pinId }: PinFormProps) {
               <TextInput
                 className="bg-surface-card rounded-xl px-4 py-3 text-text-primary text-sm"
                 placeholder="Ej. Cataluña"
-                placeholderTextColor="#606060"
+                placeholderTextColor={colors.textMuted}
                 value={form.region}
                 onChangeText={(v) => setField('region', v)}
               />
@@ -221,7 +223,7 @@ export default function PinForm({ pinId }: PinFormProps) {
                   errors.acquired_year ? 'border border-danger' : ''
                 }`}
                 placeholder="Ej. 1998"
-                placeholderTextColor="#606060"
+                placeholderTextColor={colors.textMuted}
                 value={form.acquired_year}
                 onChangeText={(v) => setField('acquired_year', v)}
                 keyboardType="numeric"
@@ -242,8 +244,8 @@ export default function PinForm({ pinId }: PinFormProps) {
                 <Switch
                   value={form.is_commemorative}
                   onValueChange={(v) => setField('is_commemorative', v)}
-                  trackColor={{ false: '#242424', true: '#b89a5a' }}
-                  thumbColor={form.is_commemorative ? '#e8c97e' : '#606060'}
+                  trackColor={{ false: colors.surfaceCard, true: colors.accentMuted }}
+                  thumbColor={form.is_commemorative ? colors.accent : colors.textMuted}
                 />
               </View>
             </View>
@@ -279,7 +281,7 @@ export default function PinForm({ pinId }: PinFormProps) {
             <TextInput
               className="bg-surface-card rounded-xl px-4 py-3 text-text-primary text-sm"
               placeholder="Ej. Esmalte, Metal, Madera..."
-              placeholderTextColor="#606060"
+              placeholderTextColor={colors.textMuted}
               value={form.material}
               onChangeText={(v) => setField('material', v)}
               maxLength={50}
@@ -307,7 +309,7 @@ export default function PinForm({ pinId }: PinFormProps) {
                       alignItems: 'center',
                       justifyContent: 'center',
                       borderWidth: selected ? 2 : 1,
-                      borderColor: selected ? '#e8c97e' : '#2a2a2a',
+                      borderColor: selected ? colors.accent : colors.border,
                       ...(!isRainbow && { backgroundColor: opt.hex }),
                     }}
                   >
@@ -326,7 +328,7 @@ export default function PinForm({ pinId }: PinFormProps) {
                       />
                     )}
                     {opt.value === 'otro' && !selected && (
-                      <Text style={{ fontSize: 14, color: '#f5f5f5', fontWeight: '600' }}>?</Text>
+                      <Text style={{ fontSize: 14, color: colors.textPrimary, fontWeight: '600' }}>?</Text>
                     )}
                   </TouchableOpacity>
                 );
@@ -350,7 +352,7 @@ export default function PinForm({ pinId }: PinFormProps) {
               </TouchableOpacity>
             </View>
             {tagsLoading ? (
-              <ActivityIndicator color="#e8c97e" size="small" />
+              <ActivityIndicator color={colors.accent} size="small" />
             ) : tagGroups.length === 0 && standaloneTags.length === 0 ? (
               <Text className="text-text-muted text-sm">
                 Aún no tienes categorías. Créalas desde Gestionar.
@@ -384,7 +386,7 @@ export default function PinForm({ pinId }: PinFormProps) {
           className={`rounded-2xl py-4 items-center ${submitting ? 'bg-accent-muted' : 'bg-accent'}`}
         >
           {submitting ? (
-            <ActivityIndicator color="#0f0f0f" />
+            <ActivityIndicator color={colors.surface} />
           ) : (
             <Text className="text-surface font-semibold text-base">Guardar elemento</Text>
           )}

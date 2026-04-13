@@ -8,7 +8,7 @@ export default {
     orientation: 'portrait',
     icon: './assets/icon.png',
     scheme: 'pins-inventory',
-    userInterfaceStyle: 'light',
+    userInterfaceStyle: 'automatic',
     splash: {
       image: './assets/splash-icon.png',
       resizeMode: 'contain',

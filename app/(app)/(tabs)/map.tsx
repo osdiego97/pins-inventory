@@ -10,6 +10,7 @@ import { useTags } from '../../../hooks/useTags';
 import { FilterState, Item } from '../../../lib/types';
 import FilterBottomSheet from '../../../components/pins/FilterBottomSheet';
 import TagIcon from '../../../components/ui/TagIcon';
+import { useTheme, useThemeColors } from '../../../contexts/ThemeContext';
 
 const EMPTY_FILTERS: FilterState = { l1: [], l2: [], country: null, city: null, year: null, material: [], color: [] };
 
@@ -86,15 +87,13 @@ function calloutPosition(group: PinGroup, region: Region, W: number, H: number) 
 
 const styles = StyleSheet.create({
   calloutBox: {
-    backgroundColor: '#1a1a1a',
     borderRadius: 12,
     paddingHorizontal: 14,
     paddingVertical: CALLOUT_PADDING_V,
     width: CALLOUT_WIDTH,
     borderWidth: 1,
-    borderColor: '#2a2a2a',
   },
-  divider: { height: 1, backgroundColor: '#2a2a2a', marginVertical: 6 },
+  divider: { height: 1, marginVertical: 6 },
   row: { flexDirection: 'row', alignItems: 'center' },
   clusterContainer: { display: 'flex', justifyContent: 'center', alignItems: 'center' },
   clusterWrapper: { position: 'absolute', opacity: 0.5, zIndex: 0 },
@@ -103,6 +102,8 @@ const styles = StyleSheet.create({
 });
 
 export default function MapScreen() {
+  const colors = useThemeColors();
+  const { resolvedTheme } = useTheme();
   const { pins, loading, refetch } = usePins();
   const { tagGroups, standaloneTags, refetch: refetchTags } = useTags();
   const [filters, setFilters] = useState<FilterState>(EMPTY_FILTERS);
@@ -229,14 +230,14 @@ export default function MapScreen() {
           style={[styles.clusterContainer, { width: outer, height: outer }]}
         >
           <View style={[styles.clusterWrapper, {
-            backgroundColor: '#e8c97e',
+            backgroundColor: colors.accent,
             width: outer, height: outer, borderRadius: outer / 2,
           }]} />
           <View style={[styles.clusterInner, {
-            backgroundColor: '#e8c97e',
+            backgroundColor: colors.accent,
             width: size, height: size, borderRadius: size / 2,
           }]}>
-            <Text style={[styles.clusterText, { color: '#0f0f0f', fontSize: 15 }]}>
+            <Text style={[styles.clusterText, { color: colors.surface, fontSize: 15 }]}>
               {totalPins}
             </Text>
           </View>
@@ -266,9 +267,9 @@ export default function MapScreen() {
           if (selectedGroupRef.current) selectGroup(null);
         }}
         mapType="standard"
-        userInterfaceStyle="dark"
-        clusterColor="#e8c97e"
-        clusterTextColor="#0f0f0f"
+        userInterfaceStyle={resolvedTheme}
+        clusterColor={colors.accent}
+        clusterTextColor={colors.surface}
         clusterFontFamily="System"
       >
         {pinGroups.map((group) => {
@@ -281,15 +282,15 @@ export default function MapScreen() {
               {...(isMulti ? { onPress: () => selectGroup(group) } : {})}
             >
               <View collapsable={false} style={{ width: 40, height: MARKER_HEIGHT }}>
-                <Ionicons name="location-sharp" size={40} color="#e8c97e" style={{ zIndex: 0 }} />
+                <Ionicons name="location-sharp" size={40} color={colors.accent} style={{ zIndex: 0 }} />
                 {isMulti && (
                   <View style={{
                     position: 'absolute', top: 0, right: 0, zIndex: 1, elevation: 1,
-                    backgroundColor: '#f5f5f5', borderRadius: 8, minWidth: 16, height: 16,
+                    backgroundColor: colors.textPrimary, borderRadius: 8, minWidth: 16, height: 16,
                     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 3,
-                    borderWidth: 1, borderColor: '#0f0f0f',
+                    borderWidth: 1, borderColor: colors.surface,
                   }}>
-                    <Text style={{ fontSize: 9, fontWeight: '700', color: '#0f0f0f' }}>
+                    <Text style={{ fontSize: 9, fontWeight: '700', color: colors.surface }}>
                       {group.pins.length}
                     </Text>
                   </View>
@@ -300,23 +301,23 @@ export default function MapScreen() {
                   tooltip
                   onPress={() => router.push(`/(app)/pin/${group.pins[0].id}` as any)}
                 >
-                  <View collapsable={false} style={styles.calloutBox}>
+                  <View collapsable={false} style={[styles.calloutBox, { backgroundColor: colors.surfaceElevated, borderColor: colors.border }]}>
                     {(() => {
                       const pin = group.pins[0];
                       const l1 = (pin.tags ?? []).find((t) => !t.parent_id)?.name;
                       return (
                         <>
                           <View style={{ ...styles.row, gap: 6 }}>
-                            {l1 && <TagIcon tagName={l1} size={12} color="#909090" />}
-                            <Text style={{ fontSize: 13, fontWeight: '600', color: '#f5f5f5', flex: 1 }} numberOfLines={1}>
+                            {l1 && <TagIcon tagName={l1} size={12} color={colors.textSecondary} />}
+                            <Text style={{ fontSize: 13, fontWeight: '600', color: colors.textPrimary, flex: 1 }} numberOfLines={1}>
                               {pin.description}
                             </Text>
                           </View>
                           <View style={{ ...styles.row, marginTop: 4 }}>
-                            <Text style={{ fontSize: 11, color: '#909090', flex: 1 }} numberOfLines={1}>
+                            <Text style={{ fontSize: 11, color: colors.textSecondary, flex: 1 }} numberOfLines={1}>
                               #{pin.collection_number} · {pin.city}, {pin.country}
                             </Text>
-                            <Ionicons name="chevron-forward" size={11} color="#e8c97e" />
+                            <Ionicons name="chevron-forward" size={11} color={colors.accent} />
                           </View>
                         </>
                       );
@@ -331,8 +332,8 @@ export default function MapScreen() {
 
       {/* Multi-pin overlay — tracks marker via Animated.Value.setValue on region change */}
       {selectedGroup && (
-        <Animated.View style={[styles.calloutBox, { position: 'absolute', left: animLeft, bottom: animBottom, elevation: 10, zIndex: 10 }]}>
-          <Text style={{ fontSize: 11, color: '#606060', fontWeight: '600', marginBottom: 6 }}>
+        <Animated.View style={[styles.calloutBox, { backgroundColor: colors.surfaceElevated, borderColor: colors.border, position: 'absolute', left: animLeft, bottom: animBottom, elevation: 10, zIndex: 10 }]}>
+          <Text style={{ fontSize: 11, color: colors.textMuted, fontWeight: '600', marginBottom: 6 }}>
             {selectedGroup.pins.length} elementos aquí
           </Text>
           <ScrollView
@@ -351,18 +352,18 @@ export default function MapScreen() {
                     router.push(`/(app)/pin/${pin.id}` as any);
                   }}
                 >
-                  {i > 0 && <View style={styles.divider} />}
+                  {i > 0 && <View style={[styles.divider, { backgroundColor: colors.border }]} />}
                   <View style={{ ...styles.row, gap: 6 }}>
-                    {l1 && <TagIcon tagName={l1} size={12} color="#909090" />}
-                    <Text style={{ fontSize: 13, fontWeight: '600', color: '#f5f5f5', flex: 1 }} numberOfLines={1}>
+                    {l1 && <TagIcon tagName={l1} size={12} color={colors.textSecondary} />}
+                    <Text style={{ fontSize: 13, fontWeight: '600', color: colors.textPrimary, flex: 1 }} numberOfLines={1}>
                       {pin.description}
                     </Text>
                   </View>
                   <View style={{ ...styles.row, marginTop: 4 }}>
-                    <Text style={{ fontSize: 11, color: '#909090', flex: 1 }} numberOfLines={1}>
+                    <Text style={{ fontSize: 11, color: colors.textSecondary, flex: 1 }} numberOfLines={1}>
                       #{pin.collection_number} · {pin.city}, {pin.country}
                     </Text>
-                    <Ionicons name="chevron-forward" size={11} color="#e8c97e" />
+                    <Ionicons name="chevron-forward" size={11} color={colors.accent} />
                   </View>
                 </TouchableOpacity>
               );
@@ -393,7 +394,7 @@ export default function MapScreen() {
           <Ionicons
             name="options-outline"
             size={16}
-            color={activeFilterCount > 0 ? '#0f0f0f' : '#909090'}
+            color={activeFilterCount > 0 ? colors.surface : colors.textSecondary}
           />
           {activeFilterCount > 0 && (
             <Text className="text-surface text-xs font-bold">{activeFilterCount}</Text>
@@ -404,7 +405,7 @@ export default function MapScreen() {
       {!loading && geocodedPins.length === 0 && (
         <View className="absolute inset-0 items-center justify-center px-8 pointer-events-none">
           <View className="bg-surface-elevated rounded-2xl px-6 py-5 items-center">
-            <Ionicons name="earth-outline" size={32} color="#606060" />
+            <Ionicons name="earth-outline" size={32} color={colors.textMuted} />
             <Text className="text-text-secondary text-sm text-center mt-3">
               Ningún elemento tiene ubicación todavía.{'\n'}Edita un elemento para añadir su posición en el mapa.
             </Text>

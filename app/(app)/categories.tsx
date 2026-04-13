@@ -18,6 +18,7 @@ import { supabase } from '../../lib/supabase';
 import { useTags } from '../../hooks/useTags';
 import { Tag } from '../../lib/types';
 import TagIcon from '../../components/ui/TagIcon';
+import { useThemeColors } from '../../contexts/ThemeContext';
 
 const L1_ICONS = [
   'star-outline', 'heart-outline', 'flag-outline', 'football-outline',
@@ -41,6 +42,7 @@ type RenameModalState =
 
 export default function CategoriesScreen() {
   const insets = useSafeAreaInsets();
+  const colors = useThemeColors();
   const { tagGroups, standaloneTags, loading, refetch } = useTags();
   const [createModal, setCreateModal] = useState<CreateModalState>({ type: null });
   const [renameModal, setRenameModal] = useState<RenameModalState>({ type: null });
@@ -141,7 +143,7 @@ export default function CategoriesScreen() {
   if (loading) {
     return (
       <View className="flex-1 bg-surface items-center justify-center">
-        <ActivityIndicator color="#e8c97e" />
+        <ActivityIndicator color={colors.accent} />
       </View>
     );
   }
@@ -151,14 +153,14 @@ export default function CategoriesScreen() {
       {/* Header */}
       <View className="flex-row items-center px-4 py-3">
         <TouchableOpacity onPress={() => router.back()} className="mr-3">
-          <Ionicons name="arrow-back" size={24} color="#f5f5f5" />
+          <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
         </TouchableOpacity>
         <Text className="text-text-primary text-lg font-semibold flex-1">Categorías</Text>
         <TouchableOpacity
           onPress={() => { setNewName(''); setSelectedIcon('star-outline'); setCreateModal({ type: 'l1' }); }}
           className="flex-row items-center bg-accent rounded-xl px-3 py-2" style={{ gap: 6 }}
         >
-          <Ionicons name="add" size={16} color="#0f0f0f" />
+          <Ionicons name="add" size={16} color={colors.surface} />
           <Text className="text-surface text-sm font-semibold">Nueva Categoría</Text>
         </TouchableOpacity>
       </View>
@@ -169,7 +171,7 @@ export default function CategoriesScreen() {
       >
         {tagGroups.length === 0 && standaloneTags.length === 0 ? (
           <View className="flex-1 items-center justify-center py-16">
-            <Ionicons name="pricetags-outline" size={40} color="#606060" />
+            <Ionicons name="pricetags-outline" size={40} color={colors.textMuted} />
             <Text className="text-text-secondary text-base mt-4 text-center">
               Aún no tienes categorías.{'\n'}Crea una categoría para empezar.
             </Text>
@@ -190,10 +192,10 @@ export default function CategoriesScreen() {
                     <Text className="text-text-secondary text-sm flex-1">{tag.name}</Text>
                     <View className="flex-row items-center" style={{ gap: 12 }}>
                       <TouchableOpacity onPress={() => { setRenameValue(tag.name); setRenameModal({ type: 'tag', tag }); }}>
-                        <Ionicons name="pencil-outline" size={14} color="#a0a0a0" />
+                        <Ionicons name="pencil-outline" size={14} color={colors.textSecondary} />
                       </TouchableOpacity>
                       <TouchableOpacity onPress={() => handleDelete(tag)}>
-                        <Ionicons name="trash-outline" size={14} color="#e05c5c" />
+                        <Ionicons name="trash-outline" size={14} color={colors.danger} />
                       </TouchableOpacity>
                     </View>
                   </View>
@@ -205,7 +207,7 @@ export default function CategoriesScreen() {
             onPress={() => { setNewName(''); setCreateModal({ type: 'l2', parentId: null }); }}
             className="bg-surface-card rounded-2xl px-4 py-4 flex-row items-center justify-center" style={{ gap: 8 }}
           >
-            <Ionicons name="add-circle-outline" size={18} color="#606060" />
+            <Ionicons name="add-circle-outline" size={18} color={colors.textMuted} />
             <Text className="text-text-muted text-sm">Añadir subcategoría compartida</Text>
           </TouchableOpacity>
         </View>
@@ -220,16 +222,16 @@ export default function CategoriesScreen() {
             <View className="bg-surface-card rounded-2xl overflow-hidden">
               <View className="px-4 py-3 flex-row items-center justify-between">
                 <View className="flex-row items-center flex-1" style={{ gap: 10 }}>
-                  <TagIcon tagName={group.category.name} tagIcon={group.category.icon} size={16} color="#a0a0a0" />
+                  <TagIcon tagName={group.category.name} tagIcon={group.category.icon} size={16} color={colors.textSecondary} />
                   <Text className="text-text-primary text-base font-semibold">{group.category.name}</Text>
                   <Text className="text-text-muted text-xs">{group.subcategories.length} subcats</Text>
                 </View>
                 <View className="flex-row items-center" style={{ gap: 12 }}>
                   <TouchableOpacity onPress={() => { setRenameValue(group.category.name); setSelectedIcon(group.category.icon ?? 'star-outline'); setRenameModal({ type: 'tag', tag: group.category }); }}>
-                    <Ionicons name="pencil-outline" size={16} color="#a0a0a0" />
+                    <Ionicons name="pencil-outline" size={16} color={colors.textSecondary} />
                   </TouchableOpacity>
                   <TouchableOpacity onPress={() => handleDelete(group.category)}>
-                    <Ionicons name="trash-outline" size={16} color="#e05c5c" />
+                    <Ionicons name="trash-outline" size={16} color={colors.danger} />
                   </TouchableOpacity>
                 </View>
               </View>
@@ -242,10 +244,10 @@ export default function CategoriesScreen() {
                     <Text className="text-text-secondary text-sm flex-1">{sub.name}</Text>
                     <View className="flex-row items-center" style={{ gap: 12 }}>
                       <TouchableOpacity onPress={() => { setRenameValue(sub.name); setRenameModal({ type: 'tag', tag: sub }); }}>
-                        <Ionicons name="pencil-outline" size={14} color="#a0a0a0" />
+                        <Ionicons name="pencil-outline" size={14} color={colors.textSecondary} />
                       </TouchableOpacity>
                       <TouchableOpacity onPress={() => handleDelete(sub)}>
-                        <Ionicons name="trash-outline" size={14} color="#e05c5c" />
+                        <Ionicons name="trash-outline" size={14} color={colors.danger} />
                       </TouchableOpacity>
                     </View>
                   </View>
@@ -258,7 +260,7 @@ export default function CategoriesScreen() {
                 onPress={() => { setNewName(''); setCreateModal({ type: 'l2', parentId: group.category.id }); }}
                 className="px-4 py-3 flex-row items-center" style={{ paddingLeft: 32, gap: 6 }}
               >
-                <Ionicons name="add-circle-outline" size={14} color="#606060" />
+                <Ionicons name="add-circle-outline" size={14} color={colors.textMuted} />
                 <Text className="text-text-muted text-sm">Añadir subcategoría</Text>
               </TouchableOpacity>
             </View>
@@ -312,7 +314,7 @@ export default function CategoriesScreen() {
                           <Ionicons
                             name={iconName as any}
                             size={20}
-                            color={selectedIcon === iconName ? '#0f0f0f' : '#a0a0a0'}
+                            color={selectedIcon === iconName ? colors.surface : colors.textSecondary}
                           />
                         </TouchableOpacity>
                       ))}
@@ -326,7 +328,7 @@ export default function CategoriesScreen() {
                       ? 'Nombre de la subcategoría compartida'
                       : 'Nombre de la categoría'
                   }
-                  placeholderTextColor="#606060"
+                  placeholderTextColor={colors.textMuted}
                   value={newName}
                   onChangeText={setNewName}
                   autoFocus
@@ -345,7 +347,7 @@ export default function CategoriesScreen() {
                     className={`flex-1 rounded-xl py-3 items-center ${saving || !newName.trim() ? 'bg-accent-muted' : 'bg-accent'}`}
                   >
                     {saving ? (
-                      <ActivityIndicator color="#0f0f0f" size="small" />
+                      <ActivityIndicator color={colors.surface} size="small" />
                     ) : (
                       <Text className="text-surface text-sm font-semibold">Crear</Text>
                     )}
@@ -391,7 +393,7 @@ export default function CategoriesScreen() {
                           <Ionicons
                             name={iconName as any}
                             size={20}
-                            color={selectedIcon === iconName ? '#0f0f0f' : '#a0a0a0'}
+                            color={selectedIcon === iconName ? colors.surface : colors.textSecondary}
                           />
                         </TouchableOpacity>
                       ))}
@@ -419,7 +421,7 @@ export default function CategoriesScreen() {
                     className={`flex-1 rounded-xl py-3 items-center ${saving || !renameValue.trim() ? 'bg-accent-muted' : 'bg-accent'}`}
                   >
                     {saving ? (
-                      <ActivityIndicator color="#0f0f0f" size="small" />
+                      <ActivityIndicator color={colors.surface} size="small" />
                     ) : (
                       <Text className="text-surface text-sm font-semibold">Guardar</Text>
                     )}

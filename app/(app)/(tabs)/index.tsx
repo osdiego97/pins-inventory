@@ -14,7 +14,8 @@ import { normalize } from '../../../lib/utils';
 import { usePins } from '../../../hooks/usePins';
 import { usePinDelete } from '../../../hooks/usePinDelete';
 import { useTags } from '../../../hooks/useTags';
-import { useUserSettings } from '../../../hooks/useUserSettings';
+import { useUserSettingsContext } from '../../../contexts/UserSettingsContext';
+import { useThemeColors } from '../../../contexts/ThemeContext';
 import { FilterState } from '../../../lib/types';
 import PinCard from '../../../components/pins/PinCard';
 import FilterBottomSheet from '../../../components/pins/FilterBottomSheet';
@@ -25,7 +26,8 @@ export default function CollectionScreen() {
   const { pins, loading, error, refetch } = usePins();
   const { confirmDelete } = usePinDelete(refetch);
   const { tagGroups, standaloneTags, refetch: refetchTags } = useTags();
-  const { settings } = useUserSettings();
+  const { settings } = useUserSettingsContext();
+  const colors = useThemeColors();
   const [search, setSearch] = useState('');
   const [filters, setFilters] = useState<FilterState>(EMPTY_FILTERS);
   const [filterSheetVisible, setFilterSheetVisible] = useState(false);
@@ -111,24 +113,24 @@ export default function CollectionScreen() {
           onPress={() => router.push('/(app)/settings' as any)}
           className="mt-1"
         >
-          <Ionicons name="settings-outline" size={22} color="#606060" />
+          <Ionicons name="settings-outline" size={22} color={colors.textMuted} />
         </TouchableOpacity>
       </View>
 
       {/* Search bar + Filter button */}
       <View className="mx-4 mb-3 flex-row items-center gap-2">
         <View className="flex-1 flex-row items-center bg-surface-card rounded-xl px-3">
-          <Ionicons name="search" size={16} color="#606060" />
+          <Ionicons name="search" size={16} color={colors.textMuted} />
           <TextInput
             className="flex-1 ml-2 py-3 text-text-primary text-sm"
             placeholder="Descripción, país, material, #42..."
-            placeholderTextColor="#606060"
+            placeholderTextColor={colors.textMuted}
             value={search}
             onChangeText={setSearch}
           />
           {search.length > 0 && (
             <TouchableOpacity onPress={() => setSearch('')}>
-              <Ionicons name="close-circle" size={16} color="#606060" />
+              <Ionicons name="close-circle" size={16} color={colors.textMuted} />
             </TouchableOpacity>
           )}
         </View>
@@ -149,7 +151,7 @@ export default function CollectionScreen() {
           <Ionicons
             name="options-outline"
             size={16}
-            color={activeFilterCount > 0 ? '#0f0f0f' : '#909090'}
+            color={activeFilterCount > 0 ? colors.surface : colors.textSecondary}
           />
           {activeFilterCount > 0 && (
             <Text className="text-surface text-xs font-bold">{activeFilterCount}</Text>
@@ -165,7 +167,7 @@ export default function CollectionScreen() {
       {/* Content */}
       {loading && pins.length === 0 ? (
         <View className="flex-1 items-center justify-center">
-          <ActivityIndicator color="#e8c97e" />
+          <ActivityIndicator color={colors.accent} />
         </View>
       ) : error ? (
         <View className="flex-1 items-center justify-center px-8">
@@ -202,7 +204,7 @@ data={filtered}
         style={{ bottom: insets.bottom + 24 }}
         onPress={() => router.push('/(app)/pin/new' as any)}
       >
-        <Ionicons name="add" size={28} color="#0f0f0f" />
+        <Ionicons name="add" size={28} color={colors.surface} />
       </TouchableOpacity>
       </View>{/* end padded content */}
 

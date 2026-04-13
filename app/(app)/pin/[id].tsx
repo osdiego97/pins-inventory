@@ -8,6 +8,7 @@ import { usePinDetail } from '../../../hooks/usePinDetail';
 import { usePinDelete } from '../../../hooks/usePinDelete';
 import { getSignedImageUrl } from '../../../lib/storage';
 import TagIcon from '../../../components/ui/TagIcon';
+import { useTheme, useThemeColors } from '../../../contexts/ThemeContext';
 
 export default function PinDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -15,6 +16,8 @@ export default function PinDetailScreen() {
   const { confirmDelete } = usePinDelete(() => router.replace('/(app)/' as any));
   const insets = useSafeAreaInsets();
   const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const colors = useThemeColors();
+  const { resolvedTheme } = useTheme();
 
   useFocusEffect(
     useCallback(() => {
@@ -35,7 +38,7 @@ export default function PinDetailScreen() {
         {/* Header */}
         <View className="flex-row items-center px-4 py-3">
           <TouchableOpacity onPress={() => router.back()} className="mr-3">
-            <Ionicons name="arrow-back" size={24} color="#f5f5f5" />
+            <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
           </TouchableOpacity>
           <Text className="text-text-primary text-lg font-semibold flex-1" numberOfLines={1}>
             {pin?.description ?? ''}
@@ -43,10 +46,10 @@ export default function PinDetailScreen() {
           {pin && (
             <View className="flex-row items-center" style={{ gap: 16 }}>
               <TouchableOpacity onPress={() => router.push(`/(app)/pin/edit/${pin.id}` as any)}>
-                <Ionicons name="pencil-outline" size={20} color="#f5f5f5" />
+                <Ionicons name="pencil-outline" size={20} color={colors.textPrimary} />
               </TouchableOpacity>
               <TouchableOpacity onPress={() => confirmDelete(pin.id)}>
-                <Ionicons name="trash-outline" size={20} color="#e05c5c" />
+                <Ionicons name="trash-outline" size={20} color={colors.danger} />
               </TouchableOpacity>
             </View>
           )}
@@ -54,7 +57,7 @@ export default function PinDetailScreen() {
 
         {loading ? (
           <View className="flex-1 items-center justify-center">
-            <ActivityIndicator color="#e8c97e" />
+            <ActivityIndicator color={colors.accent} />
           </View>
         ) : error || !pin ? (
           <View className="flex-1 items-center justify-center px-8">
@@ -73,7 +76,7 @@ export default function PinDetailScreen() {
                 <Image source={{ uri: imageUrl }} className="w-full h-full" resizeMode="cover" />
               ) : (
                 <>
-                  <Ionicons name="image-outline" size={48} color="#606060" />
+                  <Ionicons name="image-outline" size={48} color={colors.textMuted} />
                   <Text className="text-text-muted text-sm mt-2">Sin foto</Text>
                 </>
               )}
@@ -89,7 +92,7 @@ export default function PinDetailScreen() {
               {/* Location */}
               {(pin.city || pin.country) && (
                 <View className="flex-row items-center mt-2">
-                  <Ionicons name="location-outline" size={16} color="#a0a0a0" />
+                  <Ionicons name="location-outline" size={16} color={colors.textSecondary} />
                   <Text className="text-text-secondary text-sm ml-1">
                     {[pin.city, pin.region, pin.country].filter(Boolean).join(' · ')}
                   </Text>
@@ -100,13 +103,13 @@ export default function PinDetailScreen() {
               <View className="flex-row items-center mt-2" style={{ gap: 8 }}>
                 {pin.acquired_year && (
                   <View className="flex-row items-center">
-                    <Ionicons name="calendar-outline" size={16} color="#a0a0a0" />
+                    <Ionicons name="calendar-outline" size={16} color={colors.textSecondary} />
                     <Text className="text-text-secondary text-sm ml-1">{pin.acquired_year}</Text>
                   </View>
                 )}
                 {pin.is_commemorative && (
                   <View className="bg-surface-elevated rounded-full px-3 py-1 flex-row items-center" style={{ gap: 5 }}>
-                    <Ionicons name="ribbon" size={13} color="#e8c97e" />
+                    <Ionicons name="ribbon" size={13} color={colors.accent} />
                     <Text className="text-accent text-xs font-medium">Conmemorativo</Text>
                   </View>
                 )}
@@ -117,13 +120,13 @@ export default function PinDetailScreen() {
                 <View className="mt-3" style={{ gap: 6 }}>
                   {pin.material && (
                     <View className="flex-row items-center" style={{ gap: 6 }}>
-                      <Ionicons name="construct-outline" size={14} color="#a0a0a0" />
+                      <Ionicons name="construct-outline" size={14} color={colors.textSecondary} />
                       <Text className="text-text-secondary text-sm">{pin.material}</Text>
                     </View>
                   )}
                   {(pin.color ?? []).length > 0 && (
                     <View className="flex-row items-center flex-wrap" style={{ gap: 6 }}>
-                      <Ionicons name="color-palette-outline" size={14} color="#a0a0a0" />
+                      <Ionicons name="color-palette-outline" size={14} color={colors.textSecondary} />
                       <Text className="text-text-secondary text-sm">
                         {pin.color!.map((c) => c.charAt(0).toUpperCase() + c.slice(1)).join(', ')}
                       </Text>
@@ -142,7 +145,7 @@ export default function PinDetailScreen() {
                     {pin.tags!.map((tag) => (
                       <View key={tag.id} className="bg-surface-card rounded-full px-3 py-1.5 flex-row items-center" style={{ gap: 5 }}>
                         {!tag.parent_id && (
-                          <TagIcon tagName={tag.name} size={13} color="#a0a0a0" />
+                          <TagIcon tagName={tag.name} size={13} color={colors.textSecondary} />
                         )}
                         <Text className="text-text-secondary text-sm">
                           {tag.parent_id ? tag.name : tag.name.toUpperCase()}
@@ -169,10 +172,10 @@ export default function PinDetailScreen() {
                     pitchEnabled={false}
                     rotateEnabled={false}
                     mapType="standard"
-                    userInterfaceStyle="dark"
+                    userInterfaceStyle={resolvedTheme}
                   >
                     <Marker coordinate={{ latitude: pin.latitude, longitude: pin.longitude }}>
-                      <Ionicons name="location-sharp" size={32} color="#e8c97e" />
+                      <Ionicons name="location-sharp" size={32} color={colors.accent} />
                     </Marker>
                   </MapView>
                 </View>

@@ -2,6 +2,7 @@ import { memo } from 'react';
 import { ScrollView, TouchableOpacity, Text, View } from 'react-native';
 import TagIcon from '../ui/TagIcon';
 import { TAG_ICONS } from '../../lib/tagIcons';
+import { useThemeColors } from '../../contexts/ThemeContext';
 
 interface Props {
   selected: string | null;
@@ -11,6 +12,7 @@ interface Props {
 const CATEGORIES = Object.keys(TAG_ICONS);
 
 function CategoryFilterChips({ selected, onSelect }: Props) {
+  const colors = useThemeColors();
   return (
     <ScrollView
       horizontal
@@ -47,7 +49,7 @@ function CategoryFilterChips({ selected, onSelect }: Props) {
             <TagIcon
               tagName={category}
               size={12}
-              color={isActive ? '#0f0f0f' : '#909090'}
+              color={isActive ? colors.surface : colors.textSecondary}
             />
             <Text
               className={`text-xs font-medium ${

@@ -2,6 +2,7 @@ import { View, Text, TouchableOpacity } from 'react-native';
 import { TagGroup } from '../../hooks/useTags';
 import TagIcon from '../ui/TagIcon';
 import { Tag } from '../../lib/types';
+import { useThemeColors } from '../../contexts/ThemeContext';
 
 interface TagPickerProps {
   tagGroups: TagGroup[];
@@ -11,6 +12,7 @@ interface TagPickerProps {
 }
 
 export default function TagPicker({ tagGroups, standaloneTags = [], selectedIds, onToggle }: TagPickerProps) {
+  const colors = useThemeColors();
   const isEmpty = tagGroups.length === 0 && standaloneTags.length === 0;
 
   if (isEmpty) {
@@ -38,7 +40,7 @@ export default function TagPicker({ tagGroups, standaloneTags = [], selectedIds,
               tagName={category.name}
               tagIcon={category.icon}
               size={13}
-              color={selectedIds.includes(category.id) ? '#0f0f0f' : '#f5f5f5'}
+              color={selectedIds.includes(category.id) ? colors.surface : colors.textPrimary}
             />
             <Text
               className={`text-sm font-semibold ${
