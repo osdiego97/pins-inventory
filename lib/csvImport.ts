@@ -14,20 +14,18 @@ export type SchemaField =
   | 'year'
   | 'material'
   | 'color'
-  | 'notes'
   | null; // null = ignored
 
 export const SCHEMA_FIELD_LABELS: Record<Exclude<SchemaField, null>, string> = {
-  description: 'Descripción *',
-  l1_category: 'Categoría L1',
-  l2_category: 'Subcategoría L2',
+  description: 'Descripción',
+  l1_category: 'Categoría',
+  l2_category: 'Subcategoría',
   country: 'País',
   city: 'Ciudad',
   region: 'Región',
   year: 'Año',
   material: 'Material',
   color: 'Color',
-  notes: 'Notas',
 };
 
 export const ALL_SCHEMA_FIELDS = Object.keys(SCHEMA_FIELD_LABELS) as Exclude<SchemaField, null>[];
@@ -85,9 +83,6 @@ const FIELD_ALIASES: Record<string, Exclude<SchemaField, null>> = {
   // color
   color: 'color', colour: 'color', colors: 'color', colores: 'color',
 
-  // notes
-  notes: 'notes', notas: 'notes', comments: 'notes', comentarios: 'notes',
-  nota: 'notes', observaciones: 'notes',
 };
 
 /** Maps CSV headers to schema fields. Returns null for unrecognized headers. */

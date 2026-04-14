@@ -11,6 +11,7 @@ import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import * as DocumentPicker from 'expo-document-picker';
+import * as FileSystem from 'expo-file-system';
 import { useThemeColors } from '../../contexts/ThemeContext';
 import { useAuth } from '../../hooks/useAuth';
 import { useTags } from '../../hooks/useTags';
@@ -58,8 +59,7 @@ export default function ImportScreen() {
     if (result.canceled || !result.assets?.[0]) return;
 
     const asset = result.assets[0];
-    const response = await fetch(asset.uri);
-    const text = await response.text();
+    const text = await FileSystem.readAsStringAsync(asset.uri);
     const parsed = parseCSVString(text);
 
     if (parsed.error || parsed.rows.length === 0) {
@@ -170,7 +170,7 @@ function StepPick({ onPick, colors }: { onPick: () => void; colors: ReturnType<t
           mapeo antes de importar.
         </Text>
         <Text className="text-text-muted text-xs font-medium uppercase tracking-wider mb-2">
-          Columnas reconocidas
+          Columnas reconocidas *
         </Text>
         {ALL_SCHEMA_FIELDS.map((field) => (
           <View key={field} className="flex-row items-center py-1" style={{ gap: 8 }}>
