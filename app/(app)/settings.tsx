@@ -6,7 +6,6 @@ import {
   TouchableOpacity,
   ScrollView,
   ActivityIndicator,
-  Alert,
 } from 'react-native';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -14,6 +13,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '../../lib/supabase';
 import { useUserSettingsContext } from '../../contexts/UserSettingsContext';
 import { useThemeColors } from '../../contexts/ThemeContext';
+import { useAuth } from '../../hooks/useAuth';
+import ConfirmSheet from '../../components/ui/ConfirmSheet';
 
 const COLLECTION_ICONS = [
   'albums-outline',
@@ -41,10 +42,13 @@ const THEME_OPTIONS: { label: string; value: 'dark' | 'light' | 'system' }[] = [
 export default function SettingsScreen() {
   const insets = useSafeAreaInsets();
   const { settings, loading, saveSettings } = useUserSettingsContext();
+  const { session } = useAuth();
   const colors = useThemeColors();
   const [collectionName, setCollectionName] = useState('');
   const [nameError, setNameError] = useState<string | null>(null);
   const [savingName, setSavingName] = useState(false);
+  const [signOutSheetVisible, setSignOutSheetVisible] = useState(false);
+  const [signingOut, setSigningOut] = useState(false);
 
   const currentName = settings?.collection_name ?? '';
   const currentIcon = (settings?.collection_icon as CollectionIcon | null) ?? 'albums-outline';
@@ -69,17 +73,9 @@ export default function SettingsScreen() {
   }
 
   async function handleSignOut() {
-    Alert.alert('Cerrar sesión', '¿Seguro que quieres cerrar sesión?', [
-      { text: 'Cancelar', style: 'cancel' },
-      {
-        text: 'Cerrar sesión',
-        style: 'destructive',
-        onPress: async () => {
-          await supabase.auth.signOut();
-          router.replace('/(auth)/login' as any);
-        },
-      },
-    ]);
+    setSigningOut(true);
+    await supabase.auth.signOut();
+    router.replace('/(auth)/login' as any);
   }
 
   if (loading) {
@@ -221,16 +217,43 @@ export default function SettingsScreen() {
           ))}
         </View>
 
+        {/* Account */}
+        <Text className="text-text-muted text-xs font-medium uppercase tracking-wider mb-3">
+          Cuenta
+        </Text>
+        <View className="bg-surface-card rounded-2xl px-4 py-4 mb-6 flex-row items-center" style={{ gap: 12 }}>
+          <View className="w-9 h-9 rounded-full bg-surface-elevated items-center justify-center">
+            <Ionicons name="person-outline" size={18} color={colors.textSecondary} />
+          </View>
+          <View className="flex-1">
+            <Text className="text-text-muted text-xs mb-0.5">Correo electrónico</Text>
+            <Text className="text-text-primary text-sm font-medium" numberOfLines={1}>
+              {session?.user?.email ?? '—'}
+            </Text>
+          </View>
+        </View>
+
         {/* Sign out */}
         <TouchableOpacity
           className="bg-surface-card rounded-2xl px-4 py-4 flex-row items-center justify-center"
           style={{ gap: 10 }}
-          onPress={handleSignOut}
+          onPress={() => setSignOutSheetVisible(true)}
         >
           <Ionicons name="log-out-outline" size={20} color={colors.danger} />
           <Text className="text-danger text-base font-medium">Cerrar sesión</Text>
         </TouchableOpacity>
       </ScrollView>
+
+      <ConfirmSheet
+        visible={signOutSheetVisible}
+        icon="log-out-outline"
+        title="¿Cerrar sesión?"
+        body={`Para volver a entrar, solicita un nuevo enlace mágico con ${session?.user?.email ?? 'tu correo electrónico'}.`}
+        confirmLabel="Cerrar sesión"
+        isLoading={signingOut}
+        onConfirm={handleSignOut}
+        onCancel={() => setSignOutSheetVisible(false)}
+      />
     </View>
   );
 }

@@ -198,6 +198,7 @@ export interface ImportOptions {
   rows: Record<string, string>[];
   mapping: Record<string, SchemaField>;
   existingTags: Tag[];
+  mode: 'append' | 'overwrite';
   onProgress?: (done: number, total: number) => void;
 }
 
@@ -222,12 +223,17 @@ export async function importFromCSV({
   rows,
   mapping,
   existingTags,
+  mode,
   onProgress,
 }: ImportOptions): Promise<ImportSummary> {
   const summary: ImportSummary = { imported: 0, categoriesCreated: [], skipped: [] };
   const tagMap = await buildTagMap(userId, existingTags);
 
-  // Get current max collection_number to continue sequence
+  if (mode === 'overwrite') {
+    await supabase.from('items').delete().eq('user_id', userId);
+  }
+
+  // Get current max collection_number to continue sequence (0 if overwrite cleared everything)
   const { data: maxData } = await supabase
     .from('items')
     .select('collection_number')

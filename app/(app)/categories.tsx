@@ -11,6 +11,7 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
+import ConfirmSheet from '../../components/ui/ConfirmSheet';
 import { router, useFocusEffect } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -50,6 +51,8 @@ export default function CategoriesScreen() {
   const [selectedIcon, setSelectedIcon] = useState<string>('star-outline');
   const [saving, setSaving] = useState(false);
   const [renameValue, setRenameValue] = useState('');
+  const [deleteSheet, setDeleteSheet] = useState<{ tag: Tag; itemCount: number } | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   useFocusEffect(useCallback(() => { refetch(); }, []));
 
@@ -108,36 +111,27 @@ export default function CategoriesScreen() {
   }
 
   async function handleDelete(tag: Tag) {
-    // Count items using this tag
     const { count } = await supabase
       .from('item_tags')
       .select('*', { count: 'exact', head: true })
       .eq('tag_id', tag.id);
 
-    const countLabel = count && count > 0
-      ? `${count} elemento${count !== 1 ? 's' : ''} usa esta categoría. Las asociaciones se eliminarán.`
-      : 'Esta categoría no está siendo usada actualmente.';
+    setDeleteSheet({ tag, itemCount: count ?? 0 });
+  }
 
-    Alert.alert(
-      `Eliminar "${tag.name}"`,
-      countLabel + '\n\nLos elementos no se eliminarán.',
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        {
-          text: 'Eliminar',
-          style: 'destructive',
-          onPress: async () => {
-            const { data: { user } } = await supabase.auth.getUser();
-            if (!user) return;
-            await supabase.rpc('delete_tag_with_associations', {
-              p_tag_id: tag.id,
-              p_user_id: user.id,
-            });
-            refetch();
-          },
-        },
-      ]
-    );
+  async function executeDeleteTag() {
+    if (!deleteSheet) return;
+    setDeleting(true);
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      await supabase.rpc('delete_tag_with_associations', {
+        p_tag_id: deleteSheet.tag.id,
+        p_user_id: user.id,
+      });
+    }
+    setDeleting(false);
+    setDeleteSheet(null);
+    refetch();
   }
 
   if (loading) {
@@ -432,6 +426,23 @@ export default function CategoriesScreen() {
           </View>
         </KeyboardAvoidingView>
       </Modal>
+
+      <ConfirmSheet
+        visible={deleteSheet !== null}
+        icon="trash-outline"
+        title={deleteSheet ? `Eliminar "${deleteSheet.tag.name}"` : ''}
+        body={
+          deleteSheet
+            ? deleteSheet.itemCount > 0
+              ? `${deleteSheet.itemCount} elemento${deleteSheet.itemCount !== 1 ? 's' : ''} usa esta categoría. Las asociaciones se eliminarán, pero los elementos no.`
+              : 'Esta categoría no está siendo usada actualmente.'
+            : undefined
+        }
+        confirmLabel="Eliminar categoría"
+        isLoading={deleting}
+        onConfirm={executeDeleteTag}
+        onCancel={() => setDeleteSheet(null)}
+      />
     </View>
   );
 }

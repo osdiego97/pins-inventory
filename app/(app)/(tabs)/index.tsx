@@ -13,6 +13,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { normalize } from '../../../lib/utils';
 import { usePins } from '../../../hooks/usePins';
 import { usePinDelete } from '../../../hooks/usePinDelete';
+import DeleteConfirmSheet from '../../../components/ui/DeleteConfirmSheet';
 import { useTags } from '../../../hooks/useTags';
 import { useUserSettingsContext } from '../../../contexts/UserSettingsContext';
 import { useThemeColors } from '../../../contexts/ThemeContext';
@@ -24,7 +25,7 @@ const EMPTY_FILTERS: FilterState = { l1: [], l2: [], country: null, city: null, 
 
 export default function CollectionScreen() {
   const { pins, loading, error, refetch } = usePins();
-  const { confirmDelete } = usePinDelete(refetch);
+  const { pendingDeleteId, isDeleting, requestDelete, cancelDelete, executeDelete } = usePinDelete(refetch);
   const { tagGroups, standaloneTags, refetch: refetchTags } = useTags();
   const { settings } = useUserSettingsContext();
   const colors = useThemeColors();
@@ -87,10 +88,10 @@ export default function CollectionScreen() {
         pin={item}
         onPress={handlePress}
         onEdit={handleEdit}
-        onDelete={confirmDelete}
+        onDelete={requestDelete}
       />
     ),
-    [handlePress, handleEdit, confirmDelete]
+    [handlePress, handleEdit, requestDelete]
   );
 
   return (
@@ -218,6 +219,13 @@ data={filtered}
         pins={pins}
         tagGroups={tagGroups}
         search={search}
+      />
+
+      <DeleteConfirmSheet
+        visible={pendingDeleteId !== null}
+        isDeleting={isDeleting}
+        onConfirm={executeDelete}
+        onCancel={cancelDelete}
       />
     </View>
   );

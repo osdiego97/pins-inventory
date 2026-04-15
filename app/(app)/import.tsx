@@ -5,13 +5,15 @@ import {
   TouchableOpacity,
   ScrollView,
   ActivityIndicator,
-  Alert,
+  Modal,
+  Pressable,
 } from 'react-native';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import * as DocumentPicker from 'expo-document-picker';
-import * as FileSystem from 'expo-file-system';
+import * as FileSystem from 'expo-file-system/legacy';
+import { supabase } from '../../lib/supabase';
 import { useThemeColors } from '../../contexts/ThemeContext';
 import { useAuth } from '../../hooks/useAuth';
 import { useTags } from '../../hooks/useTags';
@@ -41,12 +43,14 @@ export default function ImportScreen() {
   ];
 
   const [step, setStep] = useState<Step>('pick');
+  const [isReading, setIsReading] = useState(false);
   const [fileName, setFileName] = useState<string>('');
   const [rows, setRows] = useState<Record<string, string>[]>([]);
   const [headers, setHeaders] = useState<string[]>([]);
   const [mapping, setMapping] = useState<Record<string, SchemaField>>({});
   const [progress, setProgress] = useState({ done: 0, total: 0 });
   const [summary, setSummary] = useState<ImportSummary | null>(null);
+  const [existingCount, setExistingCount] = useState<number | null>(null);
 
   // ── Step 1: pick file ──────────────────────────────────────────────────────
 
@@ -59,10 +63,13 @@ export default function ImportScreen() {
     if (result.canceled || !result.assets?.[0]) return;
 
     const asset = result.assets[0];
+    setIsReading(true);
     const text = await FileSystem.readAsStringAsync(asset.uri);
     const parsed = parseCSVString(text);
+    setIsReading(false);
 
     if (parsed.error || parsed.rows.length === 0) {
+      setIsReading(false);
       Alert.alert('Error', parsed.error ?? 'El archivo está vacío o no tiene el formato correcto.');
       return;
     }
@@ -94,6 +101,21 @@ export default function ImportScreen() {
     if (!descriptionMapped) return;
     if (!session?.user?.id) return;
 
+    const { count } = await supabase
+      .from('items')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', session.user.id);
+
+    if (count && count > 0) {
+      setExistingCount(count);
+    } else {
+      runImport('append');
+    }
+  }
+
+  async function runImport(mode: 'append' | 'overwrite') {
+    if (!session?.user?.id) return;
+
     setProgress({ done: 0, total: rows.length });
     setStep('importing');
 
@@ -102,6 +124,7 @@ export default function ImportScreen() {
       rows,
       mapping,
       existingTags: tags,
+      mode,
       onProgress: (done, total) => setProgress({ done, total }),
     });
 
@@ -126,7 +149,7 @@ export default function ImportScreen() {
         </Text>
       </View>
 
-      {step === 'pick' && <StepPick onPick={handlePickFile} colors={colors} />}
+      {step === 'pick' && <StepPick onPick={handlePickFile} isReading={isReading} colors={colors} />}
       {step === 'map' && (
         <StepMap
           headers={headers}
@@ -150,13 +173,71 @@ export default function ImportScreen() {
           insets={insets}
         />
       )}
+
+      <Modal
+        visible={existingCount !== null}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setExistingCount(null)}
+      >
+        <Pressable
+          className="flex-1 justify-end"
+          style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
+          onPress={() => setExistingCount(null)}
+        >
+          <Pressable onPress={() => {}}>
+            <View
+              className="bg-surface rounded-t-3xl px-5 pt-5"
+              style={{ paddingBottom: insets.bottom + 20 }}
+            >
+              <View className="w-10 h-1 rounded-full bg-surface-elevated self-center mb-5" />
+              <Text className="text-text-primary text-base font-semibold mb-1">
+                Ya tienes elementos en tu colección
+              </Text>
+              <Text className="text-text-muted text-sm mb-6">
+                Tienes {existingCount} elemento{existingCount !== 1 ? 's' : ''}. ¿Qué quieres hacer con el CSV?
+              </Text>
+
+              <TouchableOpacity
+                onPress={() => { setExistingCount(null); runImport('append'); }}
+                className="bg-surface-card rounded-2xl px-4 py-4 mb-3 flex-row items-center"
+                style={{ gap: 12 }}
+              >
+                <View className="w-9 h-9 rounded-full bg-surface-elevated items-center justify-center">
+                  <Ionicons name="add-circle-outline" size={20} color={colors.accent} />
+                </View>
+                <View className="flex-1">
+                  <Text className="text-text-primary text-sm font-semibold">Añadir a la colección</Text>
+                  <Text className="text-text-muted text-xs mt-0.5">Los elementos existentes no se tocan</Text>
+                </View>
+                <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={() => { setExistingCount(null); runImport('overwrite'); }}
+                className="bg-surface-card rounded-2xl px-4 py-4 flex-row items-center"
+                style={{ gap: 12 }}
+              >
+                <View className="w-9 h-9 rounded-full bg-surface-elevated items-center justify-center">
+                  <Ionicons name="trash-outline" size={20} color={colors.danger} />
+                </View>
+                <View className="flex-1">
+                  <Text className="text-danger text-sm font-semibold">Sobreescribir colección</Text>
+                  <Text className="text-text-muted text-xs mt-0.5">Se eliminarán los {existingCount} elementos actuales</Text>
+                </View>
+                <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
+              </TouchableOpacity>
+            </View>
+          </Pressable>
+        </Pressable>
+      </Modal>
     </View>
   );
 }
 
 // ─── Step: Pick ───────────────────────────────────────────────────────────────
 
-function StepPick({ onPick, colors }: { onPick: () => void; colors: ReturnType<typeof useThemeColors> }) {
+function StepPick({ onPick, isReading, colors }: { onPick: () => void; isReading: boolean; colors: ReturnType<typeof useThemeColors> }) {
   return (
     <ScrollView
       contentContainerStyle={{ padding: 16, paddingBottom: 32 }}
@@ -193,11 +274,21 @@ function StepPick({ onPick, colors }: { onPick: () => void; colors: ReturnType<t
 
       <TouchableOpacity
         onPress={onPick}
+        disabled={isReading}
         className="bg-accent rounded-2xl py-4 items-center flex-row justify-center"
-        style={{ gap: 10 }}
+        style={{ gap: 10, opacity: isReading ? 0.7 : 1 }}
       >
-        <Ionicons name="document-outline" size={20} color={colors.surface} />
-        <Text className="text-surface text-base font-semibold">Seleccionar archivo CSV</Text>
+        {isReading ? (
+          <>
+            <ActivityIndicator size="small" color={colors.surface} />
+            <Text className="text-surface text-base font-semibold">Leyendo archivo...</Text>
+          </>
+        ) : (
+          <>
+            <Ionicons name="document-outline" size={20} color={colors.surface} />
+            <Text className="text-surface text-base font-semibold">Seleccionar archivo CSV</Text>
+          </>
+        )}
       </TouchableOpacity>
     </ScrollView>
   );
@@ -427,7 +518,7 @@ function StepDone({
             <Text className="text-text-muted text-xs font-medium uppercase tracking-wider mb-2">
               Categorías creadas
             </Text>
-            <View className="bg-surface-card rounded-2xl px-4 py-3 mb-4 flex-row flex-wrap" style={{ gap: 8 }}>
+            <View className="bg-surface-card rounded-2xl px-4 py-3 mb-2 flex-row flex-wrap" style={{ gap: 8 }}>
               {summary.categoriesCreated.map((name) => (
                 <View key={name} className="bg-surface-elevated rounded-lg px-3 py-1.5">
                   <Text className="text-text-secondary text-sm">{name}</Text>
@@ -463,6 +554,23 @@ function StepDone({
             </View>
           </>
         )}
+        {/* Categories hint — always visible */}
+        <TouchableOpacity
+          onPress={() => router.push('/(app)/categories' as any)}
+          className="bg-surface-card rounded-xl px-4 py-3 flex-row items-center justify-between"
+        >
+          <View className="flex-row items-center flex-1" style={{ gap: 10 }}>
+            <Ionicons name="information-circle-outline" size={18} color={colors.accent} />
+            <Text className="text-text-secondary text-sm flex-1">
+              {summary.categoriesCreated.length > 0
+                ? `Se crearon ${summary.categoriesCreated.length} categoría${summary.categoriesCreated.length > 1 ? 's' : ''} nueva${summary.categoriesCreated.length > 1 ? 's' : ''}. `
+                : 'No se crearon categorías nuevas. '}
+              <Text className="text-text-secondary text-sm">Puedes gestionarlas en </Text>
+              <Text className="text-accent font-medium">Ajustes → Categorías</Text>
+            </Text>
+          </View>
+          <Ionicons name="chevron-forward" size={14} color={colors.textMuted} />
+        </TouchableOpacity>
       </ScrollView>
 
       {/* Fixed bottom button */}
