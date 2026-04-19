@@ -136,12 +136,23 @@ export default function OnboardingScreen() {
             </View>
           </View>
 
-          {/* Info note */}
-          <View className="bg-surface-card rounded-xl px-4 py-3 flex-row items-start" style={{ gap: 10 }}>
-            <Ionicons name="information-circle-outline" size={18} color={colors.textMuted} style={{ marginTop: 1 }} />
-            <Text className="text-text-muted text-sm flex-1">
-              Podrás configurar las categorías desde Ajustes después de empezar.
-            </Text>
+          {/* Info notes */}
+          <View style={{ gap: 10 }}>
+            <View className="bg-surface-card rounded-xl px-4 py-3 flex-row items-start" style={{ gap: 10 }}>
+              <Ionicons name="information-circle-outline" size={18} color={colors.textMuted} style={{ marginTop: 1 }} />
+              <Text className="text-text-muted text-sm flex-1">
+                Podrás configurar las categorías desde{' '}
+                <Text className="text-text-secondary font-medium">Ajustes</Text>{' '}
+                después de empezar.
+              </Text>
+            </View>
+            <View className="bg-surface-card rounded-xl px-4 py-3 flex-row items-start" style={{ gap: 10 }}>
+              <Ionicons name="cloud-upload-outline" size={18} color={colors.textMuted} style={{ marginTop: 1 }} />
+              <Text className="text-text-muted text-sm flex-1">
+                ¿Ya tienes tu colección en una hoja de cálculo? Importa un CSV desde{' '}
+                <Text className="text-text-secondary font-medium">Ajustes → Importar colección</Text>.
+              </Text>
+            </View>
           </View>
         </View>
       </ScrollView>

@@ -8,12 +8,13 @@ import { usePinDetail } from '../../../hooks/usePinDetail';
 import { usePinDelete } from '../../../hooks/usePinDelete';
 import { getSignedImageUrl } from '../../../lib/storage';
 import TagIcon from '../../../components/ui/TagIcon';
+import DeleteConfirmSheet from '../../../components/ui/DeleteConfirmSheet';
 import { useTheme, useThemeColors } from '../../../contexts/ThemeContext';
 
 export default function PinDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { pin, loading, error, refetch } = usePinDetail(id);
-  const { confirmDelete } = usePinDelete(() => router.replace('/(app)/' as any));
+  const { pendingDeleteId, isDeleting, requestDelete, cancelDelete, executeDelete } = usePinDelete(() => router.replace('/(app)/' as any));
   const insets = useSafeAreaInsets();
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const colors = useThemeColors();
@@ -48,7 +49,7 @@ export default function PinDetailScreen() {
               <TouchableOpacity onPress={() => router.push(`/(app)/pin/edit/${pin.id}` as any)}>
                 <Ionicons name="pencil-outline" size={20} color={colors.textPrimary} />
               </TouchableOpacity>
-              <TouchableOpacity onPress={() => confirmDelete(pin.id)}>
+              <TouchableOpacity onPress={() => requestDelete(pin.id)}>
                 <Ionicons name="trash-outline" size={20} color={colors.danger} />
               </TouchableOpacity>
             </View>
@@ -184,6 +185,13 @@ export default function PinDetailScreen() {
           </ScrollView>
         )}
       </View>
+
+      <DeleteConfirmSheet
+        visible={pendingDeleteId !== null}
+        isDeleting={isDeleting}
+        onConfirm={executeDelete}
+        onCancel={cancelDelete}
+      />
     </>
   );
 }

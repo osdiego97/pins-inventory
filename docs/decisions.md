@@ -23,6 +23,41 @@
 
 ## Entries
 
+### 2026-04-15 Custom bottom sheets over native Alert for destructive confirmations
+
+**Context:** All destructive actions (delete pin, delete category, sign out, CSV overwrite) were using `Alert.alert`. On Android the system dialog looks visually out of place — different typography, different button layout, no ability to show contextual detail (e.g. item counts, email address).
+
+**Options considered:**
+  - Keep `Alert.alert`: zero effort, but system-styled and not dismissible by tapping outside on Android
+  - Custom `Modal` bottom sheets: matches app design, supports rich copy, consistent dismiss behaviour across platforms
+
+**Decision:** Replaced all destructive `Alert.alert` confirmations with custom bottom sheet modals. Created two reusable components:
+  - `DeleteConfirmSheet` — dedicated delete confirmation with red button, spinner on in-progress state
+  - `ConfirmSheet` — generic configurable sheet (icon, title, body, confirm label, destructive/accent colour). Used for sign-out and delete-category flows.
+
+**Rationale:** Destructive confirmations are high-stakes moments — the UI should feel intentional and match the app. `ConfirmSheet` is generic enough to cover any future confirmation without creating a new component each time.
+
+**Trade-off accepted:** Two extra components to maintain. Error toasts (e.g. failed save) remain as `Alert.alert` — these are informational only and don't warrant a custom sheet.
+
+---
+
+### 2026-04-15 CSV import — overwrite vs. append mode
+
+**Context:** The CSV import feature needed to handle the case where a user already has items in their collection. Silently appending could produce duplicates if the user is re-importing an updated export. Silently overwriting without warning is destructive.
+
+**Options considered:**
+  - Always append: simple, but risk of duplicates on re-import
+  - Always overwrite: simple, but unrecoverable data loss with no warning
+  - Ask the user: adds one step but gives full control
+
+**Decision:** Query item count before import. If 0, proceed directly in append mode. If > 0, show a bottom sheet with two explicit options: "Añadir a colección" (append, collection numbers continue from current max) and "Sobreescribir todo" (delete all user items first, then import from #1).
+
+**Rationale:** Both use cases are valid — a first-time seed and a full re-import are different operations. The choice belongs to the user, not the app.
+
+**Trade-off accepted:** One extra tap for users importing into a non-empty collection. Acceptable given the irreversibility of overwrite.
+
+---
+
 ### 2026-04-13 Color modes — CSS variable injection over NativeWind colorScheme.set()
 
 **Context:** Adding user-controlled light/dark/system theme switching. The feature needed to work across both NativeWind className-based styles (`bg-surface`, `text-text-primary`) and inline `style` props used for icon tints and placeholders — without refactoring every component.

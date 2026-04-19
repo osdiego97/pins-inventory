@@ -85,6 +85,9 @@ Small, well-scoped problem with a real user (me). Perfect for demonstrating end-
 - **Collection number management** — auto-assigned as max+1 on add; Postgres RPC re-sequences on delete to keep numbers contiguous
 - **Swipe gestures** — `PanResponder` with `Animated.Value` for zero-dependency swipe-to-reveal on collection cards
 - **Stats screen** — dedicated tab with 7 analytics sections: summary cards (totals, year range), category donut chart with collapsible L1/L2 breakdown, country bar chart (expandable, alphabetical tiebreak), year column chart with count labels, cumulative growth line chart, cities-per-country bars, and data completeness tracker. All charts animate on mount using Reanimated. Client-side aggregation via `useStats` hook.
+- **CSV import** — document picker → auto column mapping → overwrite/append confirmation → batch insert with progress indicator. Auto-creates missing categories. Skipped rows reported on completion with reasons. Handles re-import safely by asking the user whether to append or overwrite the existing collection. Surfaced in onboarding for users migrating from a spreadsheet.
+- **Settings screen** — collection rename, icon picker, theme selector, email display (so users know which account their collection is linked to), sign-out.
+- **Custom confirmation sheets** — all destructive actions (delete item, delete category, sign out, CSV overwrite) use custom bottom sheet modals matching the app's design system instead of native `Alert.alert`.
 
 **Key screens:**
 - [Screenshots to be added when MVP is complete]
@@ -107,6 +110,9 @@ Deleting a pin leaves a gap in collection numbers (e.g. deleting #42 leaves a ju
 
 **Collection list scroll position on navigation return**
 `useFocusEffect` triggers `refetch()` every time the user returns to the collection screen. The original `loading` condition caused the FlatList to unmount and remount on every refetch, resetting scroll to zero. Fixed by changing the spinner condition to `loading && pins.length === 0` — the FlatList stays mounted on refetch and updates its data prop in place, preserving scroll position naturally without any restore logic.
+
+**expo-file-system legacy API in SDK 55**
+`expo-file-system`'s `readAsStringAsync` was deprecated in SDK 55 and throws at runtime if imported from the main package. The fix is a one-line import path change to `expo-file-system/legacy` — no EAS build required since it's a JS-only change. Worth knowing: SDK 55 deprecated several FileSystem methods this way; check the legacy path before assuming a native module issue.
 
 **SVG animation reliability on Android**
 The cumulative growth line chart required animating a path drawing on mount. Using `ClipPath` + `AnimatedRect` (a common approach) proved unreliable on Android — the clip region rendered inconsistently. Switched to animating `strokeDashoffset` on the path itself, which is the correct approach and works reliably across devices.
