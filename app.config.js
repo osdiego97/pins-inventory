@@ -2,7 +2,7 @@ const IS_DEV = process.env.APP_VARIANT === 'development';
 
 export default {
   expo: {
-    name: IS_DEV ? 'Pins Dev' : 'Pins Inventory',
+    name: IS_DEV ? 'Vitrina Dev' : 'Vitrina',
     slug: 'pins-inventory',
     version: '1.0.0',
     orientation: 'portrait',
@@ -39,8 +39,8 @@ export default {
       [
         'expo-image-picker',
         {
-          photosPermission: 'Allow Pins Inventory to access your photos.',
-          cameraPermission: 'Allow Pins Inventory to use your camera.',
+          photosPermission: 'Allow Vitrina to access your photos.',
+          cameraPermission: 'Allow Vitrina to use your camera.',
         },
       ],
     ],
