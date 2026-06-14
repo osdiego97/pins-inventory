@@ -96,6 +96,12 @@ Small, well-scoped problem with a real user (me). Perfect for demonstrating end-
 
 ## 5. Technical Challenges
 
+**NativeWind v4 dependency chain**
+NativeWind v4 has an underdocumented dependency chain that caused multiple EAS build failures. Installing `nativewind` alone is not enough — it requires `react-native-css-interop`, `react-native-reanimated`, and `react-native-worklets` to be installed explicitly. The reanimated Babel plugin also calls into worklets at build time, so both must be present or the autolinking step fails silently. Additionally, the `nativewind/babel` plugin cannot be used as a standard Babel plugin in newer versions of `@babel/core` — reference `react-native-css-interop/dist/babel-plugin` directly instead.
+
+**Metro bundler — nested semver module resolution failure**
+After installing `react-native-reanimated`, Metro failed to bundle with an `UnableToResolveError` for `../internal/parse-options` inside a nested `semver` package. The nested semver installation was incomplete — Metro was resolving to it instead of the root copy. Fix: delete `node_modules/react-native-reanimated/node_modules/semver` and restart Metro with `--clear`.
+
 **Magic link deep linking in React Native**
 Supabase's `detectSessionInUrl` is web-only. In React Native, deep links must be handled manually: listen for the URL via `expo-linking`, parse the URL fragment with `URLSearchParams`, and call `supabase.auth.setSession()`. `onAuthStateChange` handles the session propagation from there.
 
@@ -139,6 +145,6 @@ The cumulative growth line chart required animating a path drawing on mount. Usi
 
 ## 7. Links
 
-- **Repo:** [GitHub link — TBD]
+- **Repo:** https://github.com/osdiego97/pins-inventory
 - **Live app / demo:** [TestFlight link — TBD]
 - **PRDs:** `docs/` folder in this repo
